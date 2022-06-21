@@ -7,7 +7,7 @@ const toFn = (source: string) => `function render(){${source}\n}`
 
 it('should work', () => {
   const { render } = compile(`<div id="app">
-  <div>{{ foo }}</div>
+  <div :style="{ color }">{{ foo }}</div>
   <p v-for="i in list">{{ i }}</p>
   <foo inline-template>
     <div>{{ bar }}</div>
@@ -22,6 +22,7 @@ it('should work', () => {
   expect(result).not.toMatch(`_vm._c`)
   expect(result).toMatch(`_vm.foo`)
   expect(result).toMatch(`_vm.list`)
+  expect(result).toMatch(`{ color: _vm.color }`)
   expect(result).not.toMatch(`_vm.i`)
   expect(result).not.toMatch(`with (this)`)
 
@@ -33,7 +34,7 @@ it('should work', () => {
         \\"div\\",
         { attrs: { id: \\"app\\" } },
         [
-          _c(\\"div\\", [_vm._v(_vm._s(_vm.foo))]),
+          _c(\\"div\\", { style: { color: _vm.color } }, [_vm._v(_vm._s(_vm.foo))]),
           _vm._v(\\" \\"),
           _vm._l(_vm.list, function (i) {
             return _c(\\"p\\", [_vm._v(_vm._s(i))])

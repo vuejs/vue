@@ -1,7 +1,7 @@
 import MagicString from 'magic-string'
 import { parseExpression, ParserOptions, ParserPlugin } from '@babel/parser'
 import { makeMap } from 'shared/util'
-import { walkIdentifiers } from './babelUtils'
+import { isStaticProperty, walkIdentifiers } from './babelUtils'
 import { BindingMetadata } from './types'
 
 const doNotPrefix = makeMap(
@@ -39,18 +39,28 @@ export function prefixIdentifiers(
 
   walkIdentifiers(
     ast,
-    ident => {
+    (ident, parent) => {
       const { name } = ident
       if (doNotPrefix(name)) {
         return
       }
 
-      if (!isScriptSetup) {
-        s.prependRight(ident.start!, '_vm.')
-        return
+      let prefix = `_vm.`
+      if (isScriptSetup) {
+        const type = bindings[name]
+        if (type && type.startsWith('setup')) {
+          prefix = `_setup.`
+        }
       }
 
-      s.overwrite(ident.start!, ident.end!, rewriteIdentifier(name, bindings))
+      if (isStaticProperty(parent) && parent.shorthand) {
+        // property shorthand like { foo }, we need to add the key since
+        // we rewrite the value
+        // { foo } -> { foo: _vm.foo }
+        s.appendLeft(ident.end!, `: ${prefix}${name}`)
+      } else {
+        s.prependRight(ident.start!, prefix)
+      }
     },
     node => {
       if (node.type === 'WithStatement') {
@@ -69,16 +79,4 @@ export function prefixIdentifiers(
   )
 
   return s.toString()
-}
-
-export function rewriteIdentifier(
-  name: string,
-  bindings: BindingMetadata
-): string {
-  const type = bindings[name]
-  if (type && type.startsWith('setup')) {
-    return `_setup.${name}`
-  } else {
-    return `_vm.${name}`
-  }
 }
