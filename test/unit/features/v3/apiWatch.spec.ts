@@ -336,6 +336,23 @@ describe('api: watch', () => {
     expect(result2).toBe(true)
   })
 
+  // #12569
+  it('flush:pre watcher triggered before component mount (in child components)', () => {
+    const count = ref(0)
+    const spy = vi.fn()
+    const Comp = {
+      setup() {
+        watch(count, spy)
+        count.value++
+        return h => h('div')
+      }
+    }
+    new Vue({
+      render: h => h(Comp)
+    }).$mount()
+    expect(spy).toHaveBeenCalledTimes(1)
+  })
+
   it('flush timing: post', async () => {
     const count = ref(0)
     let result
