@@ -70,6 +70,7 @@ function createReadonly(target: any, shallow: boolean) {
   }
 
   const proxy = {}
+  Object.setPrototypeOf(proxy, Object.getPrototypeOf(target))
   def(target, existingFlag, proxy)
 
   def(proxy, ReactiveFlags.IS_READONLY, true)
