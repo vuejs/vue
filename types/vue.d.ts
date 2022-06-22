@@ -85,7 +85,12 @@ export type CombinedVueInstance<
   Computed,
   Props,
   SetupBindings
-> = Data & Methods & Computed & Props & Instance & SetupBindings
+> = Data &
+  Methods &
+  Computed &
+  Props &
+  Instance &
+  (SetupBindings extends void ? {} : SetupBindings)
 
 export type ExtendedVue<
   Instance extends Vue,

@@ -93,3 +93,11 @@ defineComponent({
     res?.charAt(1)
   }
 })
+
+// #12568
+const vm = new Vue({
+  setup() {},
+  render: h => h({})
+})
+
+vm.$mount('#app')
