@@ -40,7 +40,6 @@ export function registerRef(vnode: VNodeWithData, isRemoval?: boolean) {
     return
   }
 
-  const setupRefKey = vnode.data.ref_key
   const isFor = vnode.data.refInFor
   const _isString = typeof ref === 'string' || typeof ref === 'number'
   const _isRef = isRef(ref)
@@ -58,7 +57,6 @@ export function registerRef(vnode: VNodeWithData, isRemoval?: boolean) {
             setSetupRef(vm, ref, refs[ref])
           } else {
             ref.value = [refValue]
-            if (setupRefKey) refs[setupRefKey] = ref.value as any
           }
         } else if (!existing.includes(refValue)) {
           existing.push(refValue)
@@ -75,7 +73,6 @@ export function registerRef(vnode: VNodeWithData, isRemoval?: boolean) {
         return
       }
       ref.value = value
-      if (setupRefKey) refs[setupRefKey] = $refsValue
     } else if (__DEV__) {
       warn(`Invalid template ref type: ${typeof ref}`)
     }

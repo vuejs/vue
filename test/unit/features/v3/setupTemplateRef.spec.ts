@@ -371,33 +371,33 @@ describe('api: setup() template refs', () => {
   //   expect(elRef1.value).toBe(elRef2.value)
   // })
 
-  // compiled output of <script setup> inline mode
-  test('raw ref with ref_key', () => {
-    let refs: any
+  // Vue 2 doesn't have inline mode
+  // test('raw ref with ref_key', () => {
+  //   let refs: any
 
-    const el = ref()
+  //   const el = ref()
 
-    const App = {
-      mounted() {
-        refs = (this as any).$refs
-      },
-      render() {
-        return h(
-          'div',
-          {
-            ref: el,
-            ref_key: 'el'
-          },
-          'hello'
-        )
-      }
-    }
+  //   const App = {
+  //     mounted() {
+  //       refs = (this as any).$refs
+  //     },
+  //     render() {
+  //       return h(
+  //         'div',
+  //         {
+  //           ref: el,
+  //           ref_key: 'el'
+  //         },
+  //         'hello'
+  //       )
+  //     }
+  //   }
 
-    new Vue(App).$mount()
+  //   new Vue(App).$mount()
 
-    expect(el.value.innerHTML).toBe('hello')
-    expect(refs.el.innerHTML).toBe('hello')
-  })
+  //   expect(el.value.innerHTML).toBe('hello')
+  //   expect(refs.el.innerHTML).toBe('hello')
+  // })
 
   // compiled output of v-for + template ref
   test('ref in v-for', async () => {
