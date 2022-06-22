@@ -1,8 +1,8 @@
-import Vue, { AsyncComponent, Component } from "../index";
+import Vue, { AsyncComponent, Component } from '../index'
 
 const a: AsyncComponent = () => ({
   component: new Promise<Component>((res, rej) => {
-    res({ template: "" })
+    res({ template: '' })
   })
 })
 
@@ -10,14 +10,14 @@ const b: AsyncComponent = () => ({
   // @ts-expect-error component has to be a Promise that resolves to a component
   component: () =>
     new Promise<Component>((res, rej) => {
-      res({ template: "" })
+      res({ template: '' })
     })
 })
 
 const c: AsyncComponent = () =>
   new Promise<Component>((res, rej) => {
     res({
-      template: ""
+      template: ''
     })
   })
 
@@ -25,7 +25,7 @@ const d: AsyncComponent = () =>
   new Promise<{ default: Component }>((res, rej) => {
     res({
       default: {
-        template: ""
+        template: ''
       }
     })
   })
@@ -34,11 +34,11 @@ const e: AsyncComponent = () => ({
   component: new Promise<{ default: Component }>((res, rej) => {
     res({
       default: {
-        template: ""
+        template: ''
       }
     })
   })
 })
 
 // Test that Vue.component accepts any AsyncComponent
-Vue.component("async-compponent1", a)
+Vue.component('async-compponent1', a)

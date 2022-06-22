@@ -25,6 +25,7 @@ Hi! I'm really excited that you are interested in contributing to Vue.js. Before
 - Make sure `npm test` passes. (see [development setup](#development-setup))
 
 - If adding a new feature:
+
   - Add accompanying test case.
   - Provide a convincing reason to add this feature. Ideally, you should open a suggestion issue first and have it approved before working on it.
 
@@ -35,12 +36,12 @@ Hi! I'm really excited that you are interested in contributing to Vue.js. Before
 
 ## Development Setup
 
-You will need [Node.js](http://nodejs.org) **version 8+**, [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/index.html) (for running Selenium server during e2e tests) and [yarn](https://yarnpkg.com/en/docs/install).
+You will need [Node.js](http://nodejs.org) **version 12+** and [pnpm](https://pnpm.io/).
 
 After cloning the repo, run:
 
-``` bash
-$ yarn # install the dependencies of the project
+```bash
+$ pnpm i # install the dependencies of the project
 ```
 
 ### Committing Changes
@@ -49,17 +50,20 @@ Commit messages should follow the [commit message convention](./COMMIT_CONVENTIO
 
 ### Commonly used NPM scripts
 
-``` bash
+```bash
 # watch and auto re-build dist/vue.js
 $ npm run dev
 
-# watch and auto re-run unit tests in Chrome
-$ npm run dev:test
+# run unit tests
+$ npm run test:unit
+
+# run specific tests in watch mode
+$ npx vitest {test_file_name_pattern_to_match}
 
 # build all dist files, including npm packages
 $ npm run build
 
-# run the full test suite, including linting/type checking
+# run the full test suite, including unit/e2e/type checking
 $ npm test
 ```
 
@@ -79,9 +83,15 @@ The default test script will do the following: lint with ESLint -> type check wi
 
   See [dist/README.md](https://github.com/vuejs/vue/blob/dev/dist/README.md) for more details on dist files.
 
-- **`flow`**: contains type declarations for [Flow](https://flowtype.org/). These declarations are loaded **globally** and you will see them used in type annotations in normal source code.
+- **`types`**: contains public types published to npm (note the types shipped here could be different from `src/types`). These were hand-authored before we moved the codebase from Flow to TypeScript. To ensure backwards compatibility, we keep using these manually authored types.
 
-- **`packages`**: contains `vue-server-renderer` and `vue-template-compiler`, which are distributed as separate NPM packages. They are automatically generated from the source code and always have the same version with the main `vue` package.
+  Types for new features added in 2.7 (Composition API) are auto-generated from source code as `types/v3-generated.d.ts` and re-exported from `types/index.d.ts`.
+
+- **`packages`**:
+
+  - `vue-server-renderer` and `vue-template-compiler` are distributed as separate NPM packages. They are automatically generated from the source code and always have the same version with the main `vue` package.
+
+  - `compiler-sfc` is an internal package that is distributed as part of the main `vue` package. It's aliased and can be imported as `vue/compiler-sfc` similar to Vue 3.
 
 - **`test`**: contains all tests. The unit tests are written with [Jasmine](http://jasmine.github.io/2.3/introduction.html) and run with [Karma](http://karma-runner.github.io/0.13/index.html). The e2e tests are written for and run with [Nightwatch.js](http://nightwatchjs.org/).
 
@@ -111,16 +121,13 @@ The default test script will do the following: lint with ESLint -> type check wi
 
     Entry files for dist builds are located in their respective platform directory.
 
-    Each platform module contains three parts: `compiler`, `runtime` and `server`, corresponding to the three directories above. Each part contains platform-specific modules/utilities which are imported and injected to the core counterparts in platform-specific entry files. For example, the code implementing the logic behind `v-bind:class` is in `platforms/web/runtime/modules/class.js` - which is imported in `entries/web-runtime.js` and used to create the browser-specific vdom patching function.
+    Each platform module contains three parts: `compiler`, `runtime` and `server`, corresponding to the three directories above. Each part contains platform-specific modules/utilities which are imported and injected to the core counterparts in platform-specific entry files. For example, the code implementing the logic behind `v-bind:class` is in `platforms/web/runtime/modules/class.js` - which is imported in `platforms/web/entry-runtime.ts` and used to create the browser-specific vdom patching function.
 
   - **`sfc`**: contains single-file component (`*.vue` files) parsing logic. This is used in the `vue-template-compiler` package.
 
   - **`shared`**: contains utilities shared across the entire codebase.
 
-  - **`types`**: contains TypeScript type definitions
-
-    - **`test`**: contains type definitions tests
-
+  - **`types`**: contains type declarations added when we ported the codebase from Flow to TypeScript. These types should be considered internal - they care less about type inference for end-user scenarios and prioritize working with internal source code.
 
 ## Financial Contribution
 

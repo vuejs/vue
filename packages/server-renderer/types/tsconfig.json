@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "vue": ["../../../types/index.d.ts"]
+    }
+  },
+  "include": ["**/*.ts", "../../../types"]
+}
