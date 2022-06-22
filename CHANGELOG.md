@@ -1,3 +1,13 @@
+# [2.7.0-beta.5](https://github.com/vuejs/vue/compare/v2.7.0-beta.4...v2.7.0-beta.5) (2022-06-22)
+
+
+### Bug Fixes
+
+* **types:** fix instance type inference for setup() with no return value ([65531f5](https://github.com/vuejs/vue/commit/65531f580314d832f44ecd5c782f79da3e977da7)), closes [#12568](https://github.com/vuejs/vue/issues/12568)
+* **watch:** fix pre watchers not flushed on mount for nested component ([7a3aa3f](https://github.com/vuejs/vue/commit/7a3aa3faac6b8eb066f32813788b4c1d16f34c6b)), closes [#12569](https://github.com/vuejs/vue/issues/12569)
+
+
+
 # [2.7.0-beta.4](https://github.com/vuejs/vue/compare/v2.7.0-beta.3...v2.7.0-beta.4) (2022-06-21)
 
 
