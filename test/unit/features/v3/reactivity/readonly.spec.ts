@@ -499,4 +499,25 @@ describe('reactivity/readonly', () => {
     expect(obj.ror).toBe(true)
     expect(toRaw(obj).ror).not.toBe(ror) // ref successfully replaced
   })
+
+  test('compatiblity with classes', () => {
+    const spy = vi.fn()
+    class Foo {
+      x = 1
+      log() {
+        spy(this.x)
+      }
+      change() {
+        this.x++
+      }
+    }
+    const foo = new Foo()
+    const readonlyFoo = readonly(foo)
+    readonlyFoo.log()
+    expect(spy).toHaveBeenCalledWith(1)
+
+    readonlyFoo.change()
+    expect(readonlyFoo.x).toBe(1)
+    expect(`et operation on key "x" failed`).toHaveBeenWarned()
+  })
 })
