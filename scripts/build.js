@@ -67,6 +67,9 @@ function write (dest, code, zip) {
       resolve()
     }
 
+    if (!fs.existsSync(path.dirname(dest))) {
+      fs.mkdirSync(path.dirname(dest), { recursive: true })
+    }
     fs.writeFile(dest, code, err => {
       if (err) return reject(err)
       if (zip) {
