@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="../dist/vue.js"></script>
+</head>
+<body>
+  <div id="demo">
+    <h1>初始化流程</h1>
+    <p>{{obj.foo}}</p>
+
+  </div>
+  <script>
+    const app = new Vue({
+      el: '#demo',
+      // template: '<div>template</div>',
+      // template: '#app',
+      // render(h){return h('div','render')}
+      data(){ 
+        return {
+          obj:{foo: 'foooooooo'}
+        } },
+      // created(){
+      //   setTimeout(()=>{
+      //     Vue.set(this.obj,'foo', 'foo')
+      //   })
+      // }
+
+    })
+  </script>
+</body>
+</html>
