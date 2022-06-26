@@ -628,9 +628,8 @@ describe('api: watch', () => {
     expect(calls).toMatchObject(['watch 3', 'mounted'])
   })
 
-  // TODO
   // vuejs/core#1852
-  it.skip('flush: post watcher should fire after template refs updated', async () => {
+  it('flush: post watcher should fire after template refs updated', async () => {
     const toggle = ref(false)
     let dom: HTMLElement | null = null
 
@@ -1092,5 +1091,29 @@ describe('api: watch', () => {
     // should not record watcher in detached scope and only the instance's
     // own update effect
     expect(instance!._scope.effects.length).toBe(1)
+  })
+
+  // #12578
+  test('template ref triggered watcher should fire after component mount', async () => {
+    const order: string[] = []
+    const Child = { template: '<div/>' }
+    const App = {
+      setup() {
+        const child = ref<any>(null)
+        onMounted(() => {
+          order.push('mounted')
+        })
+        watch(child, () => {
+          order.push('watcher')
+        })
+        return { child }
+      },
+      components: { Child },
+      template: `<Child ref="child"/>`
+    }
+    new Vue(App).$mount()
+
+    await nextTick()
+    expect(order).toMatchObject([`mounted`, `watcher`])
   })
 })

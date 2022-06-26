@@ -320,11 +320,12 @@ function doWatch(
   } else {
     // pre
     watcher.update = () => {
-      if (!instance || instance._isMounted) {
-        queueWatcher(watcher)
-      } else {
+      if (instance && instance === currentInstance) {
+        // pre-watcher triggered inside setup()
         const buffer = instance._preWatchers || (instance._preWatchers = [])
         if (buffer.indexOf(watcher) < 0) buffer.push(watcher)
+      } else {
+        queueWatcher(watcher)
       }
     }
   }
