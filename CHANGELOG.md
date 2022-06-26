@@ -1,3 +1,13 @@
+# [2.7.0-beta.6](https://github.com/vuejs/vue/compare/v2.7.0-beta.5...v2.7.0-beta.6) (2022-06-26)
+
+
+### Bug Fixes
+
+* **reactivity:** readonly() compat with classes ([44ab1cd](https://github.com/vuejs/vue/commit/44ab1cda746252a1a81f88e1a9658d33f484ed41)), closes [#12574](https://github.com/vuejs/vue/issues/12574)
+* **watch:** template ref watcher should fire after owner instance mounted hook ([089b27c](https://github.com/vuejs/vue/commit/089b27c30b470acd98286ffe072525beb2320dea)), closes [#12578](https://github.com/vuejs/vue/issues/12578)
+
+
+
 # [2.7.0-beta.5](https://github.com/vuejs/vue/compare/v2.7.0-beta.4...v2.7.0-beta.5) (2022-06-22)
 
 
