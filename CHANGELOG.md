@@ -1,3 +1,12 @@
+# [2.7.0-beta.7](https://github.com/vuejs/vue/compare/v2.7.0-beta.6...v2.7.0-beta.7) (2022-06-27)
+
+
+### Bug Fixes
+
+* types/v3-directive not published ([#12571](https://github.com/vuejs/vue/issues/12571)) ([11e4bfe](https://github.com/vuejs/vue/commit/11e4bfe806b574747495edfb9ba22f78676ceb7c))
+
+
+
 # [2.7.0-beta.6](https://github.com/vuejs/vue/compare/v2.7.0-beta.5...v2.7.0-beta.6) (2022-06-26)
 
 
