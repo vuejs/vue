@@ -207,6 +207,7 @@ test('transform assetUrls and srcset with base option', () => {
   <img src="~fixtures/logo.png">
   <img src="~/fixtures/logo.png">
   <img src="./logo.png" srcset="./logo.png 2x, ./logo.png 3x">
+  <img src="@/fixtures/logo.png">
 </div>
 `
   const result = compileTemplate({
@@ -218,13 +219,16 @@ test('transform assetUrls and srcset with base option', () => {
 
   expect(result.errors.length).toBe(0)
 
-  const vnode = mockRender(result.code)
+  const vnode = mockRender(result.code, {
+    '@/fixtures/logo.png': 'aliased'
+  })
   expect(vnode.children[0].data.attrs.src).toBe('/base/logo.png')
   expect(vnode.children[2].data.attrs.src).toBe('/base/fixtures/logo.png')
   expect(vnode.children[4].data.attrs.src).toBe('/base/fixtures/logo.png')
   expect(vnode.children[6].data.attrs.srcset).toBe(
     '/base/logo.png 2x, /base/logo.png 3x'
   )
+  expect(vnode.children[8].data.attrs.src).toBe('aliased')
 })
 
 test('transform with includeAbsolute', () => {

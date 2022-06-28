@@ -31,7 +31,6 @@ export function urlToRequire(
         uriParts.path + (uriParts.hash || '')
       )}"`
     }
-    return returnValue
   }
 
   if (
