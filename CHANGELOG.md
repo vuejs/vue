@@ -1,3 +1,12 @@
+# [2.7.0-beta.8](https://github.com/vuejs/vue/compare/v2.7.0-beta.7...v2.7.0-beta.8) (2022-06-28)
+
+
+### Bug Fixes
+
+* **compiler-sfc:** should transform non relative paths when base option is present ([008d78b](https://github.com/vuejs/vue/commit/008d78bd7280716d2d70e150e3ed2ac5ee8497f2))
+
+
+
 # [2.7.0-beta.7](https://github.com/vuejs/vue/compare/v2.7.0-beta.6...v2.7.0-beta.7) (2022-06-27)
 
 
