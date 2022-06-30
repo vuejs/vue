@@ -1,4 +1,5 @@
 import { Vue } from './vue'
+import { DirectiveFunction, DirectiveOptions } from './options'
 
 export type ScopedSlot = (props: any) => ScopedSlotReturnValue
 type ScopedSlotReturnValue =
@@ -86,4 +87,5 @@ export interface VNodeDirective {
   arg?: string
   oldArg?: string
   modifiers?: { [key: string]: boolean }
+  def?: DirectiveFunction | DirectiveOptions
 }
