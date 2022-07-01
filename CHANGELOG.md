@@ -2,8 +2,6 @@
 
 ## Backported Features
 
-2.7 backports some of the most important features from Vue 3 so that Vue 2 users can benefit from them as well:
-
 - [Composition API](https://vuejs.org/guide/extras/composition-api-faq.html)
 - SFC [`<script setup>`](https://vuejs.org/api/sfc-script-setup.html)
 - SFC [CSS v-bind](https://vuejs.org/api/sfc-css-features.html#v-bind-in-css)
@@ -80,7 +78,32 @@ In addition, the following features are explicitly **NOT** ported:
 
 4. If you were previously using [`@vue/composition-api`](https://github.com/vuejs/composition-api), update imports from it to `vue` instead. Note that some APIs exported by the plugin, e.g. `createApp`, are not ported in 2.7.
 
-5. The SFC compiler for 2.7 now uses PostCSS 8 (upgraded from 7). PostCSS 8 should be backwards compatible with most plugins, but the upgrade **may** cause issues if you were previously using a custom PostCSS plugin that can only work with PostCSS 7. In such cases, you will need to upgrade the relevant plugins to their PostCSS 8 compatible versions.
+5. Update `eslint-plugin-vue` to latest version (9+) if you run into unused variable lint errors when using `<script setup>`.
+
+6. The SFC compiler for 2.7 now uses PostCSS 8 (upgraded from 7). PostCSS 8 should be backwards compatible with most plugins, but the upgrade **may** cause issues if you were previously using a custom PostCSS plugin that can only work with PostCSS 7. In such cases, you will need to upgrade the relevant plugins to their PostCSS 8 compatible versions.
+
+### Vite
+
+2.7 support for Vite is provided via a new plugin: [@vitejs/plugin-vue2](https://github.com/vitejs/vite-plugin-vue2). This new plugin requires Vue 2.7 or above and supersedes the existing [vite-plugin-vue2](https://github.com/underfin/vite-plugin-vue2).
+
+Note that the new plugin does not handle Vue-specific JSX / TSX transform, which is intentional. Vue 2 JSX / TSX transform should be handled in a separate, dedicated plugin, which will be provided soon.
+
+### Volar Compatibility
+
+2.7 ships improved type definitions so it is no longer necessary to install `@vue/runtime-dom` just for Volar template type inference support. All you need now is the following config in `tsconfig.json`:
+
+```json
+{
+  // ...
+  "vueCompilerOptions": {
+    "target": 2.7
+  }
+}
+```
+
+### Devtools Support
+
+Vue Devtools 6.2.0 has added support for inspecting 2.7 Composition API state, but the extensions may still need a few days to go through review on respective publishing platforms.
 
 ### Bug Fixes
 
