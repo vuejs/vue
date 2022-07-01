@@ -168,7 +168,7 @@ async function publishPackage(pkgName, version, runIfNotDry) {
     if (releaseTag) {
       releaseTag = `v2-${releaseTag}`
     } else {
-      releaseTag = 'v2'
+      releaseTag = 'v2-latest'
     }
   }
 
