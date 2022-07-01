@@ -1,3 +1,12 @@
+# [2.7.0](https://github.com/vuejs/vue/compare/v2.7.0-beta.8...v2.7.0) (2022-07-01)
+
+
+### Bug Fixes
+
+* **sfc:** only include legacy decorator parser plugin when new plugin is not used ([326d24a](https://github.com/vuejs/vue/commit/326d24a4e42b4f4fd243b36037e88b71963d963d))
+
+
+
 # [2.7.0-beta.8](https://github.com/vuejs/vue/compare/v2.7.0-beta.7...v2.7.0-beta.8) (2022-06-28)
 
 
