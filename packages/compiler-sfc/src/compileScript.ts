@@ -1835,7 +1835,8 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor) {
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 
 function processExp(exp: string, dir?: string): string {
-  if (/ as\s+\w|<.*>|:/.test(exp)) {
+  const stringStripped = stripStrings(exp)
+  if (/ as\s+\w|<.*>|:/.test(stringStripped)) {
     if (dir === 'slot') {
       exp = `(${exp})=>{}`
     } else if (dir === 'for') {
@@ -1853,7 +1854,7 @@ function processExp(exp: string, dir?: string): string {
     })
     return ret
   }
-  return stripStrings(exp)
+  return stringStripped
 }
 
 function stripStrings(exp: string) {
