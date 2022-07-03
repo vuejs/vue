@@ -181,7 +181,7 @@ export function defineReactive(
           }
         }
       }
-      return isRef(value) ? value.value : value
+      return isRef(value) && !shallow ? value.value : value
     },
     set: function reactiveSetter(newVal) {
       const value = getter ? getter.call(obj) : val
