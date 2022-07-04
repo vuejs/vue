@@ -1,3 +1,15 @@
+## [2.7.1](https://github.com/vuejs/vue/compare/v2.7.0...v2.7.1) (2022-07-04)
+
+
+### Bug Fixes
+
+* **compiler-sfc:** fix template usage check edge case for v-on statements ([caceece](https://github.com/vuejs/vue/commit/caceece8fa9b75c4832a91d3af0bc2958166d3f2)), closes [#12591](https://github.com/vuejs/vue/issues/12591)
+* export proxyRefs ([e452e9d](https://github.com/vuejs/vue/commit/e452e9d4368aaba173e8c942e5fd82f999cf65ae)), closes [#12600](https://github.com/vuejs/vue/issues/12600)
+* fix NaN comparison on state change ([ff5acb1](https://github.com/vuejs/vue/commit/ff5acb12cfa64f975f216a55aafa976b07052665)), closes [#12595](https://github.com/vuejs/vue/issues/12595)
+* **reactivity:**  shallowReactive should not unwrap refs ([#12605](https://github.com/vuejs/vue/issues/12605)) ([15b9b9b](https://github.com/vuejs/vue/commit/15b9b9b19dd3ae7cce5dcd89739e5cf719523fc5)), closes [#12597](https://github.com/vuejs/vue/issues/12597)
+
+
+
 # [2.7.0](https://github.com/vuejs/vue/compare/v2.7.0-beta.8...v2.7.0) (2022-07-01)
 
 ## Backported Features
