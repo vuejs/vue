@@ -1562,5 +1562,17 @@ describe('SFC analyze <script> bindings', () => {
       expect(content).toMatch(`name: 'Baz'`)
       assertCode(content)
     })
+
+    // #12591
+    test('should not error when performing ts expression check for v-on inline statement', () => {
+      compile(`
+      <script setup lang="ts">
+        import { foo } from './foo'
+      </script>
+      <template>
+        <div @click="$emit('update:a');"></div>
+      </tempalte>
+      `)
+    })
   })
 })

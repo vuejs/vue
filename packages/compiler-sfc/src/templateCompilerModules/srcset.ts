@@ -38,7 +38,7 @@ function transform(
         }
 
         const imageCandidates: ImageCandidate[] = value
-          .substr(1, value.length - 2)
+          .slice(1, -1)
           .split(',')
           .map(s => {
             // The attribute value arrives here with all whitespace, except
