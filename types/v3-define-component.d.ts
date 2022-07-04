@@ -52,8 +52,18 @@ type DefineComponent<
   > &
     Props
 > &
-  ComponentOptionsBase<Props, RawBindings, D, C, M, Mixin, Extends, E, EE> &
-  Component & {
+  ComponentOptionsBase<
+    Props,
+    RawBindings,
+    D,
+    C,
+    M,
+    Mixin,
+    Extends,
+    E,
+    EE,
+    Defaults
+  > & {
     props: PropsOrPropOptions
   }
 

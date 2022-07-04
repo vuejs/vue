@@ -20,6 +20,7 @@ export type Component<
   | typeof Vue
   | FunctionalComponentOptions<Props>
   | ComponentOptions<never, Data, Methods, Computed, Props, SetupBindings>
+  | DefineComponent<any, any, any, any, any>
 
 type EsModule<T> = T | { default: T }
 

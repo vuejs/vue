@@ -3,7 +3,11 @@ import { VNode } from './vnode'
 import { ComponentOptions as Vue2ComponentOptions } from './options'
 import { EmitsOptions, SetupContext } from './v3-setup-context'
 import { Data, LooseRequired, UnionToIntersection } from './common'
-import { ComponentPropsOptions, ExtractPropTypes } from './v3-component-props'
+import {
+  ComponentPropsOptions,
+  ExtractDefaultPropTypes,
+  ExtractPropTypes
+} from './v3-component-props'
 import { CreateComponentPublicInstance } from './v3-component-public-instance'
 export { ComponentPropsOptions } from './v3-component-props'
 
@@ -60,7 +64,8 @@ type ExtractOptionProp<T> = T extends ComponentOptionsBase<
   any, // M
   any, // Mixin
   any, // Extends
-  any // EmitsOptions
+  any, // EmitsOptions
+  any // Defaults
 >
   ? unknown extends P
     ? {}
@@ -76,10 +81,11 @@ export interface ComponentOptionsBase<
   Mixin extends ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin,
   Emits extends EmitsOptions,
-  EmitNames extends string = string
+  EmitNames extends string = string,
+  Defaults = {}
 > extends Omit<
       Vue2ComponentOptions<Vue, D, M, C, Props>,
-      'data' | 'computed' | 'method' | 'setup' | 'props' | 'mixins' | 'extends'
+      'data' | 'computed' | 'methods' | 'setup' | 'props' | 'mixins' | 'extends'
     >,
     ComponentCustomOptions {
   // rewrite options api types
@@ -88,6 +94,7 @@ export interface ComponentOptionsBase<
     vm: CreateComponentPublicInstance<Props, {}, {}, {}, M, Mixin, Extends>
   ) => D
   computed?: C
+  methods?: M
   mixins?: Mixin[]
   extends?: Extends
   emits?: (Emits | EmitNames[]) & ThisType<void>
@@ -102,9 +109,13 @@ export interface ComponentOptionsBase<
     RawBindings,
     Emits
   >
+
+  __defaults?: Defaults
 }
 
 export type ComponentOptionsMixin = ComponentOptionsBase<
+  any,
+  any,
   any,
   any,
   any,
@@ -133,7 +144,8 @@ export type ComponentOptionsWithProps<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
-  Props = ExtractPropTypes<PropsOptions>
+  Props = ExtractPropTypes<PropsOptions>,
+  Defaults = ExtractDefaultPropTypes<PropsOptions>
 > = ComponentOptionsBase<
   Props,
   RawBindings,
@@ -143,7 +155,8 @@ export type ComponentOptionsWithProps<
   Mixin,
   Extends,
   Emits,
-  EmitsNames
+  EmitsNames,
+  Defaults
 > & {
   props?: PropsOptions
 } & ThisType<
@@ -179,7 +192,8 @@ export type ComponentOptionsWithArrayProps<
   Mixin,
   Extends,
   Emits,
-  EmitsNames
+  EmitsNames,
+  {}
 > & {
   props?: PropNames[]
 } & ThisType<
@@ -214,7 +228,8 @@ export type ComponentOptionsWithoutProps<
   Mixin,
   Extends,
   Emits,
-  EmitsNames
+  EmitsNames,
+  {}
 > & {
   props?: undefined
 } & ThisType<

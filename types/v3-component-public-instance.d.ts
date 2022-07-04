@@ -70,9 +70,10 @@ type MixinToOptionTypes<T> = T extends ComponentOptionsBase<
   infer Mixin,
   infer Extends,
   any,
-  any
+  any,
+  infer Defaults
 >
-  ? OptionTypesType<P & {}, B & {}, D & {}, C & {}, M & {}> &
+  ? OptionTypesType<P & {}, B & {}, D & {}, C & {}, M & {}, Defaults & {}> &
       IntersectionMixin<Mixin> &
       IntersectionMixin<Extends>
   : never
@@ -83,7 +84,7 @@ type ExtractMixin<T> = {
 }[T extends ComponentOptionsMixin ? 'Mixin' : never]
 
 type IntersectionMixin<T> = IsDefaultMixinComponent<T> extends true
-  ? OptionTypesType<{}, {}, {}, {}, {}>
+  ? OptionTypesType<{}, {}, {}, {}, {}, {}>
   : UnionToIntersection<ExtractMixin<T>>
 
 type UnwrapMixinsType<
@@ -139,7 +140,18 @@ export type ComponentPublicInstance<
   PublicProps = P,
   Defaults = {},
   MakeDefaultsOptional extends boolean = false,
-  Options = ComponentOptionsBase<any, any, any, any, any, any, any, any, any>
+  Options = ComponentOptionsBase<
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any,
+    any
+  >
 > = {
   // $: ComponentInternalInstance
   $data: D
