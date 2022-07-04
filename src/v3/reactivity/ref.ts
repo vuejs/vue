@@ -93,6 +93,40 @@ export function unref<T>(ref: T | Ref<T>): T {
   return isRef(ref) ? (ref.value as any) : ref
 }
 
+export function proxyRefs<T extends object>(
+  objectWithRefs: T
+): ShallowUnwrapRef<T> {
+  if (isReactive(objectWithRefs)) {
+    return objectWithRefs as any
+  }
+  const proxy = {}
+  const keys = Object.keys(objectWithRefs)
+  for (let i = 0; i < keys.length; i++) {
+    proxyWithRefUnwrap(proxy, objectWithRefs, keys[i])
+  }
+  return proxy as any
+}
+
+export function proxyWithRefUnwrap(
+  target: any,
+  source: Record<string, any>,
+  key: string
+) {
+  Object.defineProperty(target, key, {
+    enumerable: true,
+    configurable: true,
+    get: () => unref(source[key]),
+    set: value => {
+      const oldValue = source[key]
+      if (isRef(oldValue) && !isRef(value)) {
+        oldValue.value = value
+      } else {
+        source[key] = value
+      }
+    }
+  })
+}
+
 export type CustomRefFactory<T> = (
   track: () => void,
   trigger: () => void

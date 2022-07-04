@@ -7,6 +7,7 @@ export {
   toRef,
   toRefs,
   unref,
+  proxyRefs,
   customRef,
   triggerRef,
   Ref,

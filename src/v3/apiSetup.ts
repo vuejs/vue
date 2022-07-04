@@ -12,7 +12,7 @@ import {
 } from '../shared/util'
 import { currentInstance, setCurrentInstance } from './currentInstance'
 import { shallowReactive } from './reactivity/reactive'
-import { isRef } from './reactivity/ref'
+import { proxyWithRefUnwrap } from './reactivity/ref'
 
 /**
  * @internal
@@ -68,7 +68,9 @@ export function initSetup(vm: Component) {
         // exposed for compiled render fn
         const proxy = (vm._setupProxy = {})
         for (const key in setupResult) {
-          proxyWithRefUnwrap(proxy, setupResult, key)
+          if (key !== '__sfc') {
+            proxyWithRefUnwrap(proxy, setupResult, key)
+          }
         }
       }
     } else if (__DEV__ && setupResult !== undefined) {
@@ -79,25 +81,6 @@ export function initSetup(vm: Component) {
       )
     }
   }
-}
-
-export function proxyWithRefUnwrap(
-  target: any,
-  source: Record<string, any>,
-  key: string
-) {
-  Object.defineProperty(target, key, {
-    enumerable: true,
-    configurable: true,
-    get: () => {
-      const raw = source[key]
-      return isRef(raw) ? raw.value : raw
-    },
-    set: newVal => {
-      const raw = source[key]
-      isRef(raw) ? (raw.value = newVal) : (source[key] = newVal)
-    }
-  })
 }
 
 function createSetupContext(vm: Component): SetupContext {
