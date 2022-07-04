@@ -9,6 +9,7 @@
   ],
   "dependencies": {
     "@babel/parser": "^7.18.4",
+    "@vue/reactivity-transform": "^3.2.37",
     "postcss": "^8.4.14",
     "source-map": "^0.6.1"
   },

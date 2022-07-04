@@ -5,6 +5,11 @@ export { compileStyle, compileStyleAsync } from './compileStyle'
 export { compileScript } from './compileScript'
 export { generateCodeFrame } from 'compiler/codeframe'
 export { rewriteDefault } from './rewriteDefault'
+export {
+  shouldTransform as shouldTransformRef,
+  transform as transformRef,
+  transformAST as transformRefAST
+} from '@vue/reactivity-transform'
 
 // types
 export { SFCParseOptions } from './parse'
