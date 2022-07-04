@@ -39,7 +39,7 @@ import { walk } from 'estree-walker'
 import { RawSourceMap } from 'source-map'
 import { warnOnce } from './warn'
 import { isReservedTag } from 'web/util'
-import { dirRE } from 'compiler/parser'
+import { bindRE, dirRE, onRE } from 'compiler/parser'
 import { parseText } from 'compiler/parser/text-parser'
 import { DEFAULT_FILENAME } from './parseComponent'
 import {
@@ -278,8 +278,7 @@ export function compileScript(
     local: string,
     imported: string | false,
     isType: boolean,
-    isFromSetup: boolean,
-    needTemplateUsageCheck: boolean
+    isFromSetup: boolean
   ) {
     if (source === 'vue' && imported) {
       userImportAlias[imported] = local
@@ -287,14 +286,8 @@ export function compileScript(
 
     // template usage check is only needed in non-inline mode, so we can skip
     // the work if inlineTemplate is true.
-    let isUsedInTemplate = needTemplateUsageCheck
-    if (
-      needTemplateUsageCheck &&
-      isTS &&
-      sfc.template &&
-      !sfc.template.src &&
-      !sfc.template.lang
-    ) {
+    let isUsedInTemplate = true
+    if (isTS && sfc.template && !sfc.template.src && !sfc.template.lang) {
       isUsedInTemplate = isImportUsed(local, sfc)
     }
 
@@ -658,8 +651,7 @@ export function compileScript(
             node.importKind === 'type' ||
               (specifier.type === 'ImportSpecifier' &&
                 specifier.importKind === 'type'),
-            false,
-            true
+            false
           )
         }
       } else if (node.type === 'ExportDefaultDeclaration') {
@@ -872,7 +864,6 @@ export function compileScript(
             node.importKind === 'type' ||
               (specifier.type === 'ImportSpecifier' &&
                 specifier.importKind === 'type'),
-            true,
             true
           )
         }
@@ -1809,7 +1800,11 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor) {
       for (let i = 0; i < attrs.length; i++) {
         const { name, value } = attrs[i]
         if (dirRE.test(name)) {
-          const baseName = name.replace(dirRE, '')
+          const baseName = onRE.test(name)
+            ? 'on'
+            : bindRE.test(name)
+            ? 'bind'
+            : name.replace(dirRE, '')
           if (!isBuiltInDir(baseName)) {
             code += `,v${capitalize(camelize(baseName))}`
           }
@@ -1838,6 +1833,8 @@ function processExp(exp: string, dir?: string): string {
   if (/ as\s+\w|<.*>|:/.test(exp)) {
     if (dir === 'slot') {
       exp = `(${exp})=>{}`
+    } else if (dir === 'on') {
+      exp = `()=>{${exp}}`
     } else if (dir === 'for') {
       const inMatch = exp.match(forAliasRE)
       if (inMatch) {
