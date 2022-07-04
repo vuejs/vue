@@ -4,8 +4,26 @@ import { ComponentOptions as Vue2ComponentOptions } from './options'
 import { EmitsOptions, SetupContext } from './v3-setup-context'
 import { Data } from './common'
 import { ComponentPropsOptions, ExtractPropTypes } from './v3-component-props'
-import { ComponentRenderProxy } from './v3-component-proxy'
+import { CreateComponentPublicInstance } from './v3-component-public-instance'
 export { ComponentPropsOptions } from './v3-component-props'
+
+/**
+ * Interface for declaring custom options.
+ *
+ * @example
+ * ```ts
+ * declare module 'vue' {
+ *   interface ComponentCustomOptions {
+ *     beforeRouteUpdate?(
+ *       to: Route,
+ *       from: Route,
+ *       next: () => void
+ *     ): void
+ *   }
+ * }
+ * ```
+ */
+export interface ComponentCustomOptions {}
 
 export type ComputedGetter<T> = (ctx?: any) => T
 export type ComputedSetter<T> = (v: T) => void
@@ -34,23 +52,46 @@ export type SetupFunction<
   ctx: SetupContext<Emits>
 ) => RawBindings | (() => VNode | null) | void
 
-interface ComponentOptionsBase<
+export interface ComponentOptionsBase<
   Props,
-  D = Data,
-  C extends ComputedOptions = {},
-  M extends MethodOptions = {}
+  RawBindings,
+  D,
+  C extends ComputedOptions,
+  M extends MethodOptions,
+  Mixin extends ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin,
+  Emits extends EmitsOptions,
+  EmitNames extends string = string
 > extends Omit<
-    Vue2ComponentOptions<Vue, D, M, C, Props>,
-    'data' | 'computed' | 'method' | 'setup' | 'props'
-  > {
+      Vue2ComponentOptions<Vue, D, M, C, Props>,
+      'data' | 'computed' | 'method' | 'setup' | 'props' | 'mixins' | 'extends'
+    >,
+    ComponentCustomOptions {
   // allow any custom options
   [key: string]: any
 
   // rewrite options api types
-  data?: (this: Props & Vue, vm: Props) => D
+  data?: (
+    this: CreateComponentPublicInstance<Props, {}, {}, {}, M, Mixin, Extends>,
+    vm: CreateComponentPublicInstance<Props, {}, {}, {}, M, Mixin, Extends>
+  ) => D
   computed?: C
-  methods?: M
+  mixins?: Mixin[]
+  extends?: Extends
+  emits?: (Emits | EmitNames[]) & ThisType<void>
+  setup?: SetupFunction<Props, RawBindings, Emits>
 }
+
+export type ComponentOptionsMixin = ComponentOptionsBase<
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any,
+  any
+>
 
 export type ExtractComputedReturns<T extends any> = {
   [key in keyof T]: T[key] extends { get: (...args: any[]) => infer TReturn }
@@ -66,17 +107,34 @@ export type ComponentOptionsWithProps<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
-  Extends = {},
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
   Props = ExtractPropTypes<PropsOptions>
-> = ComponentOptionsBase<Props, D, C, M> & {
+> = ComponentOptionsBase<
+  Props,
+  RawBindings,
+  D,
+  C,
+  M,
+  Mixin,
+  Extends,
+  Emits,
+  EmitsNames
+> & {
   props?: PropsOptions
-  emits?: (Emits | EmitsNames[]) & ThisType<void>
-  setup?: SetupFunction<Props, RawBindings, Emits>
 } & ThisType<
-    ComponentRenderProxy<Props, RawBindings, D, C, M, Mixin, Extends, Emits>
+    CreateComponentPublicInstance<
+      Props,
+      RawBindings,
+      D,
+      C,
+      M,
+      Mixin,
+      Extends,
+      Emits
+    >
   >
 
 export type ComponentOptionsWithArrayProps<
@@ -85,17 +143,34 @@ export type ComponentOptionsWithArrayProps<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
-  Extends = {},
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
   Props = Readonly<{ [key in PropNames]?: any }>
-> = ComponentOptionsBase<Props, D, C, M> & {
+> = ComponentOptionsBase<
+  Props,
+  RawBindings,
+  D,
+  C,
+  M,
+  Mixin,
+  Extends,
+  Emits,
+  EmitsNames
+> & {
   props?: PropNames[]
-  emits?: (Emits | EmitsNames[]) & ThisType<void>
-  setup?: SetupFunction<Props, RawBindings, Emits>
 } & ThisType<
-    ComponentRenderProxy<Props, RawBindings, D, C, M, Mixin, Extends, Emits>
+    CreateComponentPublicInstance<
+      Props,
+      RawBindings,
+      D,
+      C,
+      M,
+      Mixin,
+      Extends,
+      Emits
+    >
   >
 
 export type ComponentOptionsWithoutProps<
@@ -104,16 +179,33 @@ export type ComponentOptionsWithoutProps<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
-  Extends = {},
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string
-> = ComponentOptionsBase<Props, D, C, M> & {
+> = ComponentOptionsBase<
+  Props,
+  RawBindings,
+  D,
+  C,
+  M,
+  Mixin,
+  Extends,
+  Emits,
+  EmitsNames
+> & {
   props?: undefined
-  emits?: (Emits | EmitsNames[]) & ThisType<void>
-  setup?: SetupFunction<Props, RawBindings, Emits>
 } & ThisType<
-    ComponentRenderProxy<Props, RawBindings, D, C, M, Mixin, Extends, Emits>
+    CreateComponentPublicInstance<
+      Props,
+      RawBindings,
+      D,
+      C,
+      M,
+      Mixin,
+      Extends,
+      Emits
+    >
   >
 
 export type WithLegacyAPI<T, D, C, M, Props> = T &

@@ -1,14 +1,62 @@
-import { ComponentPropsOptions } from './v3-component-props'
+import { Component } from '..'
+import {
+  ComponentPropsOptions,
+  ExtractDefaultPropTypes,
+  ExtractPropTypes
+} from './v3-component-props'
 import {
   MethodOptions,
   ComputedOptions,
   ComponentOptionsWithoutProps,
   ComponentOptionsWithArrayProps,
-  ComponentOptionsWithProps
+  ComponentOptionsWithProps,
+  ComponentOptionsMixin,
+  ComponentOptionsBase
 } from './v3-component-options'
-import { VueProxy } from './v3-component-proxy'
+import {
+  ComponentPublicInstanceConstructor,
+  ComponentPublicInstance,
+  EmitsToProps,
+  CreateComponentPublicInstance
+} from './v3-component-public-instance'
 import { Data, HasDefined } from './common'
 import { EmitsOptions } from './v3-setup-context'
+
+type DefineComponent<
+  PropsOrPropOptions = {},
+  RawBindings = {},
+  D = {},
+  C extends ComputedOptions = ComputedOptions,
+  M extends MethodOptions = MethodOptions,
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
+  E extends EmitsOptions = {},
+  EE extends string = string,
+  Props = Readonly<
+    PropsOrPropOptions extends ComponentPropsOptions
+      ? ExtractPropTypes<PropsOrPropOptions>
+      : PropsOrPropOptions
+  > &
+    ({} extends E ? {} : EmitsToProps<E>),
+  Defaults = ExtractDefaultPropTypes<PropsOrPropOptions>
+> = ComponentPublicInstanceConstructor<
+  CreateComponentPublicInstance<
+    Props,
+    RawBindings,
+    D,
+    C,
+    M,
+    Mixin,
+    Extends,
+    E,
+    Props,
+    Defaults,
+    true
+  > &
+    Props
+> &
+  ComponentOptionsBase<Props, RawBindings, D, C, M, Mixin, Extends, E, EE> &
+  Component
 
 /**
  * overload 1: object format with no props
@@ -34,7 +82,8 @@ export function defineComponent<
     Emits,
     EmitsNames
   >
-): VueProxy<{}, RawBindings, D, C, M, Mixin, Extends, Emits>
+): DefineComponent<{}, RawBindings, D, C, M, Mixin, Extends, Emits>
+
 /**
  * overload 2: object format with array props declaration
  * props inferred as `{ [key in PropNames]?: any }`
@@ -64,7 +113,7 @@ export function defineComponent<
     Emits,
     EmitsNames
   >
-): VueProxy<
+): DefineComponent<
   Readonly<{ [key in PropNames]?: any }>,
   RawBindings,
   D,
@@ -116,4 +165,4 @@ export function defineComponent<
         Emits,
         EmitsNames
       >
-): VueProxy<PropsOptions, RawBindings, D, C, M, Mixin, Extends, Emits>
+): DefineComponent<PropsOptions, RawBindings, D, C, M, Mixin, Extends, Emits>

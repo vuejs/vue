@@ -1035,42 +1035,6 @@ describe('extract instance type', () => {
   expectError((compA.baseA = 1))
 })
 
-describe('async setup', () => {
-  type GT = string & { __brand: unknown }
-  const Comp = defineComponent({
-    async setup() {
-      // setup context
-      return {
-        a: ref(1),
-        b: {
-          c: ref('hi')
-        },
-        d: reactive({
-          e: ref('hello' as GT)
-        })
-      }
-    },
-    render() {
-      // assert setup context unwrapping
-      expectType<number>(this.a)
-      expectType<string>(this.b.c.value)
-      expectType<GT>(this.d.e)
-
-      // setup context properties should be mutable
-      this.a = 2
-    }
-  })
-
-  const vm = {} as InstanceType<typeof Comp>
-  // assert setup context unwrapping
-  expectType<number>(vm.a)
-  expectType<string>(vm.b.c.value)
-  expectType<GT>(vm.d.e)
-
-  // setup context properties should be mutable
-  vm.a = 2
-})
-
 // #5948
 describe('DefineComponent should infer correct types when assigning to Component', () => {
   let component: Component
@@ -1106,8 +1070,6 @@ describe('should allow to assign props', () => {
 
 // check if defineComponent can be exported
 export default {
-  // function components
-  a: defineComponent(_ => h('div')),
   // no props
   b: defineComponent({
     data() {
