@@ -221,7 +221,7 @@ function doWatch(
   } else if (isFunction(source)) {
     if (cb) {
       // getter with cb
-      getter = () => call(source as Function, WATCHER_GETTER)
+      getter = () => call(source, WATCHER_GETTER)
     } else {
       // no cb -> simple effect
       getter = () => {
@@ -231,7 +231,7 @@ function doWatch(
         if (cleanup) {
           cleanup()
         }
-        return call(source as Function, WATCHER, [onCleanup])
+        return call(source, WATCHER, [onCleanup])
       }
     }
   } else {
