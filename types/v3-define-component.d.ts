@@ -15,8 +15,6 @@ import {
 } from './v3-component-options'
 import {
   ComponentPublicInstanceConstructor,
-  ComponentPublicInstance,
-  EmitsToProps,
   CreateComponentPublicInstance
 } from './v3-component-public-instance'
 import { Data, HasDefined } from './common'
@@ -36,8 +34,7 @@ type DefineComponent<
     PropsOrPropOptions extends ComponentPropsOptions
       ? ExtractPropTypes<PropsOrPropOptions>
       : PropsOrPropOptions
-  > &
-    ({} extends E ? {} : EmitsToProps<E>),
+  >,
   Defaults = ExtractDefaultPropTypes<PropsOrPropOptions>
 > = ComponentPublicInstanceConstructor<
   CreateComponentPublicInstance<
@@ -56,7 +53,9 @@ type DefineComponent<
     Props
 > &
   ComponentOptionsBase<Props, RawBindings, D, C, M, Mixin, Extends, E, EE> &
-  Component
+  Component & {
+    props: PropsOrPropOptions
+  }
 
 /**
  * overload 1: object format with no props
@@ -66,8 +65,8 @@ export function defineComponent<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
-  Extends = {},
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string
 >(
@@ -96,8 +95,8 @@ export function defineComponent<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
-  Extends = {},
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
   PropsOptions extends ComponentPropsOptions = ComponentPropsOptions
@@ -135,8 +134,8 @@ export function defineComponent<
   D = Data,
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Mixin = {},
-  Extends = {},
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
   PropsOptions extends ComponentPropsOptions = ComponentPropsOptions

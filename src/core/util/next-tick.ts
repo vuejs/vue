@@ -86,7 +86,8 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 }
 
 export function nextTick(): Promise<void>
-export function nextTick(cb: (...args: any[]) => any, ctx?: object): void
+export function nextTick<T>(this: T, cb: (this: T, ...args: any[]) => any): void
+export function nextTick<T>(cb: (this: T, ...args: any[]) => any, ctx: T): void
 /**
  * @internal
  */

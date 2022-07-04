@@ -17,13 +17,7 @@ import {
   ComponentOptionsMixin,
   ComponentOptionsBase
 } from './v3-component-options'
-import {
-  ComponentRenderEmitFn,
-  EmitFn,
-  EmitsOptions,
-  ObjectEmitsOptions,
-  Slots
-} from './v3-setup-context'
+import { EmitFn, EmitsOptions, Slots } from './v3-setup-context'
 
 /**
  * Custom properties added to component instances in any way and can be accessed through `this`
@@ -40,25 +34,6 @@ import {
  * ```
  */
 export interface ComponentCustomProperties {}
-
-type EmitsToProps<T extends EmitsOptions> = T extends string[]
-  ? {
-      [K in string & `on${Capitalize<T[number]>}`]?: (...args: any[]) => any
-    }
-  : T extends ObjectEmitsOptions
-  ? {
-      [K in string &
-        `on${Capitalize<string & keyof T>}`]?: K extends `on${infer C}`
-        ? T[Uncapitalize<C>] extends null
-          ? (...args: any[]) => any
-          : (
-              ...args: T[Uncapitalize<C>] extends (...args: infer P) => any
-                ? P
-                : never
-            ) => any
-        : never
-    }
-  : {}
 
 export type ComponentInstance = InstanceType<VueConstructor>
 

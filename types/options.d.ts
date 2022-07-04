@@ -2,6 +2,7 @@ import { Vue, CreateElement, CombinedVueInstance } from './vue'
 import { VNode, VNodeData, VNodeDirective, NormalizedScopedSlot } from './vnode'
 import { SetupContext } from './v3-setup-context'
 import { DebuggerEvent } from './v3-generated'
+import { DefineComponent } from './v3-define-component'
 
 type Constructor = {
   new (...args: any[]): any
@@ -201,6 +202,7 @@ export interface ComponentOptions<
     [key: string]:
       | Component<any, any, any, any>
       | AsyncComponent<any, any, any, any>
+      | DefineComponent<any, any, any, any, any, any, any, any, any, any>
   }
   transitions?: { [key: string]: object }
   filters?: { [key: string]: Function }

@@ -2,7 +2,7 @@ import { Vue } from './vue'
 import { VNode } from './vnode'
 import { ComponentOptions as Vue2ComponentOptions } from './options'
 import { EmitsOptions, SetupContext } from './v3-setup-context'
-import { Data } from './common'
+import { Data, LooseRequired, UnionToIntersection } from './common'
 import { ComponentPropsOptions, ExtractPropTypes } from './v3-component-props'
 import { CreateComponentPublicInstance } from './v3-component-public-instance'
 export { ComponentPropsOptions } from './v3-component-props'
@@ -52,6 +52,21 @@ export type SetupFunction<
   ctx: SetupContext<Emits>
 ) => RawBindings | (() => VNode | null) | void
 
+type ExtractOptionProp<T> = T extends ComponentOptionsBase<
+  infer P, // Props
+  any, // RawBindings
+  any, // D
+  any, // C
+  any, // M
+  any, // Mixin
+  any, // Extends
+  any // EmitsOptions
+>
+  ? unknown extends P
+    ? {}
+    : P
+  : {}
+
 export interface ComponentOptionsBase<
   Props,
   RawBindings,
@@ -67,9 +82,6 @@ export interface ComponentOptionsBase<
       'data' | 'computed' | 'method' | 'setup' | 'props' | 'mixins' | 'extends'
     >,
     ComponentCustomOptions {
-  // allow any custom options
-  [key: string]: any
-
   // rewrite options api types
   data?: (
     this: CreateComponentPublicInstance<Props, {}, {}, {}, M, Mixin, Extends>,
@@ -79,7 +91,17 @@ export interface ComponentOptionsBase<
   mixins?: Mixin[]
   extends?: Extends
   emits?: (Emits | EmitNames[]) & ThisType<void>
-  setup?: SetupFunction<Props, RawBindings, Emits>
+  setup?: SetupFunction<
+    Readonly<
+      LooseRequired<
+        Props &
+          UnionToIntersection<ExtractOptionProp<Mixin>> &
+          UnionToIntersection<ExtractOptionProp<Extends>>
+      >
+    >,
+    RawBindings,
+    Emits
+  >
 }
 
 export type ComponentOptionsMixin = ComponentOptionsBase<
