@@ -1,5 +1,18 @@
 import { Vue } from './vue'
 
+/**
+ * For extending allowed non-declared props on components in TSX
+ */
+export interface ComponentCustomProps {}
+
+/**
+ * Default allowed non-declared props on component in TSX
+ */
+export interface AllowedComponentProps {
+  class?: unknown
+  style?: unknown
+}
+
 export type ScopedSlot = (props: any) => ScopedSlotReturnValue
 type ScopedSlotReturnValue =
   | VNode

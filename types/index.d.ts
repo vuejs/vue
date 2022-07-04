@@ -30,7 +30,8 @@ export {
   VNode,
   VNodeComponentOptions,
   VNodeData,
-  VNodeDirective
+  VNodeDirective,
+  ComponentCustomProps
 } from './vnode'
 
 export * from './v3-manual-apis'

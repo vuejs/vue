@@ -174,7 +174,10 @@ export interface ComponentOptions<
   el?: Element | string
   template?: string
   // hack is for functional component type inference, should not be used in user code
-  render?(createElement: CreateElement, hack: RenderContext<Props>): VNode
+  render?(
+    createElement: CreateElement,
+    hack: RenderContext<Props>
+  ): VNode | null | void
   renderError?(createElement: CreateElement, err: Error): VNode
   staticRenderFns?: ((createElement: CreateElement) => VNode)[]
 
