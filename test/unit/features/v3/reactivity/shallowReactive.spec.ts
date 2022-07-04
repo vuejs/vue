@@ -1,7 +1,9 @@
 import {
   isReactive,
+  isRef,
   isShallow,
   reactive,
+  ref,
   shallowReactive,
   shallowReadonly
 } from 'v3'
@@ -32,6 +34,15 @@ describe('shallowReactive', () => {
     r.foo = shallowReactive({ bar: {} })
     expect(isShallow(r.foo)).toBe(true)
     expect(isReactive(r.foo.bar)).toBe(false)
+  })
+
+  // #12597
+  test('should not unwrap refs', () => {
+    const foo = shallowReactive({
+      bar: ref(123)
+    })
+    expect(isRef(foo.bar)).toBe(true)
+    expect(foo.bar.value).toBe(123)
   })
 
   // @discrepancy no shallow/non-shallow versions from the same source -
