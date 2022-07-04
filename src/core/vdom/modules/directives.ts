@@ -94,7 +94,7 @@ function normalizeDirectives(
     // $flow-disable-line
     return res
   }
-  let i, dir
+  let i: number, dir: VNodeDirective
   for (i = 0; i < dirs.length; i++) {
     dir = dirs[i]
     if (!dir.modifiers) {
@@ -103,7 +103,7 @@ function normalizeDirectives(
     }
     res[getRawDirName(dir)] = dir
     if (vm._setupState && vm._setupState.__sfc) {
-      dir.def = resolveAsset(vm, '_setupState', 'v-' + dir.name)
+      dir.def = dir.def || resolveAsset(vm, '_setupState', 'v-' + dir.name)
     }
     dir.def = dir.def || resolveAsset(vm.$options, 'directives', dir.name, true)
   }
