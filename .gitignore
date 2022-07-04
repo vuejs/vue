@@ -1,5 +1,6 @@
 .DS_Store
 node_modules
+.history
 *.log
 explorations
 TODOs.md

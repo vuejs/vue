@@ -13,12 +13,13 @@ const idToTemplate = cached(id => {
   const el = query(id)
   return el && el.innerHTML
 })
-
+// runtime中的mount
 const mount = Vue.prototype.$mount
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
+
   el = el && query(el)
 
   /* istanbul ignore if */
@@ -26,6 +27,7 @@ Vue.prototype.$mount = function (
     process.env.NODE_ENV !== 'production' && warn(
       `Do not mount Vue to <html> or <body> - mount to normal elements instead.`
     )
+    // 返回vue实例
     return this
   }
 
@@ -61,7 +63,7 @@ Vue.prototype.$mount = function (
       if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
         mark('compile')
       }
-
+      // 将模板编译成render函数
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
@@ -79,6 +81,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  // 调用runtime中的mount方法 渲染dom
   return mount.call(this, el, hydrating)
 }
 
@@ -86,7 +89,7 @@ Vue.prototype.$mount = function (
  * Get outerHTML of elements, taking care
  * of SVG elements in IE as well.
  */
-function getOuterHTML (el: Element): string {
+function getOuterHTML(el: Element): string {
   if (el.outerHTML) {
     return el.outerHTML
   } else {
@@ -96,6 +99,7 @@ function getOuterHTML (el: Element): string {
   }
 }
 
+// 提供另一个可以直接调用的编译函数，html字符串编译成render函数
 Vue.compile = compileToFunctions
 
 export default Vue

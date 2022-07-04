@@ -1,3 +1,10 @@
+/*
+ * @Description:
+ * @version:
+ * @Author: Murphy
+ * @Date: 2022-07-02 12:30:56
+ * @LastEditTime: 2022-07-02 19:13:42
+ */
 /* @flow */
 
 import { toNumber, toString, looseEqual, looseIndexOf } from 'shared/util'
@@ -11,8 +18,8 @@ import { renderStatic, markOnce } from './render-static'
 import { bindObjectListeners } from './bind-object-listeners'
 import { resolveScopedSlots } from './resolve-scoped-slots'
 import { bindDynamicKeys, prependModifier } from './bind-dynamic-keys'
-
-export function installRenderHelpers (target: any) {
+// 编译中使用这些方法，与渲染相关
+export function installRenderHelpers(target: any) {
   target._o = markOnce
   target._n = toNumber
   target._s = toString

@@ -12,7 +12,9 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 
 let uid = 0
 
-export function initMixin (Vue: Class<Component>) {
+export function initMixin(Vue: Class<Component>) {
+  // 给Vue实例增加_init方法
+  // 合并options
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
     // a uid
@@ -27,6 +29,7 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     // a flag to avoid this being observed
+    // 如果是vue实例不需要被observe
     vm._isVue = true
     // merge options
     if (options && options._isComponent) {
@@ -35,6 +38,7 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      // 合并传入的options和vue的构造函数的options
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
@@ -49,12 +53,19 @@ export function initMixin (Vue: Class<Component>) {
     }
     // expose real self
     vm._self = vm
+    // 生命周期相关变量初始化
+    // $children/$parent/$root/$refs
     initLifecycle(vm)
+    // vm的事件监听初始化，父组件绑定在当前组件上的事件
     initEvents(vm)
     initRender(vm)
+    // 触发beforeCreate
     callHook(vm, 'beforeCreate')
+    // 依赖注入，把inject的成员注入到vm上
     initInjections(vm) // resolve injections before data/props
+    // 初始化vm的_props/methods/_data/computed/watch
     initState(vm)
+    // 初始化provide
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
 
@@ -64,14 +75,14 @@ export function initMixin (Vue: Class<Component>) {
       mark(endTag)
       measure(`vue ${vm._name} init`, startTag, endTag)
     }
-
+    // 调用$mount()挂载，渲染页面
     if (vm.$options.el) {
       vm.$mount(vm.$options.el)
     }
   }
 }
 
-export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
+export function initInternalComponent(vm: Component, options: InternalComponentOptions) {
   const opts = vm.$options = Object.create(vm.constructor.options)
   // doing this because it's faster than dynamic enumeration.
   const parentVnode = options._parentVnode
@@ -90,7 +101,7 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   }
 }
 
-export function resolveConstructorOptions (Ctor: Class<Component>) {
+export function resolveConstructorOptions(Ctor: Class<Component>) {
   let options = Ctor.options
   if (Ctor.super) {
     const superOptions = resolveConstructorOptions(Ctor.super)
@@ -114,7 +125,7 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
   return options
 }
 
-function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
+function resolveModifiedOptions(Ctor: Class<Component>): ?Object {
   let modified
   const latest = Ctor.options
   const sealed = Ctor.sealedOptions
