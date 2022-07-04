@@ -361,6 +361,6 @@ export function hasChanged(x: unknown, y: unknown): boolean {
   if (x === y) {
     return x === 0 && 1 / x !== 1 / (y as number)
   } else {
-    return x === x && y === y
+    return x === x || y === y
   }
 }

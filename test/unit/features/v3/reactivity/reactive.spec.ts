@@ -278,4 +278,29 @@ describe('reactivity/reactive', () => {
     const observed = reactive(original)
     expect(isReactive(observed)).toBe(false)
   })
+
+  // #12595
+  test(`should not trigger if value didn't change`, () => {
+    const state = reactive({
+      foo: 1
+    })
+    const spy = vi.fn()
+    effect(() => {
+      state.foo
+      spy()
+    })
+    expect(spy).toHaveBeenCalledTimes(1)
+
+    state.foo = 1
+    expect(spy).toHaveBeenCalledTimes(1)
+
+    state.foo = NaN
+    expect(spy).toHaveBeenCalledTimes(2)
+
+    state.foo = NaN
+    expect(spy).toHaveBeenCalledTimes(2)
+
+    state.foo = 2
+    expect(spy).toHaveBeenCalledTimes(3)
+  })
 })
