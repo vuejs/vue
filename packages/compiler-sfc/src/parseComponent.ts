@@ -10,6 +10,7 @@ export const DEFAULT_FILENAME = 'anonymous.vue'
 const splitRE = /\r?\n/g
 const replaceRE = /./g
 const isSpecialTag = makeMap('script,style,template', true)
+const isNeedIndentLang = makeMap('pug,jade')
 
 export interface SFCCustomBlock {
   type: string
@@ -177,7 +178,11 @@ export function parseComponent(
     if (depth === 1 && currentBlock) {
       currentBlock.end = start
       let text = source.slice(currentBlock.start, currentBlock.end)
-      if (options.deindent) {
+      if (
+        options.deindent ||
+        // certain langs like pug are indent sensitive, preserve old behavior
+        (currentBlock.lang && isNeedIndentLang(currentBlock.lang))
+      ) {
         text = deindent(text)
       }
       // pad content so that linters and pre-processors can output correct
