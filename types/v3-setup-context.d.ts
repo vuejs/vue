@@ -29,12 +29,6 @@ export type EmitFn<
       }[Event]
     >
 
-export type ComponentRenderEmitFn<
-  Options = ObjectEmitsOptions,
-  Event extends keyof Options = keyof Options,
-  T extends Vue | void = void
-> = EmitFn<Options, Event, T>
-
 export interface SetupContext<E extends EmitsOptions = {}> {
   attrs: Data
   slots: Slots

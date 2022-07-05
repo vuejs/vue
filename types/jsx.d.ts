@@ -1313,7 +1313,12 @@ type NativeElements = {
   >
 }
 
-import { VNode, VNodeData } from './vnode'
+import {
+  VNode,
+  VNodeData,
+  ComponentCustomProps,
+  AllowedComponentProps
+} from './vnode'
 
 declare global {
   namespace JSX {
@@ -1329,7 +1334,10 @@ declare global {
       // @ts-ignore suppress ts:2374 = Duplicate string index signature.
       [name: string]: any
     }
-    interface IntrinsicAttributes extends ReservedProps {}
+    interface IntrinsicAttributes
+      extends ReservedProps,
+        AllowedComponentProps,
+        ComponentCustomProps {}
   }
 }
 

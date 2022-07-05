@@ -30,7 +30,8 @@ export {
   VNode,
   VNodeComponentOptions,
   VNodeData,
-  VNodeDirective
+  VNodeDirective,
+  ComponentCustomProps
 } from './vnode'
 
 export * from './v3-manual-apis'
@@ -47,13 +48,15 @@ export {
   // v2 already has option with same name and it's for a single computed
   ComputedOptions as ComponentComputedOptions,
   MethodOptions as ComponentMethodOptions,
-  ComponentPropsOptions
+  ComponentPropsOptions,
+  ComponentCustomOptions
 } from './v3-component-options'
 export {
   ComponentInstance,
   ComponentPublicInstance,
-  ComponentRenderProxy
-} from './v3-component-proxy'
+  CreateComponentPublicInstance,
+  ComponentCustomProperties
+} from './v3-component-public-instance'
 export {
   // PropType,
   // PropOptions,

@@ -2,6 +2,7 @@ import { Vue, CreateElement, CombinedVueInstance } from './vue'
 import { VNode, VNodeData, VNodeDirective, NormalizedScopedSlot } from './vnode'
 import { SetupContext } from './v3-setup-context'
 import { DebuggerEvent } from './v3-generated'
+import { DefineComponent } from './v3-define-component'
 
 type Constructor = {
   new (...args: any[]): any
@@ -19,6 +20,7 @@ export type Component<
   | typeof Vue
   | FunctionalComponentOptions<Props>
   | ComponentOptions<never, Data, Methods, Computed, Props, SetupBindings>
+  | DefineComponent<any, any, any, any, any>
 
 type EsModule<T> = T | { default: T }
 
@@ -174,7 +176,10 @@ export interface ComponentOptions<
   el?: Element | string
   template?: string
   // hack is for functional component type inference, should not be used in user code
-  render?(createElement: CreateElement, hack: RenderContext<Props>): VNode
+  render?(
+    createElement: CreateElement,
+    hack: RenderContext<Props>
+  ): VNode | null | void
   renderError?(createElement: CreateElement, err: Error): VNode
   staticRenderFns?: ((createElement: CreateElement) => VNode)[]
 
@@ -198,6 +203,7 @@ export interface ComponentOptions<
     [key: string]:
       | Component<any, any, any, any>
       | AsyncComponent<any, any, any, any>
+      | DefineComponent<any, any, any, any, any, any, any, any, any, any>
   }
   transitions?: { [key: string]: object }
   filters?: { [key: string]: Function }
