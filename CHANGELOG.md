@@ -1,3 +1,18 @@
+## [2.7.2](https://github.com/vuejs/vue/compare/v2.7.1...v2.7.2) (2022-07-05)
+
+
+### Bug Fixes
+
+* **compiler-sfc:** preserve old deindent behavior for pug ([1294385](https://github.com/vuejs/vue/commit/1294385300742acbea5f05c166685bd4a1fab35a)), closes [#12611](https://github.com/vuejs/vue/issues/12611)
+
+
+### Features
+
+* allow passing directive definition directly to h() ([#12590](https://github.com/vuejs/vue/issues/12590)) ([d45bbea](https://github.com/vuejs/vue/commit/d45bbeac2710a5cf9185377abc2342295f0bb4e2))
+* **types:** define component improvements ([#12612](https://github.com/vuejs/vue/issues/12612)) ([fb93c1b](https://github.com/vuejs/vue/commit/fb93c1be77f12ea1375c5e8b47d168e4d5ceb7be))
+
+
+
 ## [2.7.1](https://github.com/vuejs/vue/compare/v2.7.0...v2.7.1) (2022-07-04)
 
 
