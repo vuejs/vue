@@ -34,7 +34,7 @@ export function initSetup(vm: Component) {
     pushTarget()
     const setupResult = invokeWithErrorHandling(
       setup,
-      null,
+      vm,
       [vm._props || shallowReactive({}), ctx],
       vm,
       `setup`
