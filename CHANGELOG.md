@@ -1,3 +1,14 @@
+## [2.7.3](https://github.com/vuejs/vue/compare/v2.7.2...v2.7.3) (2022-07-06)
+
+
+### Bug Fixes
+
+* add renderTracked/Triggered merge strategy ([#12616](https://github.com/vuejs/vue/issues/12616)) ([6d1dbee](https://github.com/vuejs/vue/commit/6d1dbeee7ebd27a87c37393d8cabf2ef8253f3a4))
+* **ssr/reactivity:** fix composition api behavior in SSR ([360272b](https://github.com/vuejs/vue/commit/360272bde32e93b1a8d611e4b97af1300c38e7a3)), closes [#12615](https://github.com/vuejs/vue/issues/12615)
+* **types:** allow slot attribute ([94ccca2](https://github.com/vuejs/vue/commit/94ccca207c9c5fc0fc8985e0c103d8a1c9cff412)), closes [#12617](https://github.com/vuejs/vue/issues/12617)
+
+
+
 ## [2.7.2](https://github.com/vuejs/vue/compare/v2.7.1...v2.7.2) (2022-07-05)
 
 
