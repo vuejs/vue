@@ -1,0 +1,189 @@
+// Vitest Snapshot v1
+
+exports[`CSS vars injection > codegen > <script> w/ default export 1`] = `
+"const __default__ = { setup() {} }
+import { useCssVars as _useCssVars } from 'vue'
+const __injectCSSVars__ = () => {
+_useCssVars((_vm, _setup) => ({
+  \\"xxxxxxxx-color\\": (_vm.color)
+}))}
+const __setup__ = __default__.setup
+__default__.setup = __setup__
+  ? (props, ctx) => { __injectCSSVars__();return __setup__(props, ctx) }
+  : __injectCSSVars__
+
+export default __default__"
+`;
+
+exports[`CSS vars injection > codegen > <script> w/ default export in strings/comments 1`] = `
+"
+          // export default {}
+          const __default__ = {}
+        
+import { useCssVars as _useCssVars } from 'vue'
+const __injectCSSVars__ = () => {
+_useCssVars((_vm, _setup) => ({
+  \\"xxxxxxxx-color\\": (_vm.color)
+}))}
+const __setup__ = __default__.setup
+__default__.setup = __setup__
+  ? (props, ctx) => { __injectCSSVars__();return __setup__(props, ctx) }
+  : __injectCSSVars__
+
+export default __default__"
+`;
+
+exports[`CSS vars injection > codegen > <script> w/ no default export 1`] = `
+"const a = 1
+const __default__ = {}
+import { useCssVars as _useCssVars } from 'vue'
+const __injectCSSVars__ = () => {
+_useCssVars((_vm, _setup) => ({
+  \\"xxxxxxxx-color\\": (_vm.color)
+}))}
+const __setup__ = __default__.setup
+__default__.setup = __setup__
+  ? (props, ctx) => { __injectCSSVars__();return __setup__(props, ctx) }
+  : __injectCSSVars__
+
+export default __default__"
+`;
+
+exports[`CSS vars injection > codegen > should ignore comments 1`] = `
+"import { useCssVars as _useCssVars } from 'vue'
+
+export default {
+  setup(__props) {
+
+_useCssVars((_vm, _setup) => ({
+  \\"xxxxxxxx-width\\": (_setup.width)
+}))
+const color = 'red';const width = 100
+return { color, width }
+}
+
+}"
+`;
+
+exports[`CSS vars injection > codegen > should work with w/ complex expression 1`] = `
+"import { useCssVars as _useCssVars } from 'vue'
+
+export default {
+  setup(__props) {
+
+_useCssVars((_vm, _setup) => ({
+  \\"xxxxxxxx-foo\\": (_setup.foo),
+  \\"xxxxxxxx-foo____px_\\": (_setup.foo + 'px'),
+  \\"xxxxxxxx-_a___b____2____px_\\": ((_setup.a + _setup.b) / 2 + 'px'),
+  \\"xxxxxxxx-__a___b______2___a_\\": (((_setup.a + _setup.b)) / (2 * _setup.a))
+}))
+
+        let a = 100
+        let b = 200
+        let foo = 300
+        
+return { a, b, foo }
+}
+
+}"
+`;
+
+exports[`CSS vars injection > codegen > w/ <script setup> 1`] = `
+"import { useCssVars as _useCssVars } from 'vue'
+
+export default {
+  setup(__props) {
+
+_useCssVars((_vm, _setup) => ({
+  \\"xxxxxxxx-color\\": (_setup.color)
+}))
+const color = 'red'
+return { color }
+}
+
+}"
+`;
+
+exports[`CSS vars injection > codegen > w/ <script setup> using the same var multiple times 1`] = `
+"import { useCssVars as _useCssVars } from 'vue'
+
+export default {
+  setup(__props) {
+
+_useCssVars((_vm, _setup) => ({
+  \\"xxxxxxxx-color\\": (_setup.color)
+}))
+
+        const color = 'red'
+        
+return { color }
+}
+
+}"
+`;
+
+exports[`CSS vars injection > generating correct code for nested paths 1`] = `
+"const a = 1
+const __default__ = {}
+import { useCssVars as _useCssVars } from 'vue'
+const __injectCSSVars__ = () => {
+_useCssVars((_vm, _setup) => ({
+  \\"xxxxxxxx-color\\": (_vm.color),
+  \\"xxxxxxxx-font_size\\": (_vm.font.size)
+}))}
+const __setup__ = __default__.setup
+__default__.setup = __setup__
+  ? (props, ctx) => { __injectCSSVars__();return __setup__(props, ctx) }
+  : __injectCSSVars__
+
+export default __default__"
+`;
+
+exports[`CSS vars injection > w/ <script setup> binding analysis 1`] = `
+"import { useCssVars as _useCssVars } from 'vue'
+import { ref } from 'vue'
+        
+export default {
+  props: {
+          foo: String
+        },
+  setup(__props) {
+
+_useCssVars((_vm, _setup) => ({
+  \\"xxxxxxxx-color\\": (_setup.color),
+  \\"xxxxxxxx-size\\": (_setup.size),
+  \\"xxxxxxxx-foo\\": (_vm.foo)
+}))
+
+        const color = 'red'
+        const size = ref('10px')
+        
+        
+return { color, size, ref }
+}
+
+}"
+`;
+
+exports[`CSS vars injection > w/ normal <script> binding analysis 1`] = `
+"
+      const __default__ = {
+        setup() {
+          return {
+            size: ref('100px')
+          }
+        }
+      }
+      
+import { useCssVars as _useCssVars } from 'vue'
+const __injectCSSVars__ = () => {
+_useCssVars((_vm, _setup) => ({
+  \\"xxxxxxxx-size\\": (_vm.size)
+}))}
+const __setup__ = __default__.setup
+__default__.setup = __setup__
+  ? (props, ctx) => { __injectCSSVars__();return __setup__(props, ctx) }
+  : __injectCSSVars__
+
+export default __default__"
+`;

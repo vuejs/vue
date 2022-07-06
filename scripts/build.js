@@ -16,11 +16,6 @@ if (process.argv[2]) {
   builds = builds.filter(b => {
     return filters.some(f => b.output.file.indexOf(f) > -1 || b._name.indexOf(f) > -1)
   })
-} else {
-  // filter out weex builds by default
-  builds = builds.filter(b => {
-    return b.output.file.indexOf('weex') === -1
-  })
 }
 
 build(builds)
@@ -46,17 +41,18 @@ function buildEntry (config) {
   const isProd = /(min|prod)\.js$/.test(file)
   return rollup.rollup(config)
     .then(bundle => bundle.generate(output))
-    .then(({ output: [{ code }] }) => {
+    .then(async ({ output: [{ code }] }) => {
       if (isProd) {
-        const minified = (banner ? banner + '\n' : '') + terser.minify(code, {
+        const {code: minifiedCode} =  await terser.minify(code, {
           toplevel: true,
-          output: {
-            ascii_only: true
-          },
           compress: {
-            pure_funcs: ['makeMap']
+            pure_funcs: ['makeMap'],
+          },
+          format: {
+            ascii_only: true,
           }
-        }).code
+        });
+        const minified = (banner ? banner + '\n' : '') + minifiedCode
         return write(file, minified, true)
       } else {
         return write(file, code)
@@ -71,6 +67,9 @@ function write (dest, code, zip) {
       resolve()
     }
 
+    if (!fs.existsSync(path.dirname(dest))) {
+      fs.mkdirSync(path.dirname(dest), { recursive: true })
+    }
     fs.writeFile(dest, code, err => {
       if (err) return reject(err)
       if (zip) {

@@ -1,9 +1,0 @@
-{
-  "env": {
-    "jasmine": true
-  },
-  "plugins": ["jasmine"],
-  "rules": {
-    "jasmine/no-focused-tests": 2
-  }
-}
