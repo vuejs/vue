@@ -1303,6 +1303,12 @@ type EventHandlers<E> = {
 type ReservedProps = {
   key?: string | number | symbol
   ref?: VNodeData['ref']
+  /**
+   * @deprecated Old named slot syntax has been deprecated, use the new syntax
+   * instead: `<template v-slot:name>`
+   * https://v2.vuejs.org/v2/guide/components-slots.html#Named-Slots
+   */
+  slot?: string
 }
 
 type ElementAttrs<T> = T & ReservedProps

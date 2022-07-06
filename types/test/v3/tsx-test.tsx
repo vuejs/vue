@@ -51,3 +51,5 @@ const Foo = defineComponent({
 // working
 ;<Foo bar={1} />
 ;<Foo bar={1} foo="baz" />
+
+;<div slot="x" />
