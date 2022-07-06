@@ -1,5 +1,12 @@
 import { observe, Observer } from 'core/observer'
-import { def, isArray, isPrimitive, warn, toRawType } from 'core/util'
+import {
+  def,
+  isArray,
+  isPrimitive,
+  warn,
+  toRawType,
+  isServerRendering
+} from 'core/util'
 import type { Ref, UnwrapRefSimple, RawSymbol } from './ref'
 
 export const enum ReactiveFlags {
@@ -67,7 +74,11 @@ function makeReactive(target: any, shallow: boolean) {
         )
       }
     }
-    const ob = observe(target, shallow)
+    const ob = observe(
+      target,
+      shallow,
+      isServerRendering() /* ssr mock reactivity */
+    )
     if (__DEV__ && !ob) {
       if (target == null || isPrimitive(target)) {
         warn(`value cannot be made reactive: ${String(target)}`)

@@ -6,7 +6,7 @@ import {
 } from './reactive'
 import type { IfAny } from 'types/utils'
 import Dep from 'core/observer/dep'
-import { warn, isArray, def } from 'core/util'
+import { warn, isArray, def, isServerRendering } from 'core/util'
 import { TrackOpTypes, TriggerOpTypes } from './operations'
 
 declare const RefSymbol: unique symbol
@@ -69,7 +69,11 @@ function createRef(rawValue: unknown, shallow: boolean) {
   const ref: any = {}
   def(ref, RefFlag, true)
   def(ref, ReactiveFlags.IS_SHALLOW, true)
-  ref.dep = defineReactive(ref, 'value', rawValue, null, shallow)
+  def(
+    ref,
+    'dep',
+    defineReactive(ref, 'value', rawValue, null, shallow, isServerRendering())
+  )
   return ref
 }
 

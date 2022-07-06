@@ -13,7 +13,8 @@ import {
   isUndef,
   isValidArrayIndex,
   isServerRendering,
-  hasChanged
+  hasChanged,
+  noop
 } from '../util/index'
 import { isReadonly, isRef, TrackOpTypes, TriggerOpTypes } from '../../v3'
 
@@ -31,6 +32,14 @@ export function toggleObserving(value: boolean) {
   shouldObserve = value
 }
 
+// ssr mock dep
+const mockDep = {
+  notify: noop,
+  depend: noop,
+  addSub: noop,
+  removeSub: noop
+} as Dep
+
 /**
  * Observer class that is attached to each observed
  * object. Once attached, the observer converts the target
@@ -41,44 +50,47 @@ export class Observer {
   dep: Dep
   vmCount: number // number of vms that have this object as root $data
 
-  constructor(public value: any, public shallow = false) {
+  constructor(public value: any, public shallow = false, public mock = false) {
     // this.value = value
-    this.dep = new Dep()
+    this.dep = mock ? mockDep : new Dep()
     this.vmCount = 0
     def(value, '__ob__', this)
     if (isArray(value)) {
-      if (hasProto) {
-        protoAugment(value, arrayMethods)
-      } else {
-        copyAugment(value, arrayMethods, arrayKeys)
+      if (!mock) {
+        if (hasProto) {
+          /* eslint-disable no-proto */
+          ;(value as any).__proto__ = arrayMethods
+          /* eslint-enable no-proto */
+        } else {
+          for (let i = 0, l = arrayKeys.length; i < l; i++) {
+            const key = arrayKeys[i]
+            def(value, key, arrayMethods[key])
+          }
+        }
       }
       if (!shallow) {
         this.observeArray(value)
       }
     } else {
-      this.walk(value, shallow)
-    }
-  }
-
-  /**
-   * Walk through all properties and convert them into
-   * getter/setters. This method should only be called when
-   * value type is Object.
-   */
-  walk(obj: object, shallow: boolean) {
-    const keys = Object.keys(obj)
-    for (let i = 0; i < keys.length; i++) {
-      const key = keys[i]
-      defineReactive(obj, key, NO_INIITIAL_VALUE, undefined, shallow)
+      /**
+       * Walk through all properties and convert them into
+       * getter/setters. This method should only be called when
+       * value type is Object.
+       */
+      const keys = Object.keys(value)
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i]
+        defineReactive(value, key, NO_INIITIAL_VALUE, undefined, shallow, mock)
+      }
     }
   }
 
   /**
    * Observe a list of Array items.
    */
-  observeArray(items: Array<any>) {
-    for (let i = 0, l = items.length; i < l; i++) {
-      observe(items[i])
+  observeArray(value: any[]) {
+    for (let i = 0, l = value.length; i < l; i++) {
+      observe(value[i], false, this.mock)
     }
   }
 }
@@ -86,33 +98,15 @@ export class Observer {
 // helpers
 
 /**
- * Augment a target Object or Array by intercepting
- * the prototype chain using __proto__
- */
-function protoAugment(target, src: Object) {
-  /* eslint-disable no-proto */
-  target.__proto__ = src
-  /* eslint-enable no-proto */
-}
-
-/**
- * Augment a target Object or Array by defining
- * hidden properties.
- */
-/* istanbul ignore next */
-function copyAugment(target: Object, src: Object, keys: Array<string>) {
-  for (let i = 0, l = keys.length; i < l; i++) {
-    const key = keys[i]
-    def(target, key, src[key])
-  }
-}
-
-/**
  * Attempt to create an observer instance for a value,
  * returns the new observer if successfully observed,
  * or the existing observer if the value already has one.
  */
-export function observe(value: any, shallow?: boolean): Observer | void {
+export function observe(
+  value: any,
+  shallow?: boolean,
+  ssrMockReactivity?: boolean
+): Observer | void {
   if (!isObject(value) || isRef(value) || value instanceof VNode) {
     return
   }
@@ -121,12 +115,12 @@ export function observe(value: any, shallow?: boolean): Observer | void {
     ob = value.__ob__
   } else if (
     shouldObserve &&
-    !isServerRendering() &&
+    (ssrMockReactivity || !isServerRendering()) &&
     (isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
-    !value.__v_skip
+    !value.__v_skip /* ReactiveFlags.SKIP */
   ) {
-    ob = new Observer(value, shallow)
+    ob = new Observer(value, shallow, ssrMockReactivity)
   }
   return ob
 }
@@ -139,7 +133,8 @@ export function defineReactive(
   key: string,
   val?: any,
   customSetter?: Function | null,
-  shallow?: boolean
+  shallow?: boolean,
+  mock?: boolean
 ) {
   const dep = new Dep()
 
@@ -158,7 +153,7 @@ export function defineReactive(
     val = obj[key]
   }
 
-  let childOb = !shallow && observe(val)
+  let childOb = !shallow && observe(val, false, mock)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
@@ -202,7 +197,7 @@ export function defineReactive(
       } else {
         val = newVal
       }
-      childOb = !shallow && observe(newVal)
+      childOb = !shallow && observe(newVal, false, mock)
       if (__DEV__) {
         dep.notify({
           type: TriggerOpTypes.SET,
@@ -241,16 +236,20 @@ export function set(
     __DEV__ && warn(`Set operation on key "${key}" failed: target is readonly.`)
     return
   }
+  const ob = (target as any).__ob__
   if (isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
+    // when mocking for SSR, array methods are not hijacked
+    if (!ob.shallow && ob.mock) {
+      observe(val, false, true)
+    }
     return val
   }
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
   }
-  const ob = (target as any).__ob__
   if ((target as any)._isVue || (ob && ob.vmCount)) {
     __DEV__ &&
       warn(
@@ -263,7 +262,7 @@ export function set(
     target[key] = val
     return val
   }
-  defineReactive(ob.value, key, val)
+  defineReactive(ob.value, key, val, undefined, ob.shallow, ob.mock)
   if (__DEV__) {
     ob.dep.notify({
       type: TriggerOpTypes.ADD,
