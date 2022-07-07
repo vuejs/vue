@@ -1,5 +1,17 @@
 /* global Vue */
-
+Vue.component('my-child', {
+  name: 'my-child',
+  data() {
+    return {
+      count: 0
+    }
+  },
+  render: function(c) {
+    c('div', {
+      class: 'xxx'
+    }, 'my-child')
+  }
+})
 var apiURL = 'https://api.github.com/repos/vuejs/vue/commits?per_page=3&sha='
 
 /**
@@ -17,7 +29,7 @@ new Vue({
   },
 
   created: function () {
-    this.fetchData()
+    // this.fetchData()
   },
 
   watch: {
