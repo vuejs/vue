@@ -74,6 +74,40 @@ describe('SSR: template option', () => {
     )
   })
 
+  it('renderToString with array setting at created', async () => {
+    const renderer = createRenderer({
+      template: defaultTemplate
+    })
+
+    const context = {
+      head: '<meta name="viewport" content="width=device-width">',
+      styles: '<style>h1 { color: red }</style>',
+      state: { a: 1 }
+    }
+
+    const res = await renderer.renderToString(
+      new Vue({
+        template: '<div>{{ arr[0] }}</div>',
+        data() {
+          return {
+            arr: ['hi']
+          }
+        },
+        created() {
+          this.$set(this.arr, 0, 'hi')
+        }
+      }),
+      context
+    )
+
+    expect(res).toContain(
+      `<html><head>${context.head}${context.styles}</head><body>` +
+        `<div data-server-rendered="true">hi</div>` +
+        `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        `</body></html>`
+    )
+  })
+
   it('renderToString with interpolation', async () => {
     const renderer = createRenderer({
       template: interpolateTemplate
