@@ -1,3 +1,7 @@
+/**
+ * Note: also update dist/vue.runtime.mjs when adding new exports to this file.
+ */
+
 export const version: string = '__VERSION__'
 
 export {
