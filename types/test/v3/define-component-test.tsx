@@ -1139,9 +1139,14 @@ defineComponent({
   }
 })
 
+// Missing / mismatching Vue 2 properties
 // https://github.com/vuejs/vue/issues/12628#issuecomment-1177258223
 defineComponent({
   render(h) {
+    this.$listeners
+    this.$on('foo', () => {})
+    this.$ssrContext
+    this.$isServer
     return h('div', {}, [...this.$slots.default!])
   }
 })

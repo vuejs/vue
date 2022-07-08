@@ -3,8 +3,6 @@ import {
   AsyncComponent,
   ComponentOptions,
   FunctionalComponentOptions,
-  WatchOptionsWithHandler,
-  WatchHandler,
   DirectiveOptions,
   DirectiveFunction,
   RecordPropsDefinition,
@@ -15,6 +13,7 @@ import {
 import { VNode, VNodeData, VNodeChildren, NormalizedScopedSlot } from './vnode'
 import { PluginFunction, PluginObject } from './plugin'
 import { DefineComponent } from './v3-define-component'
+import { nextTick } from './v3-generated'
 
 export interface CreateElement {
   (
@@ -36,20 +35,25 @@ export interface CreateElement {
   ): VNode
 }
 
-export interface Vue {
-  readonly $el: Element
-  readonly $options: ComponentOptions<Vue>
+export interface Vue extends Vue2Instance {
+  readonly $data: Record<string, any>
+  readonly $props: Record<string, any>
   readonly $parent: Vue
   readonly $root: Vue
   readonly $children: Vue[]
+  readonly $options: ComponentOptions<Vue>
+  $emit(event: string, ...args: any[]): this
+}
+
+export interface Vue2Instance {
+  readonly $el: Element
   readonly $refs: {
     [key: string]: Vue | Element | (Vue | Element)[] | undefined
   }
   readonly $slots: { [key: string]: VNode[] | undefined }
   readonly $scopedSlots: { [key: string]: NormalizedScopedSlot | undefined }
   readonly $isServer: boolean
-  readonly $data: Record<string, any>
-  readonly $props: Record<string, any>
+
   readonly $ssrContext: any
   readonly $vnode: VNode
   readonly $attrs: Record<string, string>
@@ -73,9 +77,7 @@ export interface Vue {
   $on(event: string | string[], callback: Function): this
   $once(event: string | string[], callback: Function): this
   $off(event?: string | string[], callback?: Function): this
-  $emit(event: string, ...args: any[]): this
-  $nextTick(callback: (this: this) => void): void
-  $nextTick(): Promise<void>
+  $nextTick: typeof nextTick
   $createElement: CreateElement
 }
 
