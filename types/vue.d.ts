@@ -14,6 +14,7 @@ import {
 } from './options'
 import { VNode, VNodeData, VNodeChildren, NormalizedScopedSlot } from './vnode'
 import { PluginFunction, PluginObject } from './plugin'
+import { DefineComponent } from './v3-define-component'
 
 export interface CreateElement {
   (
@@ -313,6 +314,10 @@ export interface VueConstructor<V extends Vue = Vue> {
     id: string,
     definition?: ComponentOptions<V>
   ): ExtendedVue<V, {}, {}, {}, {}, {}>
+  component<T extends DefineComponent<any, any, any, any, any, any, any, any>>(
+    id: string,
+    definition?: T
+  ): T
 
   use<T>(
     plugin: PluginObject<T> | PluginFunction<T>,

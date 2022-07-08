@@ -1,3 +1,4 @@
+import Vue, { VueConstructor } from '../../index'
 import {
   Component,
   defineComponent,
@@ -8,12 +9,12 @@ import {
 } from '../../index'
 import { describe, test, expectType, expectError, IsUnion } from '../utils'
 
-defineComponent({
-  props: {
-    foo: Number
-  },
-  render() {
-    this.foo
+describe('compat with v2 APIs', () => {
+  const comp = defineComponent({})
+
+  Vue.component('foo', comp)
+  function install(app: VueConstructor) {
+    app.component('foo', comp)
   }
 })
 
