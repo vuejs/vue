@@ -10,7 +10,7 @@ export const DEFAULT_FILENAME = 'anonymous.vue'
 const splitRE = /\r?\n/g
 const replaceRE = /./g
 const isSpecialTag = makeMap('script,style,template', true)
-const isNeedIndentLang = makeMap('pug,jade')
+const isNeedIndentLang = makeMap('pug,jade,styl,stylus,sass,scss,yaml,markdown')
 
 export interface SFCCustomBlock {
   type: string
