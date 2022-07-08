@@ -87,4 +87,6 @@ export function defineComponent(options: any) {
   return options
 }
 
+export { defineAsyncComponent } from './apiAsyncComponent'
+
 export * from './apiLifecycle'

@@ -1,4 +1,3 @@
-import { Component } from '..'
 import {
   ComponentPropsOptions,
   ExtractDefaultPropTypes,
