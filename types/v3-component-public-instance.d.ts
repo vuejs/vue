@@ -18,6 +18,7 @@ import {
   ComponentOptionsBase
 } from './v3-component-options'
 import { EmitFn, EmitsOptions, Slots } from './v3-setup-context'
+import { VNode } from './vnode'
 
 /**
  * Custom properties added to component instances in any way and can be accessed through `this`
@@ -162,7 +163,8 @@ export type ComponentPublicInstance<
   >
   $attrs: Data
   $refs: Data
-  $slots: Slots
+  $slots: Record<string, VNode[] | undefined>
+  $scopedSlots: Slots
   $root: ComponentPublicInstance | null
   $parent: ComponentPublicInstance | null
   $emit: EmitFn<E>

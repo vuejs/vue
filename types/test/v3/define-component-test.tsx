@@ -1138,3 +1138,10 @@ defineComponent({
     }
   }
 })
+
+// https://github.com/vuejs/vue/issues/12628#issuecomment-1177258223
+defineComponent({
+  render(h) {
+    return h('div', {}, [...this.$slots.default!])
+  }
+})
