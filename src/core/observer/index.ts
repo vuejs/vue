@@ -241,7 +241,7 @@ export function set(
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
     // when mocking for SSR, array methods are not hijacked
-    if (!ob.shallow && ob.mock) {
+    if (ob && !ob.shallow && ob.mock) {
       observe(val, false, true)
     }
     return val

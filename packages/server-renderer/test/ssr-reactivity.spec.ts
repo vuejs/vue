@@ -93,6 +93,10 @@ describe('SSR Reactive', () => {
 
     set(state.value, 1, {})
     expect(isReactive(state.value[1])).toBe(true)
+
+    const rawArr = []
+    set(rawArr, 1, {})
+    expect(isReactive(rawArr[1])).toBe(false)
   })
 
   // #550
