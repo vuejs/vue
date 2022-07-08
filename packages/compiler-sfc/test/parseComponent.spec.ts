@@ -25,8 +25,7 @@ describe('Single File Component parser', () => {
       <div>
         <style>nested should be ignored</style>
       </div>
-    `,
-      { deindent: true }
+    `
     )
     expect(res.template!.content.trim()).toBe('<div>hi</div>')
     expect(res.styles.length).toBe(4)
@@ -76,8 +75,7 @@ describe('Single File Component parser', () => {
       </style>
     `
     const deindentDefault = parseComponent(content.trim(), {
-      pad: false,
-      deindent: true
+      pad: false
     })
     const deindentEnabled = parseComponent(content.trim(), {
       pad: false,
@@ -89,7 +87,9 @@ describe('Single File Component parser', () => {
     })
 
     expect(deindentDefault.template!.content).toBe('\n<div></div>\n')
-    expect(deindentDefault.script!.content).toBe('\nexport default {}\n')
+    expect(deindentDefault.script!.content).toBe(
+      '\n        export default {}\n      '
+    )
     expect(deindentDefault.styles[0].content).toBe('\nh1 { color: red }\n')
     expect(deindentEnabled.template!.content).toBe('\n<div></div>\n')
     expect(deindentEnabled.script!.content).toBe('\nexport default {}\n')
@@ -203,8 +203,7 @@ describe('Single File Component parser', () => {
       }
       </test>
       <custom src="./x.json"></custom>
-    `,
-      { deindent: true }
+    `
     )
     expect(res.customBlocks.length).toBe(4)
 
