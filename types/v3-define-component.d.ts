@@ -18,6 +18,7 @@ import {
 } from './v3-component-public-instance'
 import { Data, HasDefined } from './common'
 import { EmitsOptions } from './v3-setup-context'
+import { CreateElement, RenderContext } from './umd'
 
 type DefineComponent<
   PropsOrPropOptions = {},
@@ -65,6 +66,30 @@ type DefineComponent<
   > & {
     props: PropsOrPropOptions
   }
+
+/**
+ * overload 0.0: functional component with array props
+ */
+export function defineComponent<
+  PropNames extends string,
+  Props = Readonly<{ [key in PropNames]?: any }>
+>(options: {
+  functional: true
+  props?: PropNames[]
+  render?: (h: CreateElement, context: RenderContext<Props>) => any
+}): DefineComponent<Props>
+
+/**
+ * overload 0.1: functional component with object props
+ */
+export function defineComponent<
+  PropsOptions extends ComponentPropsOptions = ComponentPropsOptions,
+  Props = ExtractPropTypes<PropsOptions>
+>(options: {
+  functional: true
+  props?: PropsOptions
+  render?: (h: CreateElement, context: RenderContext<Props>) => any
+}): DefineComponent<PropsOptions>
 
 /**
  * overload 1: object format with no props

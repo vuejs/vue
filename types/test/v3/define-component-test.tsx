@@ -1079,3 +1079,39 @@ export default {
     }
   })
 }
+
+describe('functional w/ array props', () => {
+  const Foo = defineComponent({
+    functional: true,
+    props: ['foo'],
+    render(h, ctx) {
+      ctx.props.foo
+      // @ts-expect-error
+      ctx.props.bar
+    }
+  })
+
+  ;<Foo foo="hi" />
+  // @ts-expect-error
+  ;<Foo bar={123} />
+})
+
+describe('functional w/ object props', () => {
+  const Foo = defineComponent({
+    functional: true,
+    props: {
+      foo: String
+    },
+    render(h, ctx) {
+      ctx.props.foo
+      // @ts-expect-error
+      ctx.props.bar
+    }
+  })
+
+  ;<Foo foo="hi" />
+  // @ts-expect-error
+  ;<Foo foo={123} />
+  // @ts-expect-error
+  ;<Foo bar={123} />
+})
