@@ -20,7 +20,7 @@ export type Component<
   | typeof Vue
   | FunctionalComponentOptions<Props>
   | ComponentOptions<never, Data, Methods, Computed, Props, SetupBindings>
-  | DefineComponent<any, any, any, any, any>
+  | DefineComponent<any, any, any, any, any, any, any, any, any, any, any>
 
 type EsModule<T> = T | { default: T }
 
@@ -201,9 +201,9 @@ export interface ComponentOptions<
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions }
   components?: {
     [key: string]:
-      | Component<any, any, any, any>
+      | {}
+      | Component<any, any, any, any, any>
       | AsyncComponent<any, any, any, any>
-      | DefineComponent<any, any, any, any, any, any, any, any, any, any>
   }
   transitions?: { [key: string]: object }
   filters?: { [key: string]: Function }

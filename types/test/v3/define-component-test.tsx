@@ -1115,3 +1115,26 @@ describe('functional w/ object props', () => {
   // @ts-expect-error
   ;<Foo bar={123} />
 })
+
+// #12628
+defineComponent({
+  components: {
+    App: defineComponent({})
+  },
+  data() {
+    return {}
+  },
+  provide(): any {
+    return {
+      fetchData: this.fetchData
+    }
+  },
+  created() {
+    this.fetchData()
+  },
+  methods: {
+    fetchData() {
+      throw new Error('Not implemented.')
+    }
+  }
+})
