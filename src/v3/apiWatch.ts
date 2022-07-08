@@ -320,8 +320,8 @@ function doWatch(
   } else {
     // pre
     watcher.update = () => {
-      if (instance && instance === currentInstance) {
-        // pre-watcher triggered inside setup()
+      if (instance && instance === currentInstance && !instance._isMounted) {
+        // pre-watcher triggered before
         const buffer = instance._preWatchers || (instance._preWatchers = [])
         if (buffer.indexOf(watcher) < 0) buffer.push(watcher)
       } else {

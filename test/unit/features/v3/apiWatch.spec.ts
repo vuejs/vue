@@ -1116,4 +1116,24 @@ describe('api: watch', () => {
     await nextTick()
     expect(order).toMatchObject([`mounted`, `watcher`])
   })
+
+  // #12624
+  test('pre watch triggered in mounted hook', async () => {
+    const spy = vi.fn()
+    new Vue({
+      setup() {
+        const c = ref(0)
+
+        onMounted(() => {
+          c.value++
+        })
+
+        watchEffect(() => spy(c.value))
+        return () => {}
+      }
+    }).$mount()
+    expect(spy).toHaveBeenCalledTimes(1)
+    await nextTick()
+    expect(spy).toHaveBeenCalledTimes(2)
+  })
 })
