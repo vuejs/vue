@@ -49,6 +49,7 @@ export const {
   onMounted,
   onBeforeUpdate,
   onUpdated,
+  onBeforeUnmount,
   onUnmounted,
   onErrorCaptured,
   onActivated,
