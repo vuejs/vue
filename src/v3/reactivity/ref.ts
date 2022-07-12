@@ -68,7 +68,7 @@ function createRef(rawValue: unknown, shallow: boolean) {
   }
   const ref: any = {}
   def(ref, RefFlag, true)
-  def(ref, ReactiveFlags.IS_SHALLOW, true)
+  def(ref, ReactiveFlags.IS_SHALLOW, shallow)
   def(
     ref,
     'dep',

@@ -196,12 +196,10 @@ function doWatch(
     getter = () => source.value
     forceTrigger = isShallow(source)
   } else if (isReactive(source)) {
-    getter = isArray(source)
-      ? () => {
-          ;(source as any).__ob__.dep.depend()
-          return source
-        }
-      : () => source
+    getter = () => {
+      ;(source as any).__ob__.dep.depend()
+      return source
+    }
     deep = true
   } else if (isArray(source)) {
     isMultiSource = true
