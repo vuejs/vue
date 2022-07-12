@@ -119,7 +119,16 @@ export function proxyWithRefUnwrap(
   Object.defineProperty(target, key, {
     enumerable: true,
     configurable: true,
-    get: () => unref(source[key]),
+    get: () => {
+      const val = source[key]
+      if (isRef(val)) {
+        return val.value
+      } else {
+        const ob = val && val.__ob__
+        if (ob) ob.dep.depend()
+        return val
+      }
+    },
     set: value => {
       const oldValue = source[key]
       if (isRef(oldValue) && !isRef(value)) {
