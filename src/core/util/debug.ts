@@ -2,6 +2,7 @@ import config from '../config'
 import { noop, isArray, isFunction } from 'shared/util'
 import type { Component } from 'types/component'
 import { currentInstance } from 'v3/currentInstance'
+import { getComponentName } from '../vdom/create-component'
 
 export let warn: (msg: string, vm?: Component | null) => void = noop
 export let tip = noop
@@ -40,7 +41,7 @@ if (__DEV__) {
         : vm._isVue
         ? vm.$options || (vm.constructor as any).options
         : vm
-    let name = options.name || options._componentTag
+    let name = getComponentName(options)
     const file = options.__file
     if (!name && file) {
       const match = file.match(/([^/\\]+)\.vue$/)

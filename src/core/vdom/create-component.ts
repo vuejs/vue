@@ -28,6 +28,10 @@ import type {
 import type { Component } from 'types/component'
 import type { ComponentOptions, InternalComponentOptions } from 'types/options'
 
+export function getComponentName(options: ComponentOptions) {
+  return options.name || options.__name || options._componentTag
+}
+
 // inline hooks to be invoked on component VNodes during patch
 const componentVNodeHooks = {
   init(vnode: VNodeWithData, hydrating: boolean): boolean | void {
@@ -188,7 +192,7 @@ export function createComponent(
 
   // return a placeholder vnode
   // @ts-expect-error
-  const name = Ctor.options.name || tag
+  const name = getComponentName(Ctor.options) || tag
   const vnode = new VNode(
     // @ts-expect-error
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,

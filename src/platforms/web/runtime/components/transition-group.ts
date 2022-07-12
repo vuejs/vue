@@ -23,6 +23,7 @@ import {
 } from 'web/runtime/transition-util'
 import VNode from 'core/vdom/vnode'
 import { VNodeWithData } from 'types/vnode'
+import { getComponentName } from 'core/vdom/create-component'
 
 const props = extend(
   {
@@ -72,7 +73,7 @@ export default {
         } else if (__DEV__) {
           const opts = c.componentOptions
           const name: string = opts
-            ? opts.Ctor.options.name || opts.tag || ''
+            ? getComponentName(opts.Ctor.options as any) || opts.tag || ''
             : c.tag
           warn(`<transition-group> children must be keyed: <${name}>`)
         }

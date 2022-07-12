@@ -219,6 +219,8 @@ export interface ComponentOptions<
   parent?: Vue
   mixins?: (ComponentOptions<Vue> | typeof Vue)[]
   name?: string
+  // for SFC auto name inference w/ ts-loader check
+  __name?: string
   // TODO: support properly inferred 'extends'
   extends?: ComponentOptions<Vue> | typeof Vue
   delimiters?: [string, string]

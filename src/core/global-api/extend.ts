@@ -3,6 +3,7 @@ import type { Component } from 'types/component'
 import type { GlobalAPI } from 'types/global-api'
 import { defineComputed, proxy } from '../instance/state'
 import { extend, mergeOptions, validateComponentName } from '../util/index'
+import { getComponentName } from '../vdom/create-component'
 
 export function initExtend(Vue: GlobalAPI) {
   /**
@@ -25,7 +26,8 @@ export function initExtend(Vue: GlobalAPI) {
       return cachedCtors[SuperId]
     }
 
-    const name = extendOptions.name || Super.options.name
+    const name =
+      getComponentName(extendOptions) || getComponentName(Super.options)
     if (__DEV__ && name) {
       validateComponentName(name)
     }
