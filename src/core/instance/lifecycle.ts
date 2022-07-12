@@ -375,11 +375,16 @@ export function deactivateChildComponent(vm: Component, direct?: boolean) {
   }
 }
 
-export function callHook(vm: Component, hook: string, args?: any[]) {
+export function callHook(
+  vm: Component,
+  hook: string,
+  args?: any[],
+  setContext = true
+) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
   const prev = currentInstance
-  setCurrentInstance(vm)
+  setContext && setCurrentInstance(vm)
   const handlers = vm.$options[hook]
   const info = `${hook} hook`
   if (handlers) {
@@ -390,6 +395,6 @@ export function callHook(vm: Component, hook: string, args?: any[]) {
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }
-  setCurrentInstance(prev)
+  setContext && setCurrentInstance(prev)
   popTarget()
 }
