@@ -7,6 +7,9 @@
   "unpkg": "dist/vue.js",
   "jsdelivr": "dist/vue.js",
   "typings": "types/index.d.ts",
+  "exports": {
+    "./dist/*": "./dist/*"
+  },
   "files": [
     "src",
     "dist/*.js",
