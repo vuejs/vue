@@ -37,7 +37,7 @@ class Test extends Vue {
     this.$mount("#app", false);
     this.$forceUpdate();
     this.$destroy();
-    this.$set({}, "key", "value");
+    this.$set({ key: "someValue" }, "key", "value");
     this.$delete({}, "key");
     this.$watch("a", (val: number, oldVal: number) => {}, {
       immediate: true,
@@ -90,8 +90,8 @@ class Test extends Vue {
       console.log(this.text === 'test');
     }, { text: 'test'});
     this.nextTick().then(() => {});
-    this.set({}, "", "");
-    this.set({}, 1, "");
+    this.set({"": "something"}, "", "");
+    this.set({[1]: ""}, 1, "");
     this.set([true, false, true], 1, true);
     this.delete({}, "");
     this.delete({}, 1);
