@@ -182,11 +182,10 @@ export default class Watcher {
       const value = this.get()
       if (
         value !== this.value ||
-        // Deep watchers and watchers on Object/Arrays should fire even
+        // Watchers on Object/Arrays should fire even
         // when the value is the same, because the value may
         // have mutated.
-        isObject(value) ||
-        this.deep
+        isObject(value)
       ) {
         // set new value
         const oldValue = this.value
