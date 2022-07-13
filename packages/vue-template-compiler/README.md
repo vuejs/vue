@@ -37,7 +37,7 @@ Note the returned function code uses `with` and thus cannot be used in strict mo
   - Type: `boolean`
   - Default: `false`
 
-  Set this to true will cause the `errors` returned in the compiled result become objects in the form of `{ msg, start, end }`. The `start` and `end` properties are numbers that mark the code range of the error source in the template. This can be passed on to the `compiler.generateCodeFrame` API to generate a code frame for the error.
+  Setting this to true will cause the `errors` returned in the compiled result to become objects in the form of `{ msg, start, end }`. The `start` and `end` properties are numbers that mark the code range of the error source in the template. This can be passed on to the `compiler.generateCodeFrame` API to generate a code frame for the error.
 
 - `whitespace`
   - Type: `string`
