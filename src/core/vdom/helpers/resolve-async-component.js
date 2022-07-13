@@ -107,6 +107,7 @@ export function resolveAsyncComponent (
       )
       if (isDef(factory.errorComp)) {
         factory.error = true
+        factory.errorReason = reason
         forceRender(true)
       }
     })
@@ -146,9 +147,7 @@ export function resolveAsyncComponent (
             timerTimeout = null
             if (isUndef(factory.resolved)) {
               reject(
-                process.env.NODE_ENV !== 'production'
-                  ? `timeout (${res.timeout}ms)`
-                  : null
+                  new Error(`timeout (${res.timeout}ms)`)
               )
             }
           }, res.timeout)
@@ -162,4 +161,18 @@ export function resolveAsyncComponent (
       ? factory.loadingComp
       : factory.resolved
   }
+}
+
+export function resolveAsyncComponentData(
+    factory: Function,
+    data: ?VNodeData
+) {
+  // add a prop named error with errorComponent
+  if (isTrue(factory.error) && isDef(factory.errorComp)) {
+    data = data || {}
+    let props = data.props || {}
+    props.error = factory.errorReason
+    data.props = props
+  }
+  return data
 }
