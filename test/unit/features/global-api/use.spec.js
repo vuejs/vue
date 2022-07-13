@@ -54,4 +54,18 @@ describe('Global API: use', () => {
   it('chain call', () => {
     expect(Vue.use(() => {})).toBe(Vue)
   })
+  
+  it('should warn if using invalid plugin', () => {
+    const Ctor1 = Vue.extend({})
+    Ctor1.use('hello')
+    expect('Plugin should be either function or object with install method.').toHaveBeenWarned()
+
+    const Ctor2 = Vue.extend({})
+    Ctor2.use(undefined)
+    expect('Plugin should be either function or object with install method.').toHaveBeenWarned()
+
+    const Ctor3 = Vue.extend({})
+    Ctor3.use(null)
+    expect('Plugin should be either function or object with install method.').toHaveBeenWarned()
+  })
 })
