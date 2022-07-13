@@ -227,7 +227,15 @@ export function defineComputed (
         ? createComputedGetter(key)
         : createGetterInvoker(userDef.get)
       : noop
-    sharedPropertyDefinition.set = userDef.set || noop
+
+    // pass component instance as second argument
+    sharedPropertyDefinition.set = userDef.set
+      ? userDef.set.length === 1
+        ? userDef.set
+        : function (val) {
+            userDef.set.call(this, val, this)
+          }
+      : noop
   }
   if (process.env.NODE_ENV !== 'production' &&
       sharedPropertyDefinition.set === noop) {
