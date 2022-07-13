@@ -34,7 +34,7 @@ export interface Vue {
   readonly $props: Record<string, any>;
   readonly $ssrContext: any;
   readonly $vnode: VNode;
-  readonly $attrs: Record<string, string>;
+  readonly $attrs: Record<string, any>;
   readonly $listeners: Record<string, Function | Function[]>;
 
   $mount(elementOrSelector?: Element | string, hydrating?: boolean): this;
