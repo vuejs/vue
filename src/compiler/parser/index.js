@@ -899,9 +899,8 @@ function processAttrs (el) {
 function checkInFor (el: ASTElement): boolean {
   let parent = el
   while (parent) {
-    if (parent.for !== undefined) {
-      return true
-    }
+    if (parent.attrsMap['inline-template'] != null) return false;
+    if (parent.for !== undefined) return true;
     parent = parent.parent
   }
   return false
