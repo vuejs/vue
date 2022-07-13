@@ -66,6 +66,33 @@ function createAssertions (runInNewContext) {
     })
   })
 
+  it('renderToString with callback', done => {
+    createRenderer('app-callback.js', { runInNewContext }, renderer => {
+      const context = { url: '/test' }
+      renderer.renderToString(context, (err, res) => {
+        expect(res).toBe('<div data-server-rendered="true">/test</div>')
+        expect(context.msg).toBe('hello')
+        done()
+      })
+    })
+  })
+
+  it('renderToStream with callback', done => {
+    createRenderer('app-callback.js', { runInNewContext }, renderer => {
+      const context = { url: '/test' }
+      const stream = renderer.renderToStream(context)
+      let res = ''
+      stream.on('data', chunk => {
+        res += chunk.toString()
+      })
+      stream.on('end', () => {
+        expect(res).toBe('<div data-server-rendered="true">/test</div>')
+        expect(context.msg).toBe('hello')
+        done()
+      })
+    })
+  })
+
   it('renderToString catch error', done => {
     createRenderer('error.js', { runInNewContext }, renderer => {
       renderer.renderToString(err => {
@@ -295,6 +322,34 @@ function createAssertions (runInNewContext) {
     })
   })
 
+  it('renderToString with callback (bundle format with code split)', done => {
+    createRenderer('split-callback.js', { runInNewContext, asBundle: true }, renderer => {
+      const context = { url: '/test' }
+      renderer.renderToString(context, (err, res) => {
+        expect(err).toBeNull()
+        expect(res).toBe('<div data-server-rendered="true">/test<div>async test.woff2 test.png</div></div>')
+        expect(context.msg).toBe('hello')
+        done()
+      })
+    })
+  })
+
+  it('renderToStream with callback (bundle format with code split)', done => {
+    createRenderer('split-callback.js', { runInNewContext, asBundle: true }, renderer => {
+      const context = { url: '/test' }
+      const stream = renderer.renderToStream(context)
+      let res = ''
+      stream.on('data', chunk => {
+        res += chunk.toString()
+      })
+      stream.on('end', () => {
+        expect(res).toBe('<div data-server-rendered="true">/test<div>async test.woff2 test.png</div></div>')
+        expect(context.msg).toBe('hello')
+        done()
+      })
+    })
+  })
+
   it('renderToString catch error (bundle format with source map)', done => {
     createRenderer('error.js', { runInNewContext, asBundle: true }, renderer => {
       renderer.renderToString(err => {
@@ -318,6 +373,17 @@ function createAssertions (runInNewContext) {
 
   it('renderToString return Promise', done => {
     createRenderer('app.js', { runInNewContext }, renderer => {
+      const context = { url: '/test' }
+      renderer.renderToString(context).then(res => {
+        expect(res).toBe('<div data-server-rendered="true">/test</div>')
+        expect(context.msg).toBe('hello')
+        done()
+      })
+    })
+  })
+
+  it('renderToString return Promise (callback)', done => {
+    createRenderer('app-callback.js', { runInNewContext }, renderer => {
       const context = { url: '/test' }
       renderer.renderToString(context).then(res => {
         expect(res).toBe('<div data-server-rendered="true">/test</div>')

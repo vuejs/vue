@@ -28,6 +28,10 @@ type RenderBundle = {
   modules?: { [filename: string]: Array<string> };
 };
 
+function getRenderArguments(app) {
+  return app && app._isVue ? { app, onComplete: null } : app
+}
+
 export function createBundleRendererCreator (
   createRenderer: (options?: RenderOptions) => Renderer
 ) {
@@ -100,12 +104,16 @@ export function createBundleRendererCreator (
         run(context).catch(err => {
           rewriteErrorTrace(err, maps)
           cb(err)
-        }).then(app => {
+        }).then(args => {
+          const { app, onComplete } = getRenderArguments(args)
           if (app) {
             renderer.renderToString(app, context, (err, res) => {
               rewriteErrorTrace(err, maps)
+              onComplete && onComplete()
               cb(err, res)
             })
+          } else {
+            onComplete && onComplete()
           }
         })
 
@@ -121,7 +129,8 @@ export function createBundleRendererCreator (
           process.nextTick(() => {
             res.emit('error', err)
           })
-        }).then(app => {
+        }).then(args => {
+          const { app, onComplete } = getRenderArguments(args)
           if (app) {
             const renderStream = renderer.renderToStream(app, context)
 
@@ -140,7 +149,15 @@ export function createBundleRendererCreator (
               })
             }
 
+            if (onComplete) {
+              renderStream.on('end', () => {
+                onComplete()
+              })
+            }
+
             renderStream.pipe(res)
+          } else {
+            onComplete && onComplete()
           }
         })
 
