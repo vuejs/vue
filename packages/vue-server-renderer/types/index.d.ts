@@ -28,8 +28,8 @@ interface BundleRenderer {
 interface RendererOptions {
   template?: string;
   inject?: boolean;
-  shouldPreload?: (file: string, type: string) => boolean;
-  shouldPrefetch?: (file: string, type: string) => boolean;
+  shouldPreload?: (file: string, type: string, context: object) => boolean;
+  shouldPrefetch?: (file: string, type: string, context: object) => boolean;
   cache?: RenderCache;
   directives?: {
     [key: string]: (vnode: VNode, dir: VNodeDirective) => void

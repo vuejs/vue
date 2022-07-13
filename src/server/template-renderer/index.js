@@ -14,8 +14,8 @@ type TemplateRendererOptions = {
   template?: string | (content: string, context: any) => string;
   inject?: boolean;
   clientManifest?: ClientManifest;
-  shouldPreload?: (file: string, type: string) => boolean;
-  shouldPrefetch?: (file: string, type: string) => boolean;
+  shouldPreload?: (file: string, type: string, context: any) => boolean;
+  shouldPrefetch?: (file: string, type: string, context: any) => boolean;
   serializer?: Function;
 };
 
@@ -165,7 +165,7 @@ export default class TemplateRenderer {
           return ''
         }
         // user wants to explicitly control what to preload
-        if (shouldPreload && !shouldPreload(fileWithoutQuery, asType)) {
+        if (shouldPreload && !shouldPreload(fileWithoutQuery, asType, context)) {
           return ''
         }
         if (asType === 'font') {
@@ -192,7 +192,7 @@ export default class TemplateRenderer {
         return usedAsyncFiles && usedAsyncFiles.some(f => f.file === file)
       }
       return this.prefetchFiles.map(({ file, fileWithoutQuery, asType }) => {
-        if (shouldPrefetch && !shouldPrefetch(fileWithoutQuery, asType)) {
+        if (shouldPrefetch && !shouldPrefetch(fileWithoutQuery, asType, context)) {
           return ''
         }
         if (alreadyRendered(file)) {
