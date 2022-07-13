@@ -44,7 +44,7 @@ function sameVnode (a, b) {
       ) || (
         isTrue(a.isAsyncPlaceholder) &&
         isUndef(b.asyncFactory.error)
-      )
+      ) || sameStaticVnode(a, b)
     )
   )
 }
@@ -55,6 +55,12 @@ function sameInputType (a, b) {
   const typeA = isDef(i = a.data) && isDef(i = i.attrs) && i.type
   const typeB = isDef(i = b.data) && isDef(i = i.attrs) && i.type
   return typeA === typeB || isTextInputType(typeA) && isTextInputType(typeB)
+}
+
+function sameStaticVnode (a, b) {
+  return isTrue(a.isStatic) &&
+  isTrue(b.isStatic) &&
+  (isTrue(b.isCloned) || isTrue(b.isOnce))
 }
 
 function createKeyToOldIdx (children, beginIdx, endIdx) {
@@ -530,10 +536,9 @@ export function createPatchFunction (backend) {
     // note we only do this if the vnode is cloned -
     // if the new node is not cloned it means the render functions have been
     // reset by the hot-reload-api and we need to do a proper re-render.
-    if (isTrue(vnode.isStatic) &&
-      isTrue(oldVnode.isStatic) &&
-      vnode.key === oldVnode.key &&
-      (isTrue(vnode.isCloned) || isTrue(vnode.isOnce))
+    if (
+      sameStaticVnode(oldVnode, vnode) &&
+      vnode.key === oldVnode.key
     ) {
       vnode.componentInstance = oldVnode.componentInstance
       return
