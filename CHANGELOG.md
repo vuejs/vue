@@ -7,7 +7,7 @@
 * **compiler-sfc:** use safer deindent default for compatibility with previous behavior ([b70a258](https://github.com/vuejs/vue/commit/b70a2585fcd102def2bb5a3b2b589edf5311122d))
 * pass element creation helper to static render fns for functional components ([dc8a68e](https://github.com/vuejs/vue/commit/dc8a68e8c6c4e8ed4fdde094004fca272d71ef2e)), closes [#12625](https://github.com/vuejs/vue/issues/12625)
 * **ssr/reactivity:** fix array setting error at created in ssr [[#12632](https://github.com/vuejs/vue/issues/12632)] ([#12633](https://github.com/vuejs/vue/issues/12633)) ([ca7daef](https://github.com/vuejs/vue/commit/ca7daefaa15a192046d22d060220cd595a6a275f))
-* **types:** fix missing instance properties on defineComponent this ([f8de4ca](https://github.com/vuejs/vue/commit/f8de4ca9d458a03378e848b1e62d6507f7124871)), closes [/github.com/vuejs/vue/issues/12628#issuecomment-1177258223](https://github.com//github.com/vuejs/vue/issues/12628/issues/issuecomment-1177258223)
+* **types:** fix missing instance properties on defineComponent this ([f8de4ca](https://github.com/vuejs/vue/commit/f8de4ca9d458a03378e848b1e62d6507f7124871)), closes [#12628](https://github.com/vuejs/vue/issues/12628#issuecomment-1177258223)
 * **types:** fix this.$slots type for defineComponent ([d3add06](https://github.com/vuejs/vue/commit/d3add06e6e18a78a3745240632fecd076eb49d19))
 * **types:** fix type inference when using components option ([1d5a411](https://github.com/vuejs/vue/commit/1d5a411c1e3aa062aa5080432cf3f852f1583ed2))
 * **types:** global component registration type compat w/ defineComponent ([26ff4bc](https://github.com/vuejs/vue/commit/26ff4bc0ed75d8bf7921523a2e546df24ec81d8f)), closes [#12622](https://github.com/vuejs/vue/issues/12622)
