@@ -123,6 +123,13 @@ export interface VueConstructor<V extends Vue = Vue> {
 
   util: {
     warn(msg: string, vm?: InstanceType<VueConstructor>): void;
+    defineReactive(
+      obj: Object,
+      key: string,
+      val: any,
+      customSetter?: Function,
+      shallow?: boolean
+    ): void;
   };
 
   config: VueConfiguration;
