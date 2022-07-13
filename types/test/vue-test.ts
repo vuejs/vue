@@ -238,3 +238,29 @@ const ComponentWithStyleInVNodeData = Vue.extend({
     ]);
   }
 });
+
+
+const InjectedWithArrayPropsComponent = Vue.extend({
+  props: ['test'],
+  inject: ['service'],
+  data() {
+    return {
+      test: this.test,
+      message: this.service.name,
+    }
+  }
+});
+
+const InjectedWithObjectPropsComponent = Vue.extend({
+  props: {
+    test: {type: String}
+  },
+  inject: ['service'],
+  data() {
+    return {
+      test: this.test,
+      message: this.service.name,
+    }
+  }
+});
+

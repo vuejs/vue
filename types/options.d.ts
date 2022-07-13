@@ -44,34 +44,37 @@ export type Accessors<T> = {
   [K in keyof T]: (() => T[K]) | ComputedOptions<T[K]>
 }
 
-type DataDef<Data, Props, V> = Data | ((this: Readonly<Props> & V) => Data)
+type DataDef<Data, Props, Injected, V> = Data | ((this: Readonly<Props> & Readonly<Injected> & V) => Data)
 /**
  * This type should be used when an array of strings is used for a component's `props` value.
  */
-export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, PropNames extends string> =
+export type ThisTypedComponentOptionsWithArrayProps<V extends Vue, Data, Methods, Computed, PropNames extends string, InjectNames extends string>  =
   object &
-  ComponentOptions<V, DataDef<Data, Record<PropNames, any>, V>, Methods, Computed, PropNames[], Record<PropNames, any>> &
-  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Readonly<Record<PropNames, any>>>>;
+  ComponentOptions<V, DataDef<Data, Record<PropNames, any>, Record<InjectNames, any>, V>, Methods, Computed, PropNames[], Record<PropNames, any>, InjectNames[],Record<InjectNames, any> > &
+  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Readonly<Record<PropNames, any>>, Readonly<Record<InjectNames, any>>>>  ;
 
 /**
  * This type should be used when an object mapped to `PropOptions` is used for a component's `props` value.
  */
-export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props> =
+export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Methods, Computed, Props, InjectNames extends string> =
   object &
-  ComponentOptions<V, DataDef<Data, Props, V>, Methods, Computed, RecordPropsDefinition<Props>, Props> &
-  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Readonly<Props>>>;
+  ComponentOptions<V, DataDef<Data, Props, Record<InjectNames, any>, V>, Methods, Computed, RecordPropsDefinition<Props>, Props, InjectNames[], Record<InjectNames, any>> &
+  ThisType<CombinedVueInstance<V, Data, Methods, Computed, Readonly<Props>, Readonly<Record<InjectNames, any>>>>;
 
 type DefaultData<V> =  object | ((this: V) => object);
 type DefaultProps = Record<string, any>;
 type DefaultMethods<V> =  { [key: string]: (this: V, ...args: any[]) => any };
 type DefaultComputed = { [key: string]: any };
+type DefaultInjected = { [key: string]: any };
 export interface ComponentOptions<
   V extends Vue,
   Data=DefaultData<V>,
   Methods=DefaultMethods<V>,
   Computed=DefaultComputed,
   PropsDef=PropsDefinition<DefaultProps>,
-  Props=DefaultProps> {
+  Props=DefaultProps,
+  InjectDef=InjectDefinition<DefaultInjected>,
+  Injected=DefaultInjected> {
   data?: Data;
   props?: PropsDef;
   propsData?: object;
@@ -105,7 +108,8 @@ export interface ComponentOptions<
   filters?: { [key: string]: Function };
 
   provide?: object | (() => object);
-  inject?: InjectOptions;
+  // TODO: support object definition on Inject
+  inject?: InjectDef | DefaultInjected;
 
   model?: {
     prop?: string;
@@ -201,7 +205,13 @@ export interface DirectiveOptions {
 }
 
 export type InjectKey = string | symbol;
+export type InjectTypeOptions<T = any> = {
+  from?: InjectKey, default?: T | null | undefined
+}
 
-export type InjectOptions = {
-  [key: string]: InjectKey | { from?: InjectKey, default?: any }
+export type InjectOptions<T = any> = {
+  [key: string]: InjectKey | InjectTypeOptions<T>
 } | string[];
+
+export type ArrayInjectDefinition<T> = (keyof T)[];
+export type InjectDefinition<T> = ArrayInjectDefinition<T> | InjectOptions<T>;
