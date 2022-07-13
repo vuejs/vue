@@ -329,7 +329,7 @@ describe('Observer', () => {
     const ob = observe(arr)
     const dep = ob.dep
     spyOn(dep, 'notify')
-    const objs = [{}, {}, {}]
+    const objs = [{}, {}, {}, {}]
     arr.push(objs[0])
     arr.pop()
     arr.unshift(objs[1])
@@ -337,7 +337,9 @@ describe('Observer', () => {
     arr.splice(0, 0, objs[2])
     arr.sort()
     arr.reverse()
-    expect(dep.notify.calls.count()).toBe(7)
+    arr.fill(objs[3])
+    arr.copyWithin(0)
+    expect(dep.notify.calls.count()).toBe(9)
     // inserted elements should be observed
     objs.forEach(obj => {
       expect(obj.__ob__ instanceof Observer).toBe(true)
