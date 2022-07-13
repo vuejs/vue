@@ -911,6 +911,66 @@ describe('Directive v-on', () => {
     vm.$el.querySelector('input').click()
   })
 
+  it('array syntax (no argument)', () => {
+    const click = jasmine.createSpy('click')
+    const mouseup = jasmine.createSpy('mouseup')
+    vm = new Vue({
+      el,
+      template: `<button v-on="listeners">foo</button>`,
+      created () {
+        this.listeners = [{
+          click
+        }, {
+          click,
+          mouseup
+        }, {
+          mouseup
+        }]
+      }
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(click.calls.count()).toBe(2)
+    expect(mouseup.calls.count()).toBe(0)
+
+    triggerEvent(vm.$el, 'mouseup')
+    expect(click.calls.count()).toBe(2)
+    expect(mouseup.calls.count()).toBe(2)
+  })
+
+  it('array syntax (no argument, mixed with normal listeners)', () => {
+    const click1 = jasmine.createSpy('click1')
+    const click2 = jasmine.createSpy('click2')
+    const mouseup = jasmine.createSpy('mouseup')
+    vm = new Vue({
+      el,
+      template: `<button v-on="listeners" @click="click2">foo</button>`,
+      created () {
+        this.listeners = [{
+          click: click1,
+          mouseup
+        }, {
+          click: click1
+        }, {
+          click: click2
+        }]
+      },
+      methods: {
+        click2
+      }
+    })
+
+    triggerEvent(vm.$el, 'click')
+    expect(click1.calls.count()).toBe(2)
+    expect(click2.calls.count()).toBe(2)
+    expect(mouseup.calls.count()).toBe(0)
+
+    triggerEvent(vm.$el, 'mouseup')
+    expect(click1.calls.count()).toBe(2)
+    expect(click2.calls.count()).toBe(2)
+    expect(mouseup.calls.count()).toBe(1)
+  })
+
   it('warn object syntax with modifier', () => {
     new Vue({
       template: `<button v-on.self="{}"></button>`
