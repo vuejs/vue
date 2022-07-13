@@ -34,6 +34,7 @@ function checkNode (node: ASTNode, warn: Function) {
         const value = node.attrsMap[name]
         if (value) {
           const range = node.rawAttrsMap[name]
+          warnThisInTemplate(name,value,warn,range)
           if (name === 'v-for') {
             checkFor(node, `v-for="${value}"`, warn, range)
           } else if (name === 'v-slot' || name[0] === '#') {
@@ -124,5 +125,18 @@ function checkFunctionParameterExpression (exp: string, text: string, warn: Func
       `  Raw expression: ${text.trim()}\n`,
       range
     )
+  }
+}
+
+function warnThisInTemplate(name, value, warn, range){
+  let exp=(name + "=\"" + value + "\"");
+  if (name === 'v-for') {
+    exp=("v-for=\"" + value + "\"")
+  }
+  if (value.indexOf('this.')!==-1) {
+    warn(
+      "avoid using `this` in template" + " " + exp,
+      range
+    );
   }
 }
