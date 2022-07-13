@@ -792,7 +792,7 @@ describe('parser', () => {
     expect(ast.children[0].text).toBe('123')
   })
 
-  it('should kept comments', () => {
+  it('should keep comments', () => {
     const options = extend({
       comments: true
     }, baseOptions)
@@ -814,6 +814,23 @@ describe('parser', () => {
     const ast = parse(`<!--comment here--><div>123</div>`, options)
     expect(ast.tag).toBe('div')
     expect(ast.children.length).toBe(1)
+  })
+
+  it('should keep comments of if/else', () => {
+    const options = extend({
+      comments: true
+    }, baseOptions)
+    const ast = parse(`
+  <div>
+    <div v-if="test" />
+    <!-- comment -->
+    <p v-else-if="otherTest">foo</p>
+    <!-- comment else -->
+    <b v-else>bar</b>
+  </div>
+    `, options)
+    expect(ast.children[0].ifConditions[1].comment.text).toBe(' comment ')
+    expect(ast.children[0].ifConditions[2].comment.text).toBe(' comment else ')
   })
 
   // #8103

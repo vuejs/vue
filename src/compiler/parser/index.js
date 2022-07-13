@@ -551,11 +551,13 @@ function processIf (el) {
 }
 
 function processIfConditions (el, parent) {
-  const prev = findPrevElement(parent.children)
-  if (prev && prev.if) {
+  const prevAndComment = findPrevElement(parent.children) || {}
+  const prev = prevAndComment.prev
+  if(prev && prev.if) {
     addIfCondition(prev, {
       exp: el.elseif,
-      block: el
+      block: el,
+      comment: prevAndComment.com
     })
   } else if (process.env.NODE_ENV !== 'production') {
     warn(
@@ -566,20 +568,32 @@ function processIfConditions (el, parent) {
   }
 }
 
-function findPrevElement (children: Array<any>): ASTElement | void {
+function findPrevElement (children: Array<any>): {prev: ASTElement, com?: ASTText} | void {
   let i = children.length
+  let comment: ?ASTText
   while (i--) {
     if (children[i].type === 1) {
-      return children[i]
+      return { 
+        prev: children[i], 
+        com: comment
+      }
     } else {
-      if (process.env.NODE_ENV !== 'production' && children[i].text !== ' ') {
+      if (process.env.NODE_ENV !== 'production' && children[i].text !== ' ' && !children[i].isComment) {
         warn(
           `text "${children[i].text.trim()}" between v-if and v-else(-if) ` +
           `will be ignored.`,
           children[i]
         )
       }
-      children.pop()
+
+      // always remove inbetween text from the children array
+      const c = children.pop()
+
+      // if it is a comment, return it
+      // if there are multiple blocks, ignore blocks above first
+      if (c.isComment && !comment) {
+        comment = c
+      }
     }
   }
 }
