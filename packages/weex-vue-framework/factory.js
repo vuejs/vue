@@ -2010,7 +2010,7 @@ if (process.env.NODE_ENV !== 'production') {
       'referenced during render. Make sure that this property is reactive, ' +
       'either in the data option, or for class-based components, by ' +
       'initializing the property. ' +
-      'See: https://vuejs.org/v2/guide/reactivity.html#Declaring-Reactive-Properties.',
+      'See: https://v2.vuejs.org/v2/guide/reactivity.html#Declaring-Reactive-Properties',
       target
     );
   };
@@ -2020,7 +2020,7 @@ if (process.env.NODE_ENV !== 'production') {
       "Property \"" + key + "\" must be accessed with \"$data." + key + "\" because " +
       'properties starting with "$" or "_" are not proxied in the Vue instance to ' +
       'prevent conflicts with Vue internals. ' +
-      'See: https://vuejs.org/v2/api/#data',
+      'See: https://v2.vuejs.org/v2/api/#data',
       target
     );
   };
@@ -4900,7 +4900,7 @@ function initData (vm) {
     data = {};
     process.env.NODE_ENV !== 'production' && warn(
       'data functions should return an object:\n' +
-      'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
+      'https://v2.vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
       vm
     );
   }
