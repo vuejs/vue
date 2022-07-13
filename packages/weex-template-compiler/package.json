@@ -5,7 +5,8 @@
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuejs/vue.git"
+    "url": "git+https://github.com/vuejs/vue.git",
+    "directory": "packages/weex-template-compiler"
   },
   "keywords": [
     "vue",

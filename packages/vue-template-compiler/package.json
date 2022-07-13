@@ -9,7 +9,8 @@
   "types": "types/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuejs/vue.git"
+    "url": "git+https://github.com/vuejs/vue.git",
+    "directory": "packages/vue-template-compiler"
   },
   "keywords": [
     "vue",
