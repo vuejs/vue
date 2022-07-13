@@ -130,12 +130,17 @@ function genHandler (handler: ASTElementHandler | Array<ASTElementHandler>): str
         }
       } else if (key === 'exact') {
         const modifiers: ASTModifiers = (handler.modifiers: any)
-        genModifierCode += genGuard(
-          ['ctrl', 'shift', 'alt', 'meta']
-            .filter(keyModifier => !modifiers[keyModifier])
-            .map(keyModifier => `$event.${keyModifier}Key`)
-            .join('||')
+        const modifiersKey = ['ctrl', 'shift', 'alt', 'meta'].filter(
+          keyModifier => !modifiers[keyModifier]
         )
+
+        if (modifiersKey.length) {
+          genModifierCode += genGuard(
+            modifiersKey
+              .map(keyModifier => `$event.${keyModifier}Key`)
+              .join('||')
+          )
+        }
       } else {
         keys.push(key)
       }
