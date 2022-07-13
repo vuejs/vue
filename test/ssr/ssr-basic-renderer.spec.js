@@ -67,4 +67,17 @@ describe('SSR: basicRenderer', () => {
       done()
     })
   })
+
+  // #12374
+  it('should keep CSS variables in style attributes', done => {
+    renderToString(new Vue({
+      template: `
+        <div :style="{ zIndex: 1, '--css-var1': 1, '--css_var2': 2, '--cssVar3': 3 }"></div>
+      `,
+    }), (err, html) => {
+      expect(err).toBeNull()
+      expect(html).toContain('style="z-index:1;--css-var1:1;--css_var2:2;--cssVar3:3;"')
+      done()
+    })
+  })
 })
