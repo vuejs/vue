@@ -1349,4 +1349,41 @@ describe('Component scoped slot', () => {
       expect(parent.$el.textContent).toMatch(``)
     }).then(done)
   })
+
+  // #12223
+  it('should work with multiple v-else-if', (done) => {
+    const a = 'a'
+    const b = 'b'
+    const c = 'c'
+
+    const vm = new Vue({
+      data: { frame: a },
+      template: `
+        <div>
+            <test v-if="frame === '${a}'">
+                <template #default="x">${a}</template>
+            </test>
+            <test v-else-if="frame === '${b}'">
+                <template #default="x">${b}</template>
+            </test>
+            <test v-else-if="frame === '${c}'">
+                <template #default="x">${c}</template>
+            </test>
+        </div>
+      `,
+      components: {
+        Test: {
+          template: '<div><slot/></div>'
+        }
+      }
+    }).$mount()
+
+    vm.frame = b
+    waitForUpdate(() => {
+      expect(vm.$el.innerHTML).toBe(`<div>${b}</div>`)
+      vm.frame = c
+    }).then(() => {
+      expect(vm.$el.innerHTML).toBe(`<div>${c}</div>`)
+    }).then(done)
+  })
 })
