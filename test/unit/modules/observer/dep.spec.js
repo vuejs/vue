@@ -9,7 +9,7 @@ describe('Dep', () => {
 
   describe('instance', () => {
     it('should be created with correct properties', () => {
-      expect(dep.subs.length).toBe(0)
+      expect(dep.subs.size).toBe(0)
       expect(new Dep().id).toBe(dep.id + 1)
     })
   })
@@ -17,16 +17,16 @@ describe('Dep', () => {
   describe('addSub()', () => {
     it('should add sub', () => {
       dep.addSub(null)
-      expect(dep.subs.length).toBe(1)
-      expect(dep.subs[0]).toBe(null)
+      expect(dep.subs.size).toBe(1)
+      expect(dep.subs.values().next().value).toBe(null)
     })
   })
 
   describe('removeSub()', () => {
     it('should remove sub', () => {
-      dep.subs.push(null)
+      dep.subs.add(null)
       dep.removeSub(null)
-      expect(dep.subs.length).toBe(0)
+      expect(dep.subs.size).toBe(0)
     })
   })
 
@@ -55,9 +55,9 @@ describe('Dep', () => {
 
   describe('notify()', () => {
     it('should notify subs', () => {
-      dep.subs.push(jasmine.createSpyObj('SUB', ['update']))
+      dep.subs.add(jasmine.createSpyObj('SUB', ['update']))
       dep.notify()
-      expect(dep.subs[0].update).toHaveBeenCalled()
+      expect(dep.subs.values().next().value.update).toHaveBeenCalled()
     })
   })
 })
