@@ -146,8 +146,8 @@ function genDefaultModel (
     }
   }
 
-  const { lazy, number, trim } = modifiers || {}
-  const needCompositionGuard = !lazy && type !== 'range'
+  const { lazy, number, trim, eager } = modifiers || {}
+  const needCompositionGuard = !lazy && type !== 'range' && !eager
   const event = lazy
     ? 'change'
     : type === 'range'
