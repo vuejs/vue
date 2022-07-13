@@ -1,3 +1,18 @@
+## [2.7.5](https://github.com/vuejs/vue/compare/v2.7.4...v2.7.5) (2022-07-13)
+
+
+### Bug Fixes
+
+* add missing export from `vue.runtime.mjs` ([#12648](https://github.com/vuejs/vue/issues/12648)) ([08fb4a2](https://github.com/vuejs/vue/commit/08fb4a222c016c79af77ab96817d2ed9b7abbd80))
+* detect property add/deletion on reactive objects from setup when used in templates ([a6e7498](https://github.com/vuejs/vue/commit/a6e74985cf2eab6f16d03a8eda3bf3fc7950127c))
+* do not set currentInstance in beforeCreate ([0825d30](https://github.com/vuejs/vue/commit/0825d3087f9f39435838329c16adc2a7bfccd51d)), closes [#12636](https://github.com/vuejs/vue/issues/12636)
+* **reactivity:** fix watch behavior inconsistency + deep ref shallow check ([98fb01c](https://github.com/vuejs/vue/commit/98fb01c79c41c3b9f9134f0abb77d233ce4e5b44)), closes [#12643](https://github.com/vuejs/vue/issues/12643)
+* **sfc:** fix sfc name inference type check ([04b4703](https://github.com/vuejs/vue/commit/04b4703de72b1c1e686a3aa81d5b5b56799dabab)), closes [#12637](https://github.com/vuejs/vue/issues/12637)
+* **types:** support Vue interface augmentations in defineComponent ([005e52d](https://github.com/vuejs/vue/commit/005e52d0b6f1a5bf9679789c5c4b90afd442d86b)), closes [#12642](https://github.com/vuejs/vue/issues/12642)
+* **watch:** fix deep watch for structures containing raw refs ([1a2c3c2](https://github.com/vuejs/vue/commit/1a2c3c2d77ba96ef496f4c86329b7798026511ae)), closes [#12652](https://github.com/vuejs/vue/issues/12652)
+
+
+
 ## [2.7.4](https://github.com/vuejs/vue/compare/v2.7.3...v2.7.4) (2022-07-08)
 
 
