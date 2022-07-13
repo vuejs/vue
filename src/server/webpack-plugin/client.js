@@ -47,6 +47,18 @@ export default class VueSSRClientPlugin {
           }
           const id = stripModuleIdHash(m.identifier)
           const files = manifest.modules[hash(id)] = chunk.files.map(fileToIndex)
+
+          // In production mode, modules may be concatenated by scope hoisting
+          // Include ConcatenatedModule for not losing module-component mapping
+          if (Array.isArray(m.modules)) {
+            for (const concatenatedModule of m.modules) {
+              const id = hash(concatenatedModule.identifier.replace(/\s\w+$/, ''))
+              if (!manifest.modules[id]) {
+                manifest.modules[id] = files
+              }
+            }
+          }
+
           // find all asset modules associated with the same chunk
           assetModules.forEach(m => {
             if (m.chunks.some(id => id === cid)) {
