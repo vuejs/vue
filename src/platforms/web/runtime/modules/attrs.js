@@ -109,7 +109,13 @@ function baseSetAttr (el, key, value) {
       // $flow-disable-line
       el.__ieph = true /* IE placeholder patched */
     }
-    el.setAttribute(key, value)
+    // When changing the attribute 'name' of an iframe element, the iframes window must be updated as well. Otherwise
+    // anchor tags with a 'target' attribute won't hit the right iframe.
+    if (el.tagName === 'IFRAME' && key === 'name' && el.contentWindow) {
+        // $flow-disable-line
+        el.contentWindow.name = value;
+    }
+    el.setAttribute(key, value);
   }
 }
 
