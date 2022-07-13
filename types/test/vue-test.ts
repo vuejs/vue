@@ -57,9 +57,13 @@ class Test extends Vue {
 
   static testConfig() {
     const { config } = this;
-    config.silent;
-    config.optionMergeStrategies;
-    config.devtools;
+    config.silent = true;
+    config.optionMergeStrategies = {
+      a: (a: number) => a + 1,
+      b: (a: string, b: string) => `${a} ${b}`,
+      c: (a: string, b: string, vm: Vue) => `${a} ${b} ${vm.$isServer}`
+    };
+    config.devtools = true;
     config.errorHandler = (err, vm) => {
       if (vm instanceof Test) {
         vm.testProperties();
@@ -100,7 +104,9 @@ class Test extends Vue {
     this.filter("", (value: number) => value);
     this.component("", { data: () => ({}) });
     this.component("", { functional: true, render(h) { return h("div", "hello!") } });
-    this.use;
+    this.use(() => {});
+    this.use({ install: () => {} });
+    this.use({ install: () => {}, foo: 'bar' });
     this.mixin(Test);
     this.compile("<div>{{ message }}</div>");
     this
@@ -172,6 +178,12 @@ const GrandChild = Child.extend({
   computed: {
     lower(): string {
       return this.greeting.toLowerCase();
+    }
+  },
+  methods: {
+    bar() {
+      this.foo();
+      console.log(this.greeting);
     }
   }
 });
