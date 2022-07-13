@@ -144,6 +144,20 @@ describe('api: watch', () => {
     expect(dummy).toBe(1)
   })
 
+  it('deep watch w/ raw refs', async () => {
+    const count = ref(0)
+    const src = reactive({
+      arr: [count]
+    })
+    let dummy
+    watch(src, ({ arr: [{ value }] }) => {
+      dummy = value
+    })
+    count.value++
+    await nextTick()
+    expect(dummy).toBe(1)
+  })
+
   it('watching multiple sources', async () => {
     const state = reactive({ count: 1 })
     const count = ref(1)
