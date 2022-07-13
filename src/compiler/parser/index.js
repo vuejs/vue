@@ -205,6 +205,16 @@ export function parse (
     }
   }
 
+  function checkTemplateConstraints (el) {
+    if (el.tag === 'template' && el.attrsMap.hasOwnProperty('v-show')) {
+      warnOnce(
+        'Cannot use v-show on a <template> component because adding ' +
+        'style to it may generate side-affects.',
+        el.rawAttrsMap['v-show']
+      )
+    }
+  }
+
   parseHTML(template, {
     warn,
     expectHTML: options.expectHTML,
@@ -293,6 +303,10 @@ export function parse (
         }
       }
 
+      if (process.env.NODE_ENV !== 'production') {
+        checkTemplateConstraints(element)
+      }
+      
       if (!unary) {
         currentParent = element
         stack.push(element)
