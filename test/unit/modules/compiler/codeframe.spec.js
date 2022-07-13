@@ -71,4 +71,17 @@ attr
    |  ^
     `.trim())
   })
+  
+  it('no infinite loop when EOL is CRLF', () => {
+    const source = `a\r\nb\r\nc`.trim()
+
+    expect(generateCodeFrame(source)).toBe(`
+1  |  a
+   |  ^
+2  |  b
+   |  ^
+3  |  c
+   |  ^
+    `.trim())
+  })
 })
