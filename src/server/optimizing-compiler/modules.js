@@ -106,7 +106,7 @@ export function genStyleSegments (
   vShowExpression: ?string
 ): Array<StringSegment> {
   if (staticStyle && !styleBinding && !vShowExpression) {
-    return [{ type: RAW, value: ` style=${JSON.stringify(staticStyle)}` }]
+    return [{ type: RAW, value: ` style=${JSON.stringify(staticStyle.replace(/\n/g, ''))}` }];
   } else {
     return [{
       type: EXPRESSION,
