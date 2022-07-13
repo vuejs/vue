@@ -1,5 +1,5 @@
 import Vue, { VNode } from "../index";
-import { ComponentOptions } from "../options";
+import { ComponentOptions, PropType } from "../options";
 
 class Test extends Vue {
   a: number = 0;
@@ -152,6 +152,45 @@ const FunctionalScopedSlotsComponent = Vue.extend({
   render(h, ctx) {
     return ctx.scopedSlots.default && ctx.scopedSlots.default({}) || h('div', 'functional scoped slots');
   }
+});
+
+declare function assertBoolean<A>(value: string extends A ? never : (A extends boolean ? A : never)): true;
+
+declare const val1: boolean;
+// declare const val2: boolean | (() => boolean);
+// declare const val3: any;
+
+assertBoolean(val1);    //=> compiles (good)
+// assertBoolean(val2); //=> does not compile (good)
+// assertBoolean(val3); //=> does not compile (good)
+
+const ComponentWithFunctionProps = Vue.extend({
+  props: {
+    functionProp: {
+      type: Function,
+      default: () => true,
+    },
+    functionPropWithBooleanReturnType: {
+      type: Function as PropType<() => boolean>,
+      default: () => true,
+    },
+    booleanProp: {
+      type: Boolean,
+      default: true,
+    },
+    booleanPropWithFunctionDefault: {
+      type: Boolean,
+      default: () => true,
+    },
+  },
+  methods: {
+    test(): void {
+      this.functionProp(); // callable (good)
+      assertBoolean(this.functionPropWithBooleanReturnType())
+      assertBoolean(this.booleanProp);
+      assertBoolean(this.booleanPropWithFunctionDefault);
+    },
+  },
 });
 
 const Parent = Vue.extend({

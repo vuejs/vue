@@ -151,12 +151,12 @@ export type PropType<T> = Prop<T> | Prop<T>[];
 
 export type PropValidator<T> = PropOptions<T> | PropType<T>;
 
-export interface PropOptions<T=any> {
-  type?: PropType<T>;
+export type PropOptions<T=any> = (<TypeAsAccessed extends T, TypeAsDefined extends PropType<T>>() => {
+  type?: TypeAsDefined;
   required?: boolean;
-  default?: T | null | undefined | (() => T | null | undefined);
-  validator?(value: T): boolean;
-}
+  default?: TypeAsDefined extends PropType<(...args: any[]) => any> ? TypeAsAccessed | null | undefined : TypeAsAccessed | null | undefined | (() => TypeAsAccessed | null | undefined);
+  validator?(value: TypeAsAccessed): boolean;
+}) extends () => infer Opts ? Opts : never;
 
 export type RecordPropsDefinition<T> = {
   [K in keyof T]: PropValidator<T[K]>
