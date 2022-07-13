@@ -86,8 +86,12 @@ export class Observer {
  */
 function protoAugment (target, src: Object) {
   /* eslint-disable no-proto */
-  target.__proto__ = src
-  /* eslint-enable no-proto */
+  try {
+    target.__proto__ = src
+  } catch (error) {
+    warn(error)
+  }
+ /* eslint-enable no-proto */
 }
 
 /**
