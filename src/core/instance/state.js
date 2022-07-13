@@ -244,7 +244,7 @@ export function defineComputed (
 function createComputedGetter (key) {
   return function computedGetter () {
     const watcher = this._computedWatchers && this._computedWatchers[key]
-    if (watcher) {
+    if (watcher && watcher.active) {
       if (watcher.dirty) {
         watcher.evaluate()
       }
