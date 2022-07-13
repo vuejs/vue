@@ -1,6 +1,13 @@
 /* @flow */
 
-const MAX_STACK_DEPTH = 800
+const MAX_STACK_DEPTH =
+  parseInt(
+    (typeof process !== "undefined" &&
+      process.env &&
+      process.env.MAX_STACK_DEPTH) ||
+      0,
+    10
+  ) || 800;
 const noop = _ => _
 
 const defer = typeof process !== 'undefined' && process.nextTick
