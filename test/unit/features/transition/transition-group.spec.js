@@ -340,5 +340,42 @@ if (!isIE9) {
         )
       }).then(done)
     })
+
+    it("should work with hidden children", done => {
+      const vm = new Vue({
+        template: `
+            <div>
+              <transition-group :name="name">
+                <child v-for="item in items" :key="item" :item="item"></child>
+              </transition-group>
+            </div>
+          `,
+        components: {
+          child: {
+            props: ["item"],
+            template: `<div v-if="item !== 'b'">{{ item }}</div>`
+          }
+        },
+        data: {
+          items: ["a", "b", "c"],
+          name: "group"
+        }
+      }).$mount(el)
+      waitForUpdate(() => {
+        vm.items = ["a", "b", "c", "d"]
+      })
+        .thenWaitFor(nextFrame)
+        .then(() => {
+          expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, "$1")).toBe(
+            `<span>` +
+              `<div>a</div>` +
+              `<!---->` +
+              `<div>c</div>` +
+              `<div>d</div>` +
+              `</span>`
+          );
+        })
+        .then(done)
+    })
   })
 }

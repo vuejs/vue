@@ -80,7 +80,7 @@ export default {
       for (let i = 0; i < prevChildren.length; i++) {
         const c: VNode = prevChildren[i]
         c.data.transition = transitionData
-        c.data.pos = c.elm.getBoundingClientRect()
+        c.data.pos = getBoundingClientRect(c)
         if (map[c.key]) {
           kept.push(c)
         } else {
@@ -173,12 +173,17 @@ function callPendingCbs (c: VNode) {
 }
 
 function recordPosition (c: VNode) {
-  c.data.newPos = c.elm.getBoundingClientRect()
+  c.data.newPos = getBoundingClientRect(c)
 }
 
 function applyTranslation (c: VNode) {
   const oldPos = c.data.pos
   const newPos = c.data.newPos
+
+  if (oldPos === undefined || newPos === undefined) {
+    return
+  }
+
   const dx = oldPos.left - newPos.left
   const dy = oldPos.top - newPos.top
   if (dx || dy) {
@@ -186,5 +191,12 @@ function applyTranslation (c: VNode) {
     const s = c.elm.style
     s.transform = s.WebkitTransform = `translate(${dx}px,${dy}px)`
     s.transitionDuration = '0s'
+  }
+}
+
+function getBoundingClientRect(c: VNode) {
+  // The element could be a comment, which doesn't have the getBoundingClientRect function
+  if (c.elm.getBoundingClientRect) {
+    return c.elm.getBoundingClientRect()
   }
 }
