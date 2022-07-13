@@ -129,7 +129,7 @@ export default class TemplateRenderer {
   renderStyles (context: Object): string {
     const initial = this.preloadFiles || []
     const async = this.getUsedAsyncFiles(context) || []
-    const cssFiles = initial.concat(async).filter(({ file }) => isCSS(file))
+    const cssFiles = Array.from(new Set(initial.concat(async))).filter(({ file }) => isCSS(file))
     return (
       // render links for css files
       (cssFiles.length
