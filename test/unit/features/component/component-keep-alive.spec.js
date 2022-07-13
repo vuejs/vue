@@ -254,6 +254,28 @@ describe('Component keep-alive', () => {
     sharedAssertions(vm, done)
   })
 
+  it('include (string with space)', done => {
+    const vm = new Vue({
+      template: `
+        <div v-if="ok">
+          <keep-alive include="one, two">
+            <component :is="view"></component>
+          </keep-alive>
+        </div>
+      `,
+      data: {
+        view: 'one',
+        ok: true
+      },
+      components
+    }).$mount()
+    vm.view = 'two'
+    waitForUpdate(() => {
+      assertHookCalls(one, [1, 1, 1, 1, 0])
+      assertHookCalls(two, [1, 1, 1, 0, 0])
+    }).then(done)
+  })
+
   it('include (regex)', done => {
     const vm = new Vue({
       template: `

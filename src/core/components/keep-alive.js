@@ -16,10 +16,11 @@ function getComponentName (opts: ?VNodeComponentOptions): ?string {
 }
 
 function matches (pattern: string | RegExp | Array<string>, name: string): boolean {
+  name = name.trim()
   if (Array.isArray(pattern)) {
     return pattern.indexOf(name) > -1
   } else if (typeof pattern === 'string') {
-    return pattern.split(',').indexOf(name) > -1
+    return pattern.split(',').map(i => i.trim()).indexOf(name) > -1
   } else if (isRegExp(pattern)) {
     return pattern.test(name)
   }
