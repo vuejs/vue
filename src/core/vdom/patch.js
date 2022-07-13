@@ -16,6 +16,7 @@ import { SSR_ATTR } from 'shared/constants'
 import { registerRef } from './modules/ref'
 import { traverse } from '../observer/traverse'
 import { activeInstance } from '../instance/lifecycle'
+import { inBrowser } from '../util/index';
 import { isTextInputType } from 'web/util/element'
 
 import {
@@ -31,6 +32,8 @@ import {
 export const emptyNode = new VNode('', {}, [])
 
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
+
+const customElements = inBrowser ? window.customElements : undefined
 
 function sameVnode (a, b) {
   return (
@@ -106,6 +109,7 @@ export function createPatchFunction (backend) {
 
   function isUnknownElement (vnode, inVPre) {
     return (
+      !(customElements && customElements.get(vnode.tag)) &&
       !inVPre &&
       !vnode.ns &&
       !(
