@@ -17,6 +17,7 @@ import { transitionProps, extractTransitionData } from './transition'
 import { setActiveInstance } from 'core/instance/lifecycle'
 
 import {
+  nextFrame,
   hasTransition,
   getTransitionInfo,
   transitionEndEvent,
@@ -168,7 +169,7 @@ function callPendingCbs (c: VNode) {
   }
   /* istanbul ignore if */
   if (c.elm._enterCb) {
-    c.elm._enterCb()
+    nextFrame(c.elm._enterCb)
   }
 }
 

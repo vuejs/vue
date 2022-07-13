@@ -340,5 +340,29 @@ if (!isIE9) {
         )
       }).then(done)
     })
+
+    it('should remove class v-enter-to', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition-group name="group">
+              <div v-if="ok" key="foo">foo</div>
+            </transition-group>
+          </div>
+        `,
+        data: { ok: false }
+      }).$mount(el)
+
+      vm.ok = true
+      waitForUpdate(() => {
+        vm.$forceUpdate()
+      }).thenWaitFor(duration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div>foo</div>` +
+          `</span>`
+        )
+      }).then(done)
+    })
   })
 }
