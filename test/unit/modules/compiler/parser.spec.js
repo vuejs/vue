@@ -718,7 +718,7 @@ describe('parser', () => {
     expect(text.text).toBe('\ndef')
     const pre2 = ast.children[2]
     expect(pre2.children[0].type).toBe(3)
-    expect(pre2.children[0].text).toBe('\nabc')
+    expect(pre2.children[0].text).toBe('\n\nabc')
   })
 
   it('keep first newline after unary tag in <pre>', () => {
@@ -898,7 +898,7 @@ describe('parser', () => {
     expect(text.text).toBe(' def')
     const pre2 = ast.children[2]
     expect(pre2.children[0].type).toBe(3)
-    expect(pre2.children[0].text).toBe('\nabc')
+    expect(pre2.children[0].text).toBe('\n\nabc')
   })
 
   it(`keep first newline after unary tag in <pre> with whitespace: 'condense'`, () => {
