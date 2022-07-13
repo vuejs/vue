@@ -5,6 +5,7 @@ import VueSSRClientPlugin from '../../packages/vue-server-renderer/client-plugin
 import { createRenderer as createBundleRenderer } from './ssr-bundle-render.spec.js'
 
 const defaultTemplate = `<html><head></head><body><!--vue-ssr-outlet--></body></html>`
+const customContentPlaceholderTemplate = `<html><head></head><body><!--vue-app--></body></html>`
 const interpolateTemplate = `<html><head><title>{{ title }}</title></head><body><!--vue-ssr-outlet-->{{{ snippet }}}</body></html>`
 
 function generateClientManifest (file, cb) {
@@ -61,6 +62,25 @@ describe('SSR: template option', () => {
         `<html><head>${context.head}${context.styles}</head><body>` +
         `<div data-server-rendered="true">hi</div>` +
         `<script>window.__INITIAL_STATE__={"a":1}</script>` +
+        `</body></html>`
+      )
+      done()
+    })
+  })
+
+  it('renderToString with custom content placeholder', done => {
+    const renderer = createRenderer({
+      template: customContentPlaceholderTemplate,
+      contentPlaceholder: '<!--vue-app-->'
+    })
+
+    renderer.renderToString(new Vue({
+      template: '<div>hi</div>'
+    }), (err, res) => {
+      expect(err).toBeNull()
+      expect(res).toContain(
+        `<html><head></head><body>` +
+        `<div data-server-rendered="true">hi</div>` +
         `</body></html>`
       )
       done()
