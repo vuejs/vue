@@ -53,7 +53,7 @@ export default {
     oldVnode: VNodeWithData,
     isDestroy: boolean
   ) {
-    if (!isDestroy) {
+    if (!isDestroy && el.style.display === 'none') {
       el.style.display = el.__vOriginalDisplay
     }
   }

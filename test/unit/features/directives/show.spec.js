@@ -81,4 +81,32 @@ describe('Directive v-show', () => {
       expect(vm.$el.firstChild.style.display).toBe('none')
     }).then(done)
   })
+
+  it('should set display correctly when unbind with falsy', done => {
+    const vm = new Vue({
+      template:
+        '<div v-if="tester" v-show="false" style="display: block"></div>' +
+        '<div v-else style="display: flex"></div>',
+      data: { tester: true }
+    }).$mount()
+    expect(vm.$el.style.display).toBe('none')
+    vm.tester = false
+    waitForUpdate(() => {
+      expect(vm.$el.style.display).toBe('flex')
+    }).then(done)
+  })
+
+  it('should set display correctly when unbind with truthy', done => {
+    const vm = new Vue({
+      template:
+        '<div v-if="tester" v-show="true"></div>' +
+        '<div v-else style="display: flex"></div>',
+      data: { tester: true }
+    }).$mount()
+    expect(vm.$el.style.display).toBe('')
+    vm.tester = false
+    waitForUpdate(() => {
+      expect(vm.$el.style.display).toBe('flex')
+    }).then(done)
+  })
 })
