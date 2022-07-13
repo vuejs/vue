@@ -35,17 +35,25 @@ export interface CreateElement {
   ): VNode
 }
 
-export interface Vue extends Vue2Instance {
-  readonly $data: Record<string, any>
-  readonly $props: Record<string, any>
-  readonly $parent: Vue
-  readonly $root: Vue
-  readonly $children: Vue[]
+export interface Vue<
+  Data = Record<string, any>,
+  Props = Record<string, any>,
+  Parent = never,
+  Root = never,
+  Children = never,
+  Options = never,
+  Emit = (event: string, ...args: any[]) => Vue
+> {
+  // properties with different types in defineComponent()
+  readonly $data: Data
+  readonly $props: Props
+  readonly $parent: Parent extends never ? Vue : Parent
+  readonly $root: Root extends never ? Vue : Root
+  readonly $children: Children extends never ? Vue[] : Children
   readonly $options: ComponentOptions<Vue>
-  $emit(event: string, ...args: any[]): this
-}
+  $emit: Emit
 
-export interface Vue2Instance {
+  // Vue 2 only or shared
   readonly $el: Element
   readonly $refs: {
     [key: string]: Vue | Element | (Vue | Element)[] | undefined

@@ -5,7 +5,7 @@ import {
 } from './v3-generated'
 import { UnionToIntersection } from './common'
 
-import { Vue, Vue2Instance, VueConstructor } from './vue'
+import { Vue, VueConstructor } from './vue'
 import {
   ComputedOptions,
   MethodOptions,
@@ -13,8 +13,7 @@ import {
   ComponentOptionsMixin,
   ComponentOptionsBase
 } from './v3-component-options'
-import { EmitFn, EmitsOptions, Slots } from './v3-setup-context'
-import { VNode } from './vnode'
+import { EmitFn, EmitsOptions } from './v3-setup-context'
 
 /**
  * Custom properties added to component instances in any way and can be accessed through `this`
@@ -173,18 +172,19 @@ interface Vue3Instance<
   Defaults,
   MakeDefaultsOptional,
   Options
-> extends Vue2Instance {
-  $data: D
-  readonly $props: Readonly<
-    MakeDefaultsOptional extends true
-      ? Partial<Defaults> & Omit<P & PublicProps, keyof Defaults>
-      : P & PublicProps
-  >
-  readonly $root: ComponentPublicInstance | null
-  readonly $parent: ComponentPublicInstance | null
-  readonly $emit: EmitFn<E>
-  readonly $options: Options & MergedComponentOptionsOverride
-}
+> extends Vue<
+    D,
+    Readonly<
+      MakeDefaultsOptional extends true
+        ? Partial<Defaults> & Omit<P & PublicProps, keyof Defaults>
+        : P & PublicProps
+    >,
+    ComponentPublicInstance | null,
+    ComponentPublicInstance,
+    ComponentPublicInstance[],
+    Options & MergedComponentOptionsOverride,
+    EmitFn<E>
+  > {}
 
 type MergedHook<T = () => void> = T | T[]
 

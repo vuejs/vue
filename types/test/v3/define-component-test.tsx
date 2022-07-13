@@ -1143,6 +1143,7 @@ defineComponent({
 // https://github.com/vuejs/vue/issues/12628#issuecomment-1177258223
 defineComponent({
   render(h) {
+    // vue 2
     this.$listeners
     this.$on('foo', () => {})
     this.$ssrContext
