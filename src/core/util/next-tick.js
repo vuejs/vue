@@ -33,13 +33,19 @@ function flushCallbacks () {
 let timerFunc
 
 // The nextTick behavior leverages the microtask queue, which can be accessed
-// via either native Promise.then or MutationObserver.
+// via native WindowOrWorkerGlobalScope.queueMicrotask, Promise.then or MutationObserver.
 // MutationObserver has wider support, however it is seriously bugged in
 // UIWebView in iOS >= 9.3.3 when triggered in touch event handlers. It
 // completely stops working after triggering a few times... so, if native
-// Promise is available, we will use it:
+// WindowOrWorkerGlobalScope.queueMicrotask or Promise is available, we will use native support by priority:
 /* istanbul ignore next, $flow-disable-line */
-if (typeof Promise !== 'undefined' && isNative(Promise)) {
+if (typeof queueMicrotask !== 'undefined' && isNative(queueMicrotask)) {
+  timerFunc = () => {
+    queueMicrotask(flushCallbacks)
+  }
+  isUsingMicroTask = true
+}
+else if (typeof Promise !== 'undefined' && isNative(Promise)) {
   const p = Promise.resolve()
   timerFunc = () => {
     p.then(flushCallbacks)
