@@ -57,6 +57,24 @@ var getAssetName = function (asset) {
 
 var hash = require('hash-sum');
 var uniq = require('lodash.uniq');
+var getAssets = function (stats) {
+  var _assets = []
+
+  stats.modules.forEach(function (m) {
+    if (m.chunks.length === 1) {
+      var cid = m.chunks[0];
+      var chunk = stats.chunks.find(function (c) { return c.id === cid; });
+      if (!chunk || !chunk.files) {
+        return
+      }
+      _assets = _assets.concat(chunk.files)
+    }
+  });
+  _assets = _assets.concat(stats.assets.map(function (a) { return a.name; }))
+
+  return _assets
+}
+
 
 var VueSSRClientPlugin = function VueSSRClientPlugin (options) {
   if ( options === void 0 ) options = {};
@@ -73,8 +91,8 @@ VueSSRClientPlugin.prototype.apply = function apply (compiler) {
   onEmit(compiler, 'vue-client-plugin', stage, function (compilation, cb) {
     var stats = compilation.getStats().toJson();
 
-    var allFiles = uniq(stats.assets
-      .map(function (a) { return a.name; }));
+    // I need to merge chunks，otherwise webpack import in SSR ,there is -1 in the client-manifest
+    var allFiles = uniq(getAssets(stats));
 
     var initialFiles = uniq(Object.keys(stats.entrypoints)
       .map(function (name) { return stats.entrypoints[name].assets; })
