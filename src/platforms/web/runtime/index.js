@@ -67,7 +67,7 @@ if (inBrowser) {
       console[console.info ? 'info' : 'log'](
         `You are running Vue in development mode.\n` +
         `Make sure to turn on production mode when deploying for production.\n` +
-        `See more tips at https://vuejs.org/guide/deployment.html`
+        `See more tips at https://v2.vuejs.org/v2/guide/deployment.html`
       )
     }
   }, 0)
