@@ -50,14 +50,14 @@ const normalizeRender = vm => {
   }
 }
 
-function waitForServerPrefetch (vm, resolve, reject) {
+function waitForServerPrefetch (vm, resolve, reject, ssrContext) {
   let handlers = vm.$options.serverPrefetch
   if (isDef(handlers)) {
     if (!Array.isArray(handlers)) handlers = [handlers]
     try {
       const promises = []
       for (let i = 0, j = handlers.length; i < j; i++) {
-        const result = handlers[i].call(vm, vm)
+        const result = handlers[i].call(vm, ssrContext)
         if (result && typeof result.then === 'function') {
           promises.push(result)
         }
@@ -206,7 +206,7 @@ function renderComponentInner (node, isRoot, context) {
 
   const reject = context.done
 
-  waitForServerPrefetch(child, resolve, reject)
+  waitForServerPrefetch(child, resolve, reject, context)
 }
 
 function renderAsyncComponent (node, isRoot, context) {
@@ -432,6 +432,6 @@ export function createRenderFunction (
     const resolve = () => {
       renderNode(component._render(), true, context)
     }
-    waitForServerPrefetch(component, resolve, done)
+    waitForServerPrefetch(component, resolve, done, context)
   }
 }

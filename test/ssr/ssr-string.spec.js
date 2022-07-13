@@ -1397,6 +1397,28 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  it('should pass $ssrContext to serverPrefetch option', done => {
+    renderVmWithOptions({
+      template: `
+        <div>{{ ctx }}</div>
+      `,
+      data: {
+        count: 0
+      },
+      serverPrefetch (ctx) {
+        return new Promise((resolve) => {
+          setTimeout(() => {
+            this.ctx = ctx.userContext.foo
+            resolve()
+          }, 1)
+        })
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true">bar</div>')
+      done()
+    }, { foo: 'bar' })
+  })
+
   it('should support serverPrefetch option (nested)', done => {
     renderVmWithOptions({
       template: `
@@ -1668,8 +1690,8 @@ describe('SSR: renderToString', () => {
   })
 })
 
-function renderVmWithOptions (options, cb) {
-  renderToString(new Vue(options), (err, res) => {
+function renderVmWithOptions (options, cb, ctx = {}) {
+  renderToString(new Vue(options), ctx, (err, res) => {
     expect(err).toBeNull()
     cb(res)
   })
