@@ -71,6 +71,8 @@ export interface ASTElementHandler {
   value: string;
   params?: any[];
   modifiers: ASTModifiers | undefined;
+  start?: number;
+  end?: number;
 }
 
 export interface ASTElementHandlers {
@@ -83,6 +85,8 @@ export interface ASTDirective {
   value: string;
   arg: string | undefined;
   modifiers: ASTModifiers | undefined;
+  start?: number;
+  end?: number;
 }
 
 export type ASTNode = ASTElement | ASTText | ASTExpression;
@@ -95,6 +99,9 @@ export interface ASTElement {
   parent: ASTElement | undefined;
   children: ASTNode[];
 
+  start?: number;
+  end?: number;
+  
   processed?: true;
 
   static?: boolean;
@@ -173,6 +180,8 @@ export interface ASTExpression {
   static?: boolean;
   // 2.4 ssr optimization
   ssrOptimizability?: SSROptimizability;
+  start?: number;
+  end?: number;
 }
 
 export interface ASTText {
@@ -182,6 +191,8 @@ export interface ASTText {
   isComment?: boolean;
   // 2.4 ssr optimization
   ssrOptimizability?: SSROptimizability;
+  start?: number;
+  end?: number;
 }
 
 /*
