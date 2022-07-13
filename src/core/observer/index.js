@@ -159,11 +159,13 @@ export function defineReactive (
     configurable: true,
     get: function reactiveGetter () {
       const value = getter ? getter.call(obj) : val
-      if (Dep.target) {
+      const targetWatcher = Dep.target
+      if (targetWatcher) {
         dep.depend()
         if (childOb) {
+          const needDepend = Array.isArray(value) && !targetWatcher.checkRelated(childOb.dep)
           childOb.dep.depend()
-          if (Array.isArray(value)) {
+          if (needDepend) {
             dependArray(value)
           }
         }

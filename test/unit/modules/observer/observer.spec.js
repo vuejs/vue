@@ -6,7 +6,7 @@ import {
   del as delProp
 } from 'core/observer/index'
 import Dep from 'core/observer/dep'
-import { hasOwn } from 'core/util/index'
+import { hasOwn, _Set as Set } from 'core/util/index'
 
 describe('Observer', () => {
   it('create on non-observables', () => {
@@ -342,6 +342,33 @@ describe('Observer', () => {
     objs.forEach(obj => {
       expect(obj.__ob__ instanceof Observer).toBe(true)
     })
+  })
+
+  it('Array\'s getter is triggered multiple times, the Watcher should only associate with Dep once.', () => {
+    const data = {
+      arr: [{}]
+    }
+    observe(data)
+    // mock a watcher!
+    const watcher = {
+      newDepIds: new Set(),
+      addDep (dep) {
+        this.newDepIds.add(dep.id)
+        dep.addSub(this)
+      },
+      checkRelated: function (dep) {
+        return this.newDepIds.has(dep.id)
+      }
+    }
+    spyOn(watcher, 'checkRelated').and.callThrough()
+    Dep.target = watcher
+    data.arr
+    data.arr
+    Dep.target = null
+    expect(watcher.checkRelated.calls.count()).toBe(2)
+    const allCalls = watcher.checkRelated.calls.all()
+    expect(allCalls[0].returnValue).toBe(false)
+    expect(allCalls[1].returnValue).toBe(true)
   })
 
   it('warn set/delete on non valid values', () => {

@@ -138,6 +138,13 @@ export default class Watcher {
   }
 
   /**
+   * Check if a dependency has been associated with the current watcher.
+   */
+  checkRelated (dep: Dep) {
+    return this.newDepIds.has(dep.id)
+  }
+
+  /**
    * Clean up for dependency collection.
    */
   cleanupDeps () {
