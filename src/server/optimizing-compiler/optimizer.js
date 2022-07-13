@@ -59,7 +59,14 @@ function walk (node: ASTNode, isRoot?: boolean) {
         check(block)
       }
     }
-    if (node.ssrOptimizability == null ||
+    if (
+      !isRoot &&
+      node.attrsMap['v-if'] &&
+      (node.attrsMap['v-html'] || node.attrsMap['v-text'])
+    ) {
+      // #11299
+      node.ssrOptimizability = optimizability.CHILDREN
+    } else if (node.ssrOptimizability == null ||
       (!isRoot && (node.attrsMap['v-html'] || node.attrsMap['v-text']))
     ) {
       node.ssrOptimizability = optimizability.FULL

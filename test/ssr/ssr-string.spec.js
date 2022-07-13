@@ -397,6 +397,24 @@ describe('SSR: renderToString', () => {
     })
   })
 
+  // #11299
+  it('v-html and v-if', done => {
+    renderVmWithOptions({
+      template: '<div><div v-if="foo" v-html="\'Foo.\'" key="hey"/><div v-else>bar: <BarComponent /></div></div>',
+      data: {
+        foo: false
+      },
+      components: {
+        BarComponent: {
+          template: '<div>Bar!</div>'
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div>bar: <div>Bar!</div></div></div>')
+      done()
+    })
+  })
+
   it('v-text', done => {
     renderVmWithOptions({
       template: '<div><div v-text="text"></div></div>',
@@ -417,6 +435,24 @@ describe('SSR: renderToString', () => {
       }
     }, result => {
       expect(result).toContain('<div data-server-rendered="true"><div></div></div>')
+      done()
+    })
+  })
+
+  // #11299
+  it('v-text and v-if', done => {
+    renderVmWithOptions({
+      template: '<div><div v-if="foo" v-text="\'Foo.\'" key="hey"/><div v-else>bar: <BarComponent /></div></div>',
+      data: {
+        foo: false
+      },
+      components: {
+        BarComponent: {
+          template: '<div>Bar!</div>'
+        }
+      }
+    }, result => {
+      expect(result).toContain('<div data-server-rendered="true"><div>bar: <div>Bar!</div></div></div>')
       done()
     })
   })
