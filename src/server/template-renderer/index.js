@@ -126,19 +126,24 @@ export default class TemplateRenderer {
     }
   }
 
-  renderStyles (context: Object): string {
+  renderCriticalStyles (context: Object): string {
+    // context.styles is a getter exposed by vue-style-loader which contains
+    // the inline component styles collected during SSR
+    return (context.styles || '')
+  }
+
+  renderStyleLinks (context: Object): string {
     const initial = this.preloadFiles || []
     const async = this.getUsedAsyncFiles(context) || []
     const cssFiles = initial.concat(async).filter(({ file }) => isCSS(file))
-    return (
-      // render links for css files
-      (cssFiles.length
-        ? cssFiles.map(({ file }) => `<link rel="stylesheet" href="${this.publicPath}${file}">`).join('')
-        : '') +
-      // context.styles is a getter exposed by vue-style-loader which contains
-      // the inline component styles collected during SSR
-      (context.styles || '')
-    )
+
+    return cssFiles.length
+      ? cssFiles.map(({ file }) => `<link rel="stylesheet" href="${this.publicPath}${file}">`).join('')
+      : ''
+  }
+
+  renderStyles (context: Object): string {
+    return this.renderStyleLinks(context) + this.renderCriticalStyles(context)
   }
 
   renderResourceHints (context: Object): string {
