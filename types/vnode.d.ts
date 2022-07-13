@@ -5,7 +5,7 @@ type ScopedSlotReturnValue = VNode | string | boolean | null | undefined | Scope
 interface ScopedSlotReturnArray extends Array<ScopedSlotReturnValue> {}
 
 // Scoped slots are guaranteed to return Array of VNodes starting in 2.6
-export type NormalizedScopedSlot = (props: any) => ScopedSlotChildren;
+export type NormalizedScopedSlot = (props?: any) => ScopedSlotChildren;
 export type ScopedSlotChildren = VNode[] | undefined;
 
 // Relaxed type compatible with $createElement
