@@ -3,8 +3,6 @@ import {
   AsyncComponent,
   ComponentOptions,
   FunctionalComponentOptions,
-  WatchOptionsWithHandler,
-  WatchHandler,
   DirectiveOptions,
   DirectiveFunction,
   RecordPropsDefinition,
