@@ -5,10 +5,9 @@ import { initUse } from './use'
 import { initMixin } from './mixin'
 import { initExtend } from './extend'
 import { initAssetRegisters } from './assets'
-import { set, del } from '../observer/index'
+import { set, del, observe } from '../observer/index'
 import { ASSET_TYPES } from 'shared/constants'
 import builtInComponents from '../components/index'
-import { observe } from 'core/observer/index'
 
 import {
   warn,
