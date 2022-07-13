@@ -730,7 +730,7 @@ export function createPatchFunction (backend) {
               return oldVnode
             } else if (process.env.NODE_ENV !== 'production') {
               warn(
-                'The client-side rendered virtual DOM tree is not matching ' +
+                'The client-side rendered virtual DOM tree does not match ' +
                 'server-rendered content. This is likely caused by incorrect ' +
                 'HTML markup, for example nesting block-level elements inside ' +
                 '<p>, or missing <tbody>. Bailing hydration and performing ' +
