@@ -76,19 +76,15 @@ export default {
 
     if (prevChildren) {
       const kept: Array<VNode> = []
-      const removed: Array<VNode> = []
       for (let i = 0; i < prevChildren.length; i++) {
         const c: VNode = prevChildren[i]
         c.data.transition = transitionData
         c.data.pos = c.elm.getBoundingClientRect()
         if (map[c.key]) {
           kept.push(c)
-        } else {
-          removed.push(c)
         }
       }
       this.kept = h(tag, null, kept)
-      this.removed = removed
     }
 
     return h(tag, null, children)
