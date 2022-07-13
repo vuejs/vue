@@ -23,22 +23,8 @@ if (process.argv[2]) {
   })
 }
 
-build(builds)
-
-function build (builds) {
-  let built = 0
-  const total = builds.length
-  const next = () => {
-    buildEntry(builds[built]).then(() => {
-      built++
-      if (built < total) {
-        next()
-      }
-    }).catch(logError)
-  }
-
-  next()
-}
+builds.reduce((result, build) => result.then(() => buildEntry(build)).catch(logError), Promise.resolve())
+  .then(() => process.exit(logError.called ? 1 : 0))
 
 function buildEntry (config) {
   const output = config.output
@@ -90,6 +76,7 @@ function getSize (code) {
 }
 
 function logError (e) {
+  logError.called = true
   console.log(e)
 }
 
