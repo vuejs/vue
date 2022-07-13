@@ -195,6 +195,42 @@ describe('Instance properties', () => {
     }).then(done)
   })
 
+  // #7257 Do not rerender child components that use $listeners when the parent component gets updated
+  it('parent component update should not rerender child component with listeners', done => {
+    const spyA = jasmine.createSpy('A')
+    const spyB = jasmine.createSpy('B')
+    const vm = new Vue({
+      template: `<div><foo v-model="foo"/> <bar v-model="bar"/></div>`,
+      data: { foo: 'foo', bar: 'bar' },
+      components: {
+        foo: {
+          props: {
+            value: String
+          },
+          template: `<div><input v-on="$listeners" id="foo" v-bind:value="value" /></div>`,
+          updated() {
+            spyA()
+          }
+        },
+        bar: {
+          props: {
+            value: String
+          },
+          template: `<div><input v-on="$listeners" v-bind:value="value" /></div>`,
+          updated() {
+              spyB()
+          }
+        }
+      }
+    }).$mount()
+
+    vm.foo = 'new foo'
+    waitForUpdate(() => {
+      expect(spyA.calls.count()).toBe(1)
+      expect(spyB.calls.count()).toBe(0)
+    }).then(done)
+  })
+
   it('warn mutating $listeners', () => {
     const vm = new Vue()
     vm.$listeners = {}
