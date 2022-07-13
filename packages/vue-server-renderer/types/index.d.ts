@@ -26,7 +26,7 @@ interface BundleRenderer {
 }
 
 interface RendererOptions {
-  template?: string;
+  template?: string | ((result: string, context: object) => string);
   inject?: boolean;
   shouldPreload?: (file: string, type: string) => boolean;
   shouldPrefetch?: (file: string, type: string) => boolean;
