@@ -251,7 +251,9 @@ function mergeHook (f1: any, f2: any): Function {
 // prop and event handler respectively.
 function transformModel (options, data: any) {
   const prop = (options.model && options.model.prop) || 'value'
-  const event = (options.model && options.model.event) || 'input'
+  const defaultEvent = data.model.lazy ? 'change' : 'input'
+  const event = (options.model && (data.model.lazy ?
+    options.model.eventLazy : options.model.event)) || defaultEvent
   ;(data.attrs || (data.attrs = {}))[prop] = data.model.value
   const on = data.on || (data.on = {})
   const existing = on[event]

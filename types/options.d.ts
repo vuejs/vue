@@ -110,6 +110,7 @@ export interface ComponentOptions<
   model?: {
     prop?: string;
     event?: string;
+    eventLazy?: string;
   };
 
   parent?: Vue;
@@ -128,6 +129,7 @@ export interface FunctionalComponentOptions<Props = DefaultProps, PropDefs = Pro
   model?: {
     prop?: string;
     event?: string;
+    eventLazy?: string;
   };
   inject?: InjectOptions;
   functional: boolean;

@@ -8,7 +8,7 @@ export function genComponentModel (
   value: string,
   modifiers: ?ASTModifiers
 ): ?boolean {
-  const { number, trim } = modifiers || {}
+  const { number, trim, lazy } = modifiers || {}
 
   const baseValueExpression = '$$v'
   let valueExpression = baseValueExpression
@@ -26,6 +26,7 @@ export function genComponentModel (
   el.model = {
     value: `(${value})`,
     expression: JSON.stringify(value),
+    lazy: !!lazy,
     callback: `function (${baseValueExpression}) {${assignment}}`
   }
 }

@@ -62,6 +62,7 @@ declare interface VNodeData {
   model?: {
     value: any;
     callback: Function;
+    lazy: boolean;
   };
 };
 

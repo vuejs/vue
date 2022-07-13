@@ -149,6 +149,40 @@ describe('Directive v-model component', () => {
     expect(vm.text).toBe('foo o')
   })
 
+  it('modifier: .lazy', () => {
+    const vm = new Vue({
+      template: `
+        <div>
+          <default-model ref="default" v-model.lazy="text1" />
+          <custom-model ref="custom" v-model.lazy="text2" />
+        </div>
+      `,
+      data: { text1: 'foo', text2: 'foo' },
+      components: {
+        'default-model': {
+          template: '<input>'
+        },
+        'custom-model': {
+          template: '<input>',
+          model: {
+            eventLazy: 'lazy-update'
+          }
+        }
+      }
+    }).$mount()
+    expect(vm.text1).toBe('foo')
+    vm.$refs.default.$emit('input', 'bar')
+    expect(vm.text1).toBe('foo')
+    vm.$refs.default.$emit('change', 'baz')
+    expect(vm.text1).toBe('baz')
+
+    // customized model option
+    vm.$refs.custom.$emit('change', 'bar')
+    expect(vm.text2).toBe('foo')
+    vm.$refs.custom.$emit('lazy-update', 'baz')
+    expect(vm.text2).toBe('baz')
+  })
+
   // #8436
   it('should not double transform mode props', () => {
     const BaseInput = {

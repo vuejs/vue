@@ -170,6 +170,12 @@ describe('codegen', () => {
       '<my-component v-model="\n test \n" />',
       `with(this){return _c('my-component',{model:{value:(\n test \n),callback:function ($$v) {\n test \n=$$v},expression:"\\n test \\n"}})}`
     )
+
+    // for lazy modifier
+    assertCodegen(
+      '<my-component v-model.lazy="\n test \n" />',
+      `with(this){return _c('my-component',{model:{value:(\n test \n),callback:function ($$v) {\n test \n=$$v},expression:"\\n test \\n",lazy:true}})}`
+    )
   })
 
   it('generate template tag', () => {
