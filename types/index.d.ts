@@ -37,3 +37,5 @@ export {
   VNodeData,
   VNodeDirective
 } from "./vnode";
+
+export { VIntrinsicElementAttributes } from "./dom";
