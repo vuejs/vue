@@ -232,6 +232,25 @@ describe('Directive v-model select', () => {
     }).then(done)
   })
 
+  it('should not set model to `undefined` when both model and options changed', (done) => {
+    const vm = new Vue({
+      data: {
+        test: 'a',
+        opts: ['a', 'b', 'c']
+      },
+      template:
+        '<select v-model="test">' +
+          '<option v-for="o in opts" :value="o">option {{ o }}</option>' +
+        '</select>'
+    }).$mount()
+    document.body.appendChild(vm.$el)
+    vm.test = '1'
+    vm.opts = ['2', '3', '4']
+    waitForUpdate(() => {
+      expect(vm.test).toBe('1') // should not set vm.test to `undefined` but reserves '1'
+    }).then(done)
+  })
+
   if (!hasMultiSelectBug()) {
     it('multiple', done => {
       const vm = new Vue({
