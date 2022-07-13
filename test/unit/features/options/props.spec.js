@@ -284,6 +284,18 @@ describe('Options props', () => {
       makeInstance(123, null, v => v === 234)
       expect('custom validator check failed').toHaveBeenWarned()
     })
+ 
+    it('custom validator + custom error', () => {
+      const validator = v => {
+        if (v !== 123) throw new Error(`the prop '{{name}}' should be 123.`)
+        
+        return true
+      }
+      makeInstance(123, null, validator)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(234, null, validator)
+      expect(`the prop 'test' should be 123.`).toHaveBeenWarned()
+    })
 
     it('type check + custom validator', () => {
       makeInstance(123, Number, v => v === 123)

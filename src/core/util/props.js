@@ -138,9 +138,18 @@ function assertProp (
   }
   const validator = prop.validator
   if (validator) {
-    if (!validator(value)) {
+    let result
+    try {
+      result = validator(value)
+    } catch (error) {
+      result = error
+    }
+    
+    if (result !== true) {
+      const message = result instanceof Error ? result.message.replace(/{{\s*name\s*}}/g, name) : 'custom validator check failed for prop "' + name + '".'
+
       warn(
-        'Invalid prop: custom validator check failed for prop "' + name + '".',
+        'Invalid prop: ' + message ,
         vm
       )
     }
