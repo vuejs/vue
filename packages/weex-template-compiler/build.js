@@ -683,7 +683,7 @@ function parseText (
     var exp = parseFilters(match[1].trim());
     tokens.push(("_s(" + exp + ")"));
     rawTokens.push({ '@binding': exp });
-    lastIndex = index + match[0].length;
+    lastIndex = tagRE.lastIndex;
   }
   if (lastIndex < text.length) {
     rawTokens.push(tokenValue = text.slice(lastIndex));
