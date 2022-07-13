@@ -151,10 +151,10 @@ export function hasOwn (obj: Object | Array<*>, key: string): boolean {
  * Create a cached version of a pure function.
  */
 export function cached<F: Function> (fn: F): F {
-  const cache = Object.create(null)
+  const cache = Object.create({})
   return (function cachedFn (str: string) {
-    const hit = cache[str]
-    return hit || (cache[str] = fn(str))
+    if(!cache.hasOwnProperty(str)) cache[str] = fn(str)
+    return cache[str]
   }: any)
 }
 
