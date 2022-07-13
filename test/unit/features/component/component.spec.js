@@ -289,6 +289,8 @@ describe('Component', () => {
         }
       }
     }).$mount()
+    expect('"somecollection" is passed').toHaveBeenTipped()
+    expect('declared prop name is "someCollection"').toHaveBeenTipped()
     expect(
       'You should probably use "some-collection" instead of "someCollection".'
     ).toHaveBeenTipped()
@@ -306,6 +308,8 @@ describe('Component', () => {
         }
       }
     }).$mount()
+    expect('"fooBar" is emitted').toHaveBeenTipped()
+    expect('handler is registered for "foobar"').toHaveBeenTipped()
     expect(
       'You should probably use "foo-bar" instead of "fooBar".'
     ).toHaveBeenTipped()
