@@ -17,6 +17,7 @@ import {
   mergeOptions,
   defineReactive
 } from '../util/index'
+import { handleError } from '../util/error'
 
 export function initGlobalAPI (Vue: GlobalAPI) {
   // config
@@ -38,7 +39,8 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     warn,
     extend,
     mergeOptions,
-    defineReactive
+    defineReactive,
+    handleError
   }
 
   Vue.set = set
