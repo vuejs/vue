@@ -644,16 +644,32 @@ describe('Directive v-on', () => {
     }).then(done)
   })
 
-  it('warn missing handlers', () => {
+  it('allow event handler to be undefined or null', done => {
+    const spy2 = Vue.config.errorHandler = jasmine.createSpy()
     vm = new Vue({
       el,
-      data: { none: null },
-      template: `<div @click="none"></div>`
+      methods: { foo: spy },
+      data: {
+        ok: true
+      },
+      render (h) {
+        return h('input', { on: {
+          click: this.ok ? this.foo : null,
+          input: this.ok ? this.foo : undefined 
+        }})
+      }
     })
-    expect(`Invalid handler for event "click": got null`).toHaveBeenWarned()
-    expect(() => {
+    triggerEvent(vm.$el, 'click')
+    triggerEvent(vm.$el, 'input')
+    expect(spy.calls.count()).toBe(2)
+    vm.ok = false
+    waitForUpdate(() => {
       triggerEvent(vm.$el, 'click')
-    }).not.toThrow()
+      triggerEvent(vm.$el, 'input')
+      expect(spy.calls.count()).toBe(2) // should no longer trigger
+      expect(spy2.calls.count()).toBe(0) // no error should occur
+      Vue.config.errorHandler = null
+    }).then(done)
   })
 
   // Github Issue #5046
