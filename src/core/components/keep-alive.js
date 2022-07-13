@@ -1,7 +1,7 @@
 /* @flow */
 
-import { isRegExp, remove } from 'shared/util'
-import { getFirstComponentChild } from 'core/vdom/helpers/index'
+import {isRegExp, remove} from 'shared/util'
+import {getFirstComponentChild} from 'core/vdom/helpers/index'
 
 type CacheEntry = {
   name: ?string;
@@ -11,11 +11,11 @@ type CacheEntry = {
 
 type CacheEntryMap = { [key: string]: ?CacheEntry };
 
-function getComponentName (opts: ?VNodeComponentOptions): ?string {
+function getComponentName(opts: ?VNodeComponentOptions): ?string {
   return opts && (opts.Ctor.options.name || opts.tag)
 }
 
-function matches (pattern: string | RegExp | Array<string>, name: string): boolean {
+function matches(pattern: string | RegExp | Array<string>, name: string): boolean {
   if (Array.isArray(pattern)) {
     return pattern.indexOf(name) > -1
   } else if (typeof pattern === 'string') {
@@ -27,8 +27,8 @@ function matches (pattern: string | RegExp | Array<string>, name: string): boole
   return false
 }
 
-function pruneCache (keepAliveInstance: any, filter: Function) {
-  const { cache, keys, _vnode } = keepAliveInstance
+function pruneCache(keepAliveInstance: any, filter: Function) {
+  const {cache, keys, _vnode} = keepAliveInstance
   for (const key in cache) {
     const entry: ?CacheEntry = cache[key]
     if (entry) {
@@ -40,7 +40,7 @@ function pruneCache (keepAliveInstance: any, filter: Function) {
   }
 }
 
-function pruneCacheEntry (
+function pruneCacheEntry(
   cache: CacheEntryMap,
   key: string,
   keys: Array<string>,
@@ -68,13 +68,14 @@ export default {
 
   methods: {
     cacheVNode() {
-      const { cache, keys, vnodeToCache, keyToCache } = this
+      const {cache, keys, vnodeToCache, keyToCache} = this
       if (vnodeToCache) {
-        const { tag, componentInstance, componentOptions } = vnodeToCache
+        const {tag, componentInstance, componentOptions} = vnodeToCache
         cache[keyToCache] = {
           name: getComponentName(componentOptions),
           tag,
           componentInstance,
+          cid: vnodeToCache.cid
         }
         keys.push(keyToCache)
         // prune oldest entry
@@ -86,18 +87,18 @@ export default {
     }
   },
 
-  created () {
+  created() {
     this.cache = Object.create(null)
     this.keys = []
   },
 
-  destroyed () {
+  destroyed() {
     for (const key in this.cache) {
       pruneCacheEntry(this.cache, key, this.keys)
     }
   },
 
-  mounted () {
+  mounted() {
     this.cacheVNode()
     this.$watch('include', val => {
       pruneCache(this, name => matches(val, name))
@@ -107,18 +108,19 @@ export default {
     })
   },
 
-  updated () {
+  updated() {
     this.cacheVNode()
   },
 
-  render () {
+  render() {
     const slot = this.$slots.default
     const vnode: VNode = getFirstComponentChild(slot)
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
+      vnode.cid = componentOptions.Ctor.cid;
       // check pattern
       const name: ?string = getComponentName(componentOptions)
-      const { include, exclude } = this
+      const {include, exclude} = this
       if (
         // not included
         (include && (!name || !matches(include, name))) ||
@@ -128,17 +130,23 @@ export default {
         return vnode
       }
 
-      const { cache, keys } = this
+      const {cache, keys} = this
       const key: ?string = vnode.key == null
         // same constructor may get registered as different local components
         // so cid alone is not enough (#3269)
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')
         : vnode.key
       if (cache[key]) {
-        vnode.componentInstance = cache[key].componentInstance
-        // make current key freshest
-        remove(keys, key)
-        keys.push(key)
+        if (vnode.cid === cache[key].cid) {
+          vnode.componentInstance = cache[key].componentInstance
+          // make current key freshest
+          remove(keys, key)
+          keys.push(key)
+        } else {
+          cache[key].componentInstance.$destroy();
+          cache[key] = vnode;
+        }
+
       } else {
         // delay setting the cache until update
         this.vnodeToCache = vnode
