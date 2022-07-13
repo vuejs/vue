@@ -283,7 +283,7 @@ export function parseHTML (html, options) {
           )
         }
         if (options.end) {
-          options.end(stack[i].tag, start, end)
+          options.end(start, end)
         }
       }
 
@@ -299,7 +299,7 @@ export function parseHTML (html, options) {
         options.start(tagName, [], false, start, end)
       }
       if (options.end) {
-        options.end(tagName, start, end)
+        options.end(start, end)
       }
     }
   }
