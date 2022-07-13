@@ -58,7 +58,7 @@ Vue.prototype.$mount = function (
     }
     if (template) {
       /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+      if (config.performance && mark) {
         mark('compile')
       }
 
@@ -73,7 +73,7 @@ Vue.prototype.$mount = function (
       options.staticRenderFns = staticRenderFns
 
       /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
+      if (config.performance && mark) {
         mark('compile end')
         measure(`vue ${this._name} compile`, 'compile', 'compile end')
       }
