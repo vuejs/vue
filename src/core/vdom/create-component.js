@@ -158,6 +158,8 @@ export function createComponent (
   // extract props
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
+  resolveNativeAttributes(data)
+
   // functional component
   if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(Ctor, propsData, data, context, children)
@@ -267,4 +269,31 @@ function transformModel (options, data: any) {
   } else {
     on[event] = callback
   }
+}
+
+function resolveNativeAttributes(data) {
+  if(data == undefined || data.attrs == undefined || Object.keys(data.attrs).length == 0){
+    return
+  }
+  let attrs = data.attrs
+  let nativeAttrs = collectNativeAttributes(data.attrs)
+  for(let key in nativeAttrs){
+    const attr = nativeAttrs[key]
+    delete attrs[key]
+    attrs[attr.newKey] = attr.value
+  }
+}
+
+function collectNativeAttributes(attrs){
+  let nativeAttrs = {}
+  for(let key in attrs){
+    if(key.endsWith('.native')){
+        nativeAttrs[key] = {newKey: transformNativeAttributeName(key) , value: attrs[key]}
+    }
+  }
+  return nativeAttrs
+}
+
+function transformNativeAttributeName(nativeAttributeName){
+  return nativeAttributeName.substring(0, nativeAttributeName.length - '.native'.length)
 }

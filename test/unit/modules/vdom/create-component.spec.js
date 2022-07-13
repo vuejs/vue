@@ -150,4 +150,22 @@ describe('create-component', () => {
     expect(vnode).toBeUndefined()
     expect(`Invalid Component definition: ${Ctor}`).toHaveBeenWarned()
   })
+
+  it('add attributes with native modifiers to the root node of the component', () => {
+    let comp = new Vue({
+      props: ['title','message'],
+      template: '<div><h3>{{title}}</h3><p>{{message}}</p></div>'
+    }).$mount()
+    const child = {
+      name: 'child',
+      props: ['title', 'message'],
+      render () {}
+    }
+    const data = {
+      attrs: { "title": "Test Title", "message": "Testing Message", "title.native": "Tooltip", "id": "1" }
+    }
+    const vnode = createComponent(child, data, comp, comp)
+    expect(vnode.data.attrs).toEqual({ id: '1', title: 'Tooltip' })
+    expect(vnode.componentOptions.propsData).toEqual({ message: 'Testing Message', title: 'Test Title' })
+  })
 })
