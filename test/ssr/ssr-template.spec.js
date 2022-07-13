@@ -378,7 +378,7 @@ describe('SSR: template option', () => {
       // manifest chunk should be first
       `<script src="/manifest.js" defer></script>` +
       // async chunks should be before main chunk
-      `<script src="/0.js" defer></script>` +
+      (options.noAsyncScripts ? ``: `<script src="/0.js" defer></script>`) +
       `<script src="/main.js" defer></script>` +
     `</body></html>`
 
@@ -436,6 +436,25 @@ describe('SSR: template option', () => {
         stream.on('end', () => {
           expect(res).toContain(expectedHTMLWithManifest({
             noPrefetch: true
+          }))
+          done()
+        })
+      })
+    })
+
+    it('bundleRenderer + renderToStream + clientManifest + shouldRenderAsyncScripts', done => {
+      createRendererWithManifest('split.js', {
+        runInNewContext,
+        shouldRenderAsyncScripts: false
+      }, renderer => {
+        const stream = renderer.renderToStream({ state: { a: 1 }})
+        let res = ''
+        stream.on('data', chunk => {
+          res += chunk.toString()
+        })
+        stream.on('end', () => {
+          expect(res).toContain(expectedHTMLWithManifest({
+            noAsyncScripts: true
           }))
           done()
         })
