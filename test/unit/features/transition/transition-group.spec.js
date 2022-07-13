@@ -6,6 +6,7 @@ import { nextFrame } from 'web/runtime/transition-util'
 if (!isIE9) {
   describe('Transition group', () => {
     const { duration, buffer } = injectStyles()
+    const explicitDuration = 100
 
     let el
     beforeEach(() => {
@@ -282,6 +283,172 @@ if (!isIE9) {
             `<div class="test">d</div>` +
             `<div class="test">b</div>` +
             `<div class="test">a</div>` +
+          `</span>`
+        )
+      }).then(done)
+    })
+
+    it('explicit enter duration', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition-group :duration="{ enter: ${explicitDuration} }">
+              <div v-for="item in items" :key="item" class="test">{{ item }}</div>
+            </transition-group>
+          </div>
+        `,
+        data: {
+          items: ['a', 'b', 'c']
+        }
+      }).$mount(el)
+
+      vm.items.push('d', 'e')
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            ['a', 'b', 'c'].map(i => `<div class="test">${i}</div>`).join('') +
+            `<div class="test v-enter v-enter-active">d</div>` +
+            `<div class="test v-enter v-enter-active">e</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            ['a', 'b', 'c'].map(i => `<div class="test">${i}</div>`).join('') +
+            `<div class="test v-enter-active v-enter-to">d</div>` +
+            `<div class="test v-enter-active v-enter-to">e</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(explicitDuration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            vm.items.map(i => `<div class="test">${i}</div>`).join('') +
+          `</span>`
+        )
+      }).then(done)
+    })
+
+    it('explicit leave duration', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition-group :duration="{ leave: ${explicitDuration} }">
+              <div v-for="item in items" :key="item" class="test">{{ item }}</div>
+            </transition-group>
+          </div>
+        `,
+        data: {
+          items: ['a', 'b', 'c']
+        }
+      }).$mount(el)
+
+      vm.items = ['b']
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="test v-leave v-leave-active">a</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test v-leave v-leave-active">c</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="test v-leave-active v-leave-to">a</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test v-leave-active v-leave-to">c</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(explicitDuration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            vm.items.map(i => `<div class="test">${i}</div>`).join('') +
+          `</span>`
+        )
+      }).then(done)
+    })
+
+    it('explicit enter + leave duration', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition-group :duration="${explicitDuration}">
+              <div v-for="item in items" :key="item" class="test">{{ item }}</div>
+            </transition-group>
+          </div>
+        `,
+        data: {
+          items: ['a', 'b', 'c']
+        }
+      }).$mount(el)
+
+      vm.items = ['b', 'c', 'd']
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="test v-leave v-leave-active">a</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test">c</div>` +
+            `<div class="test v-enter v-enter-active">d</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            `<div class="test v-leave-active v-leave-to">a</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test">c</div>` +
+            `<div class="test v-enter-active v-enter-to">d</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(explicitDuration + buffer).then(() => {
+        expect(vm.$el.innerHTML).toBe(
+          `<span>` +
+            vm.items.map(i => `<div class="test">${i}</div>`).join('') +
+          `</span>`
+        )
+      }).then(done)
+    })
+
+    it('explicit move duration', done => {
+      const vm = new Vue({
+        template: `
+          <div>
+            <transition-group name="group" :duration="{ move: ${explicitDuration} }">
+              <div v-for="item in items" :key="item" class="test">{{ item }}</div>
+            </transition-group>
+          </div>
+        `,
+        data: {
+          items: ['a', 'b', 'c']
+        }
+      }).$mount(el)
+
+      vm.items = ['d', 'b', 'a']
+      waitForUpdate(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="test group-enter group-enter-active">d</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test group-move" style="transition-duration: ${explicitDuration}ms;">a</div>` +
+            `<div class="test group-leave group-leave-active group-move" style="transition-duration: ${explicitDuration}ms;">c</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(nextFrame).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="test group-enter-active group-enter-to">d</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test group-move" style="transition-duration: ${explicitDuration}ms;">a</div>` +
+            `<div class="test group-leave-active group-move group-leave-to" style="transition-duration: ${explicitDuration}ms;">c</div>` +
+          `</span>`
+        )
+      }).thenWaitFor(explicitDuration * 2).then(() => {
+        expect(vm.$el.innerHTML.replace(/\s?style=""(\s?)/g, '$1')).toBe(
+          `<span>` +
+            `<div class="test">d</div>` +
+            `<div class="test">b</div>` +
+            `<div class="test" style="transition-duration: ${explicitDuration}ms;">a</div>` +
           `</span>`
         )
       }).then(done)
