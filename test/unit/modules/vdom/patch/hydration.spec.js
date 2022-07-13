@@ -372,6 +372,19 @@ describe('vdom patch: hydration', () => {
     }).then(done)
   })
 
+  it('should hydrate with correct inline styles', () => {
+    const dom = createMockSSRDOM('<div style="padding-left: 0px; padding-right: 3px"></div>')
+
+    const vm = new Vue({
+      data: {
+        style: { paddingLeft: '2px' }
+      },
+      template: `<div><div :style="style"></div></div>`
+    }).$mount(dom)
+
+    expect(vm.$el.innerHTML).toBe('<div style="padding-left: 2px;"></div>')
+  })
+
   it('should properly initialize dynamic class bindings for future updates', done => {
     const dom = createMockSSRDOM('<div class="foo bar"></div>')
 

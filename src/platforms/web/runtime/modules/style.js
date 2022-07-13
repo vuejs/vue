@@ -1,6 +1,6 @@
 /* @flow */
 
-import { getStyle, normalizeStyleBinding } from 'web/util/style'
+import { getStyle, normalizeStyleBinding, parseStyleText } from 'web/util/style'
 import { cached, camelize, extend, isDef, isUndef, hyphenate } from 'shared/util'
 
 const cssVarRE = /^--/
@@ -44,7 +44,7 @@ const normalize = cached(function (prop) {
   }
 })
 
-function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData, creating: boolean = false) {
   const data = vnode.data
   const oldData = oldVnode.data
 
@@ -60,7 +60,7 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const oldStyleBinding: any = oldData.normalizedStyle || oldData.style || {}
 
   // if static style exists, stylebinding already merged into it when doing normalizeStyleData
-  const oldStyle = oldStaticStyle || oldStyleBinding
+  let oldStyle = oldStaticStyle || oldStyleBinding
 
   const style = normalizeStyleBinding(vnode.data.style) || {}
 
@@ -72,6 +72,10 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
     : style
 
   const newStyle = getStyle(vnode, true)
+
+  if (creating && el.style.cssText) {
+    oldStyle = parseStyleText(el.style.cssText)
+  }
 
   for (name in oldStyle) {
     if (isUndef(newStyle[name])) {
@@ -88,6 +92,6 @@ function updateStyle (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 }
 
 export default {
-  create: updateStyle,
+  create: (oldVNode: VNodeWithData, vnode: VNodeWithData) => updateStyle(oldVNode, vnode, true),
   update: updateStyle
 }
