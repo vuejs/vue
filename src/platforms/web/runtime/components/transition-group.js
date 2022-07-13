@@ -167,7 +167,7 @@ function callPendingCbs (c: VNode) {
     c.elm._moveCb()
   }
   /* istanbul ignore if */
-  if (c.elm._enterCb) {
+  if (c.elm._enterCb && !Object.keys(c.data.pos).every(key => c.data.pos[key] === 0)) {
     c.elm._enterCb()
   }
 }
@@ -181,7 +181,7 @@ function applyTranslation (c: VNode) {
   const newPos = c.data.newPos
   const dx = oldPos.left - newPos.left
   const dy = oldPos.top - newPos.top
-  if (dx || dy) {
+  if ((dx || dy) && !Object.keys(oldPos).every(key => oldPos[key] === 0)) {
     c.data.moved = true
     const s = c.elm.style
     s.transform = s.WebkitTransform = `translate(${dx}px,${dy}px)`
