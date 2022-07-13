@@ -100,6 +100,18 @@ describe('vdom events module', () => {
     expect(click.calls.count()).toBe(2)
   })
 
+  // #11151
+  it('should not remove handlers that are undefined', () => {
+    const vnode1 = new VNode('a', { on: { click: undefined }})
+    const vnode2 = new VNode('a', {})
+
+    expect(()=>{
+      patch(null, vnode1)
+      patch(vnode1, vnode2)
+    }).not.toThrow()
+    expect('[Vue warn]: Invalid handler for event "click": got undefined').toHaveBeenWarned()
+  })
+
   // #4650
   it('should handle single -> array or array -> single handler changes', () => {
     const click = jasmine.createSpy()

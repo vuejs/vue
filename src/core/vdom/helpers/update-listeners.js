@@ -6,6 +6,7 @@ import {
 } from 'core/util/index'
 import {
   cached,
+  isDef,
   isUndef,
   isTrue,
   isPlainObject
@@ -89,7 +90,9 @@ export function updateListeners (
   for (name in oldOn) {
     if (isUndef(on[name])) {
       event = normalizeEvent(name)
-      remove(event.name, oldOn[name], event.capture)
+      if (isDef(oldOn[name])) {
+        remove(event.name, oldOn[name], event.capture)
+      }
     }
   }
 }
