@@ -117,6 +117,12 @@ In addition, the following features are explicitly **NOT** ported:
 - ❌ Reactivity transform (still experimental)
 - ❌ `expose` option is not supported for options components (but `defineExpose()` is supported in `<script setup>`).
 
+### TypeScript Changes
+
+- `defineComponent` provides improved type inference similar to that of Vue 3. Note the type of `this` inside `defineComponent()` is not interoperable with `this` from `Vue.extend()`.
+
+- Similar to Vue 3, TSX support is now built-in. If your project previously had manual JSX type shims, make sure to remove them.
+
 ## Upgrade Guide
 
 ### Vue CLI / webpack
