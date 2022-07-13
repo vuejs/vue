@@ -331,6 +331,51 @@ describe('Options props', () => {
       makeInstance(null, true)
       expect(console.error.calls.count()).toBe(0)
     })
+
+    it('required + null accepts anything', () => {
+      makeInstance({}, null, null, true)
+      makeInstance(null, null, null, true)
+      makeInstance(1, null, null, true)
+      makeInstance('foo', null, null, true)
+      makeInstance(() => {}, null, null, true)
+      makeInstance(undefined, null, null, true)
+      expect(console.error.calls.count()).toBe(0)
+    })
+
+    it('required + nullable object', () => {
+      makeInstance(null, [Object, null], null, true)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance({}, [Object, null], null, true)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(undefined, [Object, null], null, true)
+      expect('Expected Object, null').toHaveBeenWarned()
+    })
+
+    it('non required + nullable object', () => {
+      makeInstance(null, [Object, null])
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance({}, [Object, null])
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(undefined, [Object, null])
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance('hello', [Object, null])
+      expect('Expected Object, null').toHaveBeenWarned()
+    })
+
+    it('required + nullable non object', () => {
+      makeInstance(null, [String, null], null, true)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance('foo', [String, null], null, true)
+      expect(console.error.calls.count()).toBe(0)
+      makeInstance(undefined, [String, null], null, true)
+      expect('Expected String, null').toHaveBeenWarned()
+    })
+
+    it('non-required nullable string fails with object', () => {
+      makeInstance({}, [String, null])
+      expect('Expected String, null').toHaveBeenWarned()
+    })
+
   })
 
   it('should work with v-bind', () => {
