@@ -102,6 +102,28 @@ describe('Directive v-on', () => {
     expect(spy).toHaveBeenCalledWith(true)
   })
 
+  it('should support the .emit event modifier', () => {
+    vm = new Vue({
+      el,
+      template: '<bar @custom="foo"></bar>',
+      methods: { foo: spy },
+      components: {
+        bar: {
+          template: '<emitter @custom.emit></emitter>',
+          components: {
+            emitter: {
+              template: '<div></div>',
+              mounted() {
+                this.$emit('custom', 'a', 'b')
+              }
+            }
+          }
+        }
+      }
+    })
+    expect(spy).toHaveBeenCalledWith('a', 'b')
+  })
+
   it('should support capture', () => {
     const callOrder = []
     vm = new Vue({

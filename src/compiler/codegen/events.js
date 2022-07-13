@@ -42,6 +42,7 @@ const genGuard = condition => `if(${condition})return null;`
 const modifierCode: { [key: string]: string } = {
   stop: '$event.stopPropagation();',
   prevent: '$event.preventDefault();',
+  emit: '$emit(arguments.callee.name, ...arguments)',
   self: genGuard(`$event.target !== $event.currentTarget`),
   ctrl: genGuard(`!$event.ctrlKey`),
   shift: genGuard(`!$event.shiftKey`),
