@@ -1,20 +1,41 @@
 /* @flow */
 
 import { cached, extend, toObject } from 'shared/util'
+import { isServerRendering } from 'core/util/env'
 
 export const parseStyleText = cached(function (cssText) {
   const res = {}
   const listDelimiter = /;(?![^(]*\))/g
   const propertyDelimiter = /:(.+)/
-  cssText.split(listDelimiter).forEach(function (item) {
-    if (item) {
-      const tmp = item.split(propertyDelimiter)
-      tmp.length > 1 && (res[tmp[0].trim()] = tmp[1].trim())
-    }
-  })
-  return res
-})
+  if (isServerRendering()) {
+    cssText.split(listDelimiter).forEach(function (item) {
+      if (item) {
+        const tmp = item.split(propertyDelimiter)
+        tmp.length > 1 && (res[tmp[0].trim()] = tmp[1].trim())
+      }
+    })
+  } else {
+    const verifiedNode = document.createElement('div')
+    verifiedNode.style.cssText = cssText
+    cssText.split(listDelimiter).forEach(function (item) {
+      if (item) {
+        const tmp = item.split(propertyDelimiter)
+        const styleKey = tmp[0].trim()
+        const styleValue = tmp[1].trim()
+        if (tmp.length > 1 && checkCssValid(verifiedNode.style, styleKey, styleValue))
+          res[styleKey] = styleValue
+        }
+    });
+  }
+  return res;
+});
 
+function checkCssValid(nodeStyle: Object, styleKey, styleValue) {
+  if(styleValue.indexOf('url') >= 0) {
+    return true
+  }
+  return nodeStyle[styleKey] === styleValue
+}
 // merge static and dynamic style data on the same vnode
 function normalizeStyleData (data: VNodeData): ?Object {
   const style = normalizeStyleBinding(data.style)
