@@ -104,7 +104,7 @@
     "http-server": "^0.12.3",
     "jasmine": "^2.99.0",
     "jasmine-core": "^2.99.0",
-    "karma": "^3.1.1",
+    "karma": "^4.2.0",
     "karma-chrome-launcher": "^2.1.1",
     "karma-coverage": "^1.1.1",
     "karma-firefox-launcher": "^1.0.1",
@@ -137,7 +137,7 @@
     "shelljs": "^0.8.1",
     "terser": "^3.10.2",
     "typescript": "^3.6.4",
-    "webpack": "~4.28.4",
+    "webpack": "~4.44.0",
     "weex-js-runtime": "^0.23.6",
     "weex-styler": "^0.3.0",
     "yorkie": "^2.0.0"
