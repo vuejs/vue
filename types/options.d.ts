@@ -62,7 +62,7 @@ export type ThisTypedComponentOptionsWithRecordProps<V extends Vue, Data, Method
   ThisType<CombinedVueInstance<V, Data, Methods, Computed, Readonly<Props>>>;
 
 type DefaultData<V> =  object | ((this: V) => object);
-type DefaultProps = Record<string, any>;
+type DefaultProps = {};
 type DefaultMethods<V> =  { [key: string]: (this: V, ...args: any[]) => any };
 type DefaultComputed = { [key: string]: any };
 export interface ComponentOptions<
