@@ -63,6 +63,10 @@ export function isRegExp (v: any): boolean {
   return _toString.call(v) === '[object RegExp]'
 }
 
+export function isDate (v: any): boolean {
+  return v instanceof Date || _toString.call(v) === '[object Date]'
+}
+
 /**
  * Check if val is a valid array index.
  */
@@ -294,7 +298,7 @@ export function looseEqual (a: any, b: any): boolean {
         return a.length === b.length && a.every((e, i) => {
           return looseEqual(e, b[i])
         })
-      } else if (a instanceof Date && b instanceof Date) {
+      } else if (isDate(a) && isDate(b)) {
         return a.getTime() === b.getTime()
       } else if (!isArrayA && !isArrayB) {
         const keysA = Object.keys(a)

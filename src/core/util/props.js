@@ -8,6 +8,7 @@ import {
   toRawType,
   hyphenate,
   capitalize,
+  isDate,
   isPlainObject
 } from 'shared/util'
 
@@ -166,6 +167,8 @@ function assertType (value: any, type: Function, vm: ?Component): {
     valid = isPlainObject(value)
   } else if (expectedType === 'Array') {
     valid = Array.isArray(value)
+  } else if (expectedType === 'Date') {
+    valid = isDate(value)
   } else {
     try {
       valid = value instanceof type
