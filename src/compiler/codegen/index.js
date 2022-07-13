@@ -430,7 +430,14 @@ function containsSlotChild (el: ASTNode): boolean {
     if (el.tag === 'slot') {
       return true
     }
-    return el.children.some(containsSlotChild)
+    // #12232, #12245: nested scoped slot should update
+    const childrenIsDynamic = el.children.some(containsSlotChild)
+    if (childrenIsDynamic) {
+      return childrenIsDynamic
+    } else if (el.scopedSlots) {
+      const scopedSlots = el.scopedSlots
+      return Object.keys(scopedSlots).some(key => containsSlotChild(scopedSlots[key]))
+    }
   }
   return false
 }

@@ -1026,6 +1026,72 @@ describe('Component scoped slot', () => {
     }).then(done)
   })
 
+  // #12232, #12245
+  it('nested named scoped slots should update', done => {
+    const initialText = 'initial'
+    const scopedSlotContent = 'scopedSlot'
+
+    const inner = {
+      template: `<div><slot v-bind="{ user: '${scopedSlotContent}' }"/></div>`
+    }
+
+    const innerContainer = {
+      template: `<div><slot name="content"/></div>`
+    }
+
+    const wrapper = {
+      components: { inner, innerContainer },
+      name: 'wrapper',
+      template: `
+  <inner v-slot="{ user }">
+      <innerContainer>
+          <template #content>
+              <div>
+                <span>{{ user }}</span>
+                <slot/>
+              </div>
+          </template>
+      </innerContainer>
+  </inner>
+  `
+    }
+
+    const outer = {
+      components: { wrapper },
+      template: `
+    <wrapper>
+      <form>
+        <span>{{ text }}</span>
+        <input v-model="text" type="text"/>
+      </form>
+    </wrapper>
+  `,
+      data() {
+        return {
+          text: initialText,
+        }
+      },
+    }
+
+    const vm = new Vue({
+      components: { outer },
+      template: `<outer ref="outer"></outer>`
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe(`${scopedSlotContent} ${initialText} `)
+
+    const newValue = 'newValue'
+    vm.$refs.outer.text = newValue
+    const input = vm.$el.querySelector('input')
+    input.value = newValue
+    triggerEvent(input, 'input')
+
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe(`${scopedSlotContent} ${newValue} `)
+      expect(input.value).toBe(newValue)
+    }).then(done)
+  })
+
   it('dynamic v-bind arguments on <slot>', done => {
     const Foo = {
       data() {
