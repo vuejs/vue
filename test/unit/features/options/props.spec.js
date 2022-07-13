@@ -575,7 +575,7 @@ describe('Options props', () => {
       }
     }).$mount()
     expect(
-      'Invalid prop type: "String" is not a constructor'
+      'Invalid prop "a" type: "String" is not a constructor'
     ).toHaveBeenWarned()
   })
 
