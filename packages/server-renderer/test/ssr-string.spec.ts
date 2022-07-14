@@ -1086,7 +1086,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('custom directives', done => {
+  it('custom directives on raw element', done => {
     const renderer = createRenderer({
       directives: {
         'class-prefixer': (node, dir) => {
@@ -1123,6 +1123,98 @@ describe('SSR: renderToString', () => {
         expect(err).toBeNull()
         expect(result).toContain(
           '<p data-server-rendered="true" class="my-class2 my-class1">hello world</p>'
+        )
+        done()
+      }
+    )
+  })
+
+  it('custom directives on component', done => {
+    const Test = {
+      template: '<span>hello world</span>'
+    }
+    const renderer = createRenderer({
+      directives: {
+        'class-prefixer': (node, dir) => {
+          if (node.data.class) {
+            node.data.class = `${dir.value}-${node.data.class}`
+          }
+          if (node.data.staticClass) {
+            node.data.staticClass = `${dir.value}-${node.data.staticClass}`
+          }
+        }
+      }
+    })
+    renderer.renderToString(
+      new Vue({
+        template:
+          '<p><Test v-class-prefixer="\'my\'" class="class1" :class="\'class2\'" /></p>',
+        components: { Test }
+      }),
+      (err, result) => {
+        expect(err).toBeNull()
+        expect(result).toContain(
+          '<p data-server-rendered="true"><span class="my-class1 my-class2">hello world</span></p>'
+        )
+        done()
+      }
+    )
+  })
+
+  it('custom directives on element root of a component', done => {
+    const Test = {
+      template:
+        '<span v-class-prefixer="\'my\'" class="class1" :class="\'class2\'">hello world</span>'
+    }
+    const renderer = createRenderer({
+      directives: {
+        'class-prefixer': (node, dir) => {
+          if (node.data.class) {
+            node.data.class = `${dir.value}-${node.data.class}`
+          }
+          if (node.data.staticClass) {
+            node.data.staticClass = `${dir.value}-${node.data.staticClass}`
+          }
+        }
+      }
+    })
+    renderer.renderToString(
+      new Vue({
+        template: '<p><Test /></p>',
+        components: { Test }
+      }),
+      (err, result) => {
+        expect(err).toBeNull()
+        expect(result).toContain(
+          '<p data-server-rendered="true"><span class="my-class1 my-class2">hello world</span></p>'
+        )
+        done()
+      }
+    )
+  })
+
+  it('custom directives on element with parent element', done => {
+    const renderer = createRenderer({
+      directives: {
+        'class-prefixer': (node, dir) => {
+          if (node.data.class) {
+            node.data.class = `${dir.value}-${node.data.class}`
+          }
+          if (node.data.staticClass) {
+            node.data.staticClass = `${dir.value}-${node.data.staticClass}`
+          }
+        }
+      }
+    })
+    renderer.renderToString(
+      new Vue({
+        template:
+          '<p><span v-class-prefixer="\'my\'" class="class1" :class="\'class2\'">hello world</span></p>'
+      }),
+      (err, result) => {
+        expect(err).toBeNull()
+        expect(result).toContain(
+          '<p data-server-rendered="true"><span class="my-class1 my-class2">hello world</span></p>'
         )
         done()
       }
