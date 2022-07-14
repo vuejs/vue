@@ -139,12 +139,12 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
-  const dep = new Dep()
-
   const property = Object.getOwnPropertyDescriptor(obj, key)
   if (property && property.configurable === false) {
     return
   }
+
+  const dep = new Dep()
 
   // cater for pre-defined getter/setters
   const getter = property && property.get
