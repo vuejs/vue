@@ -33,4 +33,5 @@ export interface SetupContext<E extends EmitsOptions = {}> {
   attrs: Data
   slots: Slots
   emit: EmitFn<E>
+  expose(exposed?: Record<string, any>): void
 }
