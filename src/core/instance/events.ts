@@ -21,15 +21,15 @@ export function initEvents(vm: Component) {
 
 let target: any
 
-function add(event, fn) {
+function add(event: any, fn: Function) {
   target.$on(event, fn)
 }
 
-function remove(event, fn) {
+function remove(event: any, fn: Function) {
   target.$off(event, fn)
 }
 
-function createOnceHandler(event, fn) {
+function createOnceHandler(event: any, fn: Function) {
   const _target = target
   return function onceHandler() {
     const res = fn.apply(null, arguments)
@@ -116,7 +116,7 @@ export function eventsMixin(Vue: typeof Component) {
       return vm
     }
     // specific handler
-    let cb
+    let cb: any
     let i = cbs.length
     while (i--) {
       cb = cbs[i]
