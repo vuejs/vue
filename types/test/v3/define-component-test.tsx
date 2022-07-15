@@ -1148,6 +1148,7 @@ defineComponent({
     this.$on('foo', () => {})
     this.$ssrContext
     this.$isServer
+    this.$children[0].$root.$children
     return h('div', {}, [...this.$slots.default!])
   }
 })

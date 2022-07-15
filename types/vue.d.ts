@@ -35,6 +35,8 @@ export interface CreateElement {
   ): VNode
 }
 
+type NeverFallback<T, D> = [T] extends [never] ? D : T
+
 export interface Vue<
   Data = Record<string, any>,
   Props = Record<string, any>,
@@ -47,10 +49,10 @@ export interface Vue<
   // properties with different types in defineComponent()
   readonly $data: Data
   readonly $props: Props
-  readonly $parent: Parent extends never ? Vue : Parent
-  readonly $root: Root extends never ? Vue : Root
-  readonly $children: Children extends never ? Vue[] : Children
-  readonly $options: ComponentOptions<Vue>
+  readonly $parent: NeverFallback<Parent, Vue>
+  readonly $root: NeverFallback<Root, Vue>
+  readonly $children: NeverFallback<Children, Vue[]>
+  readonly $options: NeverFallback<Options, ComponentOptions<Vue>>
   $emit: Emit
 
   // Vue 2 only or shared
