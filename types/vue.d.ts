@@ -38,18 +38,18 @@ export interface CreateElement {
 export interface Vue<
   Data = Record<string, any>,
   Props = Record<string, any>,
-  Parent = never,
-  Root = never,
-  Children = never,
-  Options = never,
+  Parent = unknown,
+  Root = unknown,
+  Children = unknown,
+  Options = unknown,
   Emit = (event: string, ...args: any[]) => Vue
 > {
   // properties with different types in defineComponent()
   readonly $data: Data
   readonly $props: Props
-  readonly $parent: Parent extends never ? Vue : Parent
-  readonly $root: Root extends never ? Vue : Root
-  readonly $children: Children extends never ? Vue[] : Children
+  readonly $parent: Parent extends unknown ? Vue : Parent
+  readonly $root: Root extends unknown ? Vue : Root
+  readonly $children: Children extends unknown ? Vue[] : Children
   readonly $options: ComponentOptions<Vue>
   $emit: Emit
 

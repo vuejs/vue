@@ -41,6 +41,7 @@ const vm = new Vue({
 
 vm.$instanceProperty
 vm.$instanceMethod()
+vm.$root.$children[0].$children[0]
 
 Vue.staticProperty
 Vue.staticMethod()
