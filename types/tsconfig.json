@@ -9,7 +9,6 @@
     "jsx": "preserve",
     "strict": true,
     "noEmit": true,
-    "baseUrl": ".",
     "paths": {
       "vue": ["../index.d.ts"]
     }
