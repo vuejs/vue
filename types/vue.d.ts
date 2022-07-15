@@ -14,7 +14,7 @@ import { VNode, VNodeData, VNodeChildren, NormalizedScopedSlot } from './vnode'
 import { PluginFunction, PluginObject } from './plugin'
 import { DefineComponent } from './v3-define-component'
 import { nextTick } from './v3-generated'
-import { ComponentPublicInstance } from 'v3-component-public-instance'
+import { ComponentPublicInstance } from './v3-component-public-instance'
 
 export interface CreateElement {
   (
