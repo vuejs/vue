@@ -156,7 +156,11 @@ function callActivatedHooks(queue) {
  */
 export function queueWatcher(watcher: Watcher) {
   const id = watcher.id
-  if (has[id] != null) {
+  if (
+    has[id] != null &&
+    // not skip post watcher which id is Infinity
+    id !== Infinity
+  ) {
     return
   }
 

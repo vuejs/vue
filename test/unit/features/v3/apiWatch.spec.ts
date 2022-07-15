@@ -672,6 +672,51 @@ describe('api: watch', () => {
     await nextTick()
     expect(dom!.tagName).toBe('P')
   })
+  
+  // #12664
+  it('flush: post watchers from 2 components should both fire after template refs updated', async () => {
+    let appPostWatcherTrigger = false
+    let childComponentPostWatcherTrigger = false
+
+    const Child = {
+      setup() {
+        const el = ref();
+        watch(
+          el,
+          () => {
+            childComponentPostWatcherTrigger = true
+          },
+          {flush: 'post'}
+        )
+        return { el };
+      },
+      template: `<div><span ref="el">hello child</span></div>`
+    }
+    const App = {
+      components: { Child },
+      setup() {
+        const el = ref();
+        watch(
+          el,
+          () => {
+            appPostWatcherTrigger = true
+          },
+          {flush: 'post'}
+        )
+        return { el };
+      },
+      template: `<div><Child /><span ref="el">hello app1</span></div>`
+    }
+
+    const container = document.createElement('div')
+    const root = document.createElement('div')
+    container.appendChild(root)
+    new Vue(App).$mount(root)
+
+    await nextTick()
+    expect(appPostWatcherTrigger).toBe(true)
+    expect(childComponentPostWatcherTrigger).toBe(true)
+  })
 
   it('deep', async () => {
     const state = reactive({
