@@ -1,3 +1,14 @@
+## [2.7.6](https://github.com/vuejs/vue/compare/v2.7.5...v2.7.6) (2022-07-15)
+
+
+### Bug Fixes
+
+* **types:** $refs can also contain ComponentPublicInstance ([#12659](https://github.com/vuejs/vue/issues/12659)) ([fffbb9e](https://github.com/vuejs/vue/commit/fffbb9e856de5e4b3053a6b4d01d1404bfb6f85e))
+* **types:** fix $children and $root instance types ([52a5979](https://github.com/vuejs/vue/commit/52a59790a5b6e16c9f8cc737fcd784413dda282d)), closes [#12655](https://github.com/vuejs/vue/issues/12655)
+* **types:** fix missing expose() type on setup context ([e0a9546](https://github.com/vuejs/vue/commit/e0a9546ef32fa4bbfc4bede3002b2d6a5be8cf72)), closes [#12660](https://github.com/vuejs/vue/issues/12660)
+
+
+
 ## [2.7.5](https://github.com/vuejs/vue/compare/v2.7.4...v2.7.5) (2022-07-13)
 
 
