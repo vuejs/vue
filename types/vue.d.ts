@@ -14,6 +14,7 @@ import { VNode, VNodeData, VNodeChildren, NormalizedScopedSlot } from './vnode'
 import { PluginFunction, PluginObject } from './plugin'
 import { DefineComponent } from './v3-define-component'
 import { nextTick } from './v3-generated'
+import { ComponentPublicInstance } from 'v3-component-public-instance'
 
 export interface CreateElement {
   (
@@ -58,7 +59,12 @@ export interface Vue<
   // Vue 2 only or shared
   readonly $el: Element
   readonly $refs: {
-    [key: string]: Vue | Element | (Vue | Element)[] | undefined
+    [key: string]:
+      | Vue
+      | Element
+      | ComponentPublicInstance
+      | (Vue | Element | ComponentPublicInstance)[]
+      | undefined
   }
   readonly $slots: { [key: string]: VNode[] | undefined }
   readonly $scopedSlots: { [key: string]: NormalizedScopedSlot | undefined }
