@@ -1,5 +1,6 @@
 import { isFunction, warn } from 'core/util'
 import { currentInstance } from './currentInstance'
+import type { Component } from 'types/component'
 
 export interface InjectionKey<T> extends Symbol {}
 
@@ -9,19 +10,23 @@ export function provide<T>(key: InjectionKey<T> | string | number, value: T) {
       warn(`provide() can only be used inside setup().`)
     }
   } else {
-    let provides = currentInstance._provided
-    // by default an instance inherits its parent's provides object
-    // but when it needs to provide values of its own, it creates its
-    // own provides object using parent provides object as prototype.
-    // this way in `inject` we can simply look up injections from direct
-    // parent and let the prototype chain do the work.
-    const parentProvides =
-      currentInstance.$parent && currentInstance.$parent._provided
-    if (parentProvides === provides) {
-      provides = currentInstance._provided = Object.create(parentProvides)
-    }
     // TS doesn't allow symbol as index type
-    provides[key as string] = value
+    resolveProvided(currentInstance)[key as string] = value
+  }
+}
+
+export function resolveProvided(vm: Component): Record<string, any> {
+  // by default an instance inherits its parent's provides object
+  // but when it needs to provide values of its own, it creates its
+  // own provides object using parent provides object as prototype.
+  // this way in `inject` we can simply look up injections from direct
+  // parent and let the prototype chain do the work.
+  const existing = vm._provided
+  const parentProvides = vm.$parent && vm.$parent._provided
+  if (parentProvides === existing) {
+    return (vm._provided = Object.create(parentProvides))
+  } else {
+    return existing
   }
 }
 
