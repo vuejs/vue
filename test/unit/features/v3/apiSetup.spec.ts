@@ -165,6 +165,9 @@ describe('api: setup context', () => {
 
     const Child = {
       setup(_props: any, { slots }: any) {
+        // #12672 behavior consistency with Vue 3: should be able to access
+        // slots directly in setup()
+        expect(slots.foo()).toBeTruthy()
         return () => h('div', [...slots.foo(), ...slots.bar()])
       }
     }
