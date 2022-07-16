@@ -1,3 +1,16 @@
+## [2.7.7](https://github.com/vuejs/vue/compare/v2.7.6...v2.7.7) (2022-07-16)
+
+
+### Bug Fixes
+
+* **codegen:** script setup should not attempt to resolve native elements as component ([e8d3a7d](https://github.com/vuejs/vue/commit/e8d3a7d7a17f9e66d592fb1ddc4a603af9958d36)), closes [#12674](https://github.com/vuejs/vue/issues/12674)
+* **inject:** fix edge case of provided with async-mutated getters ([ea5d0f3](https://github.com/vuejs/vue/commit/ea5d0f3fbfd983cb0275457cbcef344f926381ea)), closes [#12667](https://github.com/vuejs/vue/issues/12667)
+* **setup:** ensure setup context slots can be accessed immediately ([67760f8](https://github.com/vuejs/vue/commit/67760f8d30778f58afeada3589d4ac4493329ad5)), closes [#12672](https://github.com/vuejs/vue/issues/12672)
+* **types:** vue.d.ts should use relative import to v3-component-public-instance ([#12668](https://github.com/vuejs/vue/issues/12668)) ([46ec648](https://github.com/vuejs/vue/commit/46ec64869479393f95b6abda7a4adecf19867d06)), closes [#12666](https://github.com/vuejs/vue/issues/12666)
+* **watch:** fix queueing multiple post watchers ([25ffdb6](https://github.com/vuejs/vue/commit/25ffdb62d22fe8688aca144d945671d5c82a8887)), closes [#12664](https://github.com/vuejs/vue/issues/12664)
+
+
+
 ## [2.7.6](https://github.com/vuejs/vue/compare/v2.7.5...v2.7.6) (2022-07-15)
 
 
