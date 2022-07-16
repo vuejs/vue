@@ -95,14 +95,15 @@ export function genElement(el: ASTElement, state: CodegenState): string {
       code = genComponent(el.component, el, state)
     } else {
       let data
-      if (!el.plain || (el.pre && state.maybeComponent(el))) {
+      const maybeComponent = state.maybeComponent(el)
+      if (!el.plain || (el.pre && maybeComponent)) {
         data = genData(el, state)
       }
 
       let tag: string | undefined
       // check if this is a component in <script setup>
       const bindings = state.options.bindings
-      if (bindings && bindings.__isScriptSetup !== false) {
+      if (maybeComponent && bindings && bindings.__isScriptSetup !== false) {
         tag =
           checkBindingType(bindings, el.tag) ||
           checkBindingType(bindings, camelize(el.tag)) ||

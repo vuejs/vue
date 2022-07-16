@@ -724,4 +724,20 @@ describe('codegen', () => {
       '"with(this){return _c(\'div\',[_c(Foo),_c(FooBar)],1)}"'
     )
   })
+
+  // #12674
+  it('component with bindings: should not resolve native elements', () => {
+    const ast = parse(`<div><form>{{ n }}</form></div>`, baseOptions)
+    optimize(ast, baseOptions)
+    const res = generate(ast, {
+      ...baseOptions,
+      bindings: {
+        form: BindingTypes.SETUP_CONST
+      }
+    })
+    expect(res.render).toMatch(`_c('form'`)
+    expect(res.render).toMatchInlineSnapshot(
+      "\"with(this){return _c('div',[_c('form',[_v(_s(n))])])}\""
+    )
+  })
 })
