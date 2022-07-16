@@ -59,6 +59,15 @@ if (inBrowser && !isIE) {
   }
 }
 
+const sortCompareFn = (a: Watcher, b: Watcher): number => {
+  if (a.post) {
+    if (!b.post) return 1
+  } else if (b.post) {
+    return -1
+  }
+  return a.id - b.id
+}
+
 /**
  * Flush both queues and run the watchers.
  */
@@ -75,7 +84,7 @@ function flushSchedulerQueue() {
   //    user watchers are created before the render watcher)
   // 3. If a component is destroyed during a parent component's watcher run,
   //    its watchers can be skipped.
-  queue.sort((a, b) => a.id - b.id)
+  queue.sort(sortCompareFn)
 
   // do not cache length because more watchers might be pushed
   // as we run existing watchers

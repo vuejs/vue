@@ -58,6 +58,7 @@ export default class Watcher implements DepTarget {
   noRecurse?: boolean
   getter: Function
   value: any
+  post: boolean
 
   // dev only
   onTrack?: ((event: DebuggerEvent) => void) | undefined
@@ -93,6 +94,7 @@ export default class Watcher implements DepTarget {
     this.cb = cb
     this.id = ++uid // uid for batching
     this.active = true
+    this.post = false
     this.dirty = this.lazy // for lazy watchers
     this.deps = []
     this.newDeps = []

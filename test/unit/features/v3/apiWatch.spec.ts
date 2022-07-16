@@ -1167,4 +1167,37 @@ describe('api: watch', () => {
     set(r.value, 'foo', 1)
     expect(spy).not.toHaveBeenCalled()
   })
+
+  // #12664
+  it('queueing multiple flush: post watchers', async () => {
+    const parentSpy = vi.fn()
+    const childSpy = vi.fn()
+
+    const Child = {
+      setup() {
+        const el = ref()
+        watch(el, childSpy, { flush: 'post' })
+        return { el }
+      },
+      template: `<div><span ref="el">hello child</span></div>`
+    }
+    const App = {
+      components: { Child },
+      setup() {
+        const el = ref()
+        watch(el, parentSpy, { flush: 'post' })
+        return { el }
+      },
+      template: `<div><Child /><span ref="el">hello app1</span></div>`
+    }
+
+    const container = document.createElement('div')
+    const root = document.createElement('div')
+    container.appendChild(root)
+    new Vue(App).$mount(root)
+
+    await nextTick()
+    expect(parentSpy).toHaveBeenCalledTimes(1)
+    expect(childSpy).toHaveBeenCalledTimes(1)
+  })
 })
