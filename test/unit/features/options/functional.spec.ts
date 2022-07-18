@@ -269,7 +269,6 @@ describe('Options functional', () => {
   })
 
   it('should work with render fns compiled from template', done => {
-    // code generated via vue-template-es2015-compiler
     const render = function (_h, _vm) {
       const _c = _vm._c
       return _c(

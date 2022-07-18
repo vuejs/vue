@@ -115,7 +115,6 @@ importers:
       sass: ^1.52.3
       source-map: ^0.6.1
       stylus: ^0.58.1
-      vue-template-es2015-compiler: ^1.9.1
     dependencies:
       '@babel/parser': 7.18.4
       postcss: 8.4.14
@@ -138,7 +137,6 @@ importers:
       pug: 3.0.2
       sass: 1.52.3
       stylus: 0.58.1
-      vue-template-es2015-compiler: 1.9.1
 
   packages/server-renderer:
     specifiers:
@@ -6220,10 +6218,6 @@ packages:
   /void-elements/3.1.0:
     resolution: {integrity: sha1-YU9/v42AHwu18GYfWy9XhXUOTwk=}
     engines: {node: '>=0.10.0'}
-    dev: true
-
-  /vue-template-es2015-compiler/1.9.1:
-    resolution: {integrity: sha512-4gDntzrifFnCEvyoO8PqyJDmguXgVPxKiIxrBKjIowvL9l+N66196+72XVYR8BBf1Uv1Fgt3bGevJ+sEmxfZzw==}
     dev: true
 
   /w3c-hr-time/1.0.2:
