@@ -42,7 +42,7 @@ export * from './v3-setup-helpers'
 export { Data } from './common'
 export { SetupContext } from './v3-setup-context'
 export { defineComponent } from './v3-define-component'
-// export { defineAsyncComponent } from './defineAsyncComponent'
+export { defineAsyncComponent } from './v3-define-async-component'
 export {
   SetupFunction,
   // v2 already has option with same name and it's for a single computed
