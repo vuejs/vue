@@ -31,6 +31,10 @@ export type EmitFn<
 
 export interface SetupContext<E extends EmitsOptions = {}> {
   attrs: Data
+  /**
+   * Equivalent of `this.$listeners`, which is Vue 2 only.
+   */
+  listeners: Record<string, Function | Function[]>
   slots: Slots
   emit: EmitFn<E>
   expose(exposed?: Record<string, any>): void

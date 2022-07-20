@@ -18,7 +18,7 @@ import {
   invokeWithErrorHandling
 } from '../util/index'
 import { currentInstance, setCurrentInstance } from 'v3/currentInstance'
-import { syncSetupAttrs } from 'v3/apiSetup'
+import { syncSetupProxy } from 'v3/apiSetup'
 
 export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false
@@ -288,11 +288,12 @@ export function updateChildComponent(
     // force update if attrs are accessed and has changed since it may be
     // passed to a child component.
     if (
-      syncSetupAttrs(
+      syncSetupProxy(
         vm._attrsProxy,
         attrs,
         (prevVNode.data && prevVNode.data.attrs) || emptyObject,
-        vm
+        vm,
+        '$attrs'
       )
     ) {
       needsForceUpdate = true
@@ -300,7 +301,20 @@ export function updateChildComponent(
   }
   vm.$attrs = attrs
 
-  vm.$listeners = listeners || emptyObject
+  // update listeners
+  listeners = listeners || emptyObject
+  const prevListeners = vm.$options._parentListeners
+  if (vm._listenersProxy) {
+    syncSetupProxy(
+      vm._listenersProxy,
+      listeners,
+      prevListeners || emptyObject,
+      vm,
+      '$listeners'
+    )
+  }
+  vm.$listeners = vm.$options._parentListeners = listeners
+  updateComponentListeners(vm, listeners, prevListeners)
 
   // update props
   if (propsData && vm.$options.props) {
@@ -316,12 +330,6 @@ export function updateChildComponent(
     // keep a copy of raw propsData
     vm.$options.propsData = propsData
   }
-
-  // update listeners
-  listeners = listeners || emptyObject
-  const oldListeners = vm.$options._parentListeners
-  vm.$options._parentListeners = listeners
-  updateComponentListeners(vm, listeners, oldListeners)
 
   // resolve slots + force update if has children
   if (needsForceUpdate) {

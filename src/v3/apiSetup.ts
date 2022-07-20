@@ -19,6 +19,7 @@ import { proxyWithRefUnwrap } from './reactivity/ref'
  */
 export interface SetupContext {
   attrs: Record<string, any>
+  listeners: Record<string, Function | Function[]>
   slots: Record<string, () => VNode[]>
   emit: (event: string, ...args: any[]) => any
   expose: (exposed: Record<string, any>) => void
@@ -87,7 +88,19 @@ function createSetupContext(vm: Component): SetupContext {
   let exposeCalled = false
   return {
     get attrs() {
-      return initAttrsProxy(vm)
+      if (!vm._attrsProxy) {
+        const proxy = (vm._attrsProxy = {})
+        def(proxy, '_v_attr_proxy', true)
+        syncSetupProxy(proxy, vm.$attrs, emptyObject, vm, '$attrs')
+      }
+      return vm._attrsProxy
+    },
+    get listeners() {
+      if (!vm._listenersProxy) {
+        const proxy = (vm._listenersProxy = {})
+        syncSetupProxy(proxy, vm.$listeners, emptyObject, vm, '$listeners')
+      }
+      return vm._listenersProxy
     },
     get slots() {
       return initSlotsProxy(vm)
@@ -109,26 +122,18 @@ function createSetupContext(vm: Component): SetupContext {
   }
 }
 
-function initAttrsProxy(vm: Component) {
-  if (!vm._attrsProxy) {
-    const proxy = (vm._attrsProxy = {})
-    def(proxy, '_v_attr_proxy', true)
-    syncSetupAttrs(proxy, vm.$attrs, emptyObject, vm)
-  }
-  return vm._attrsProxy
-}
-
-export function syncSetupAttrs(
+export function syncSetupProxy(
   to: any,
   from: any,
   prev: any,
-  instance: Component
+  instance: Component,
+  type: string
 ) {
   let changed = false
   for (const key in from) {
     if (!(key in to)) {
       changed = true
-      defineProxyAttr(to, key, instance)
+      defineProxyAttr(to, key, instance, type)
     } else if (from[key] !== prev[key]) {
       changed = true
     }
@@ -142,12 +147,17 @@ export function syncSetupAttrs(
   return changed
 }
 
-function defineProxyAttr(proxy: any, key: string, instance: Component) {
+function defineProxyAttr(
+  proxy: any,
+  key: string,
+  instance: Component,
+  type: string
+) {
   Object.defineProperty(proxy, key, {
     enumerable: true,
     configurable: true,
     get() {
-      return instance.$attrs[key]
+      return instance[type][key]
     }
   })
 }
@@ -171,17 +181,21 @@ export function syncSetupSlots(to: any, from: any) {
 }
 
 /**
- * @internal use manual type def
+ * @internal use manual type def because it relies on legacy VNode types
  */
 export function useSlots(): SetupContext['slots'] {
   return getContext().slots
 }
 
-/**
- * @internal use manual type def
- */
 export function useAttrs(): SetupContext['attrs'] {
   return getContext().attrs
+}
+
+/**
+ * Vue 2 only
+ */
+export function useListeners(): SetupContext['listeners'] {
+  return getContext().listeners
 }
 
 function getContext(): SetupContext {

@@ -77,7 +77,7 @@ export { provide, inject, InjectionKey } from './apiInject'
 
 export { h } from './h'
 export { getCurrentInstance } from './currentInstance'
-export { useSlots, useAttrs, mergeDefaults } from './apiSetup'
+export { useSlots, useAttrs, useListeners, mergeDefaults } from './apiSetup'
 export { nextTick } from 'core/util/next-tick'
 export { set, del } from 'core/observer'
 

@@ -297,4 +297,27 @@ describe('api: setup context', () => {
     await nextTick()
     expect(spy).toHaveBeenCalledTimes(1)
   })
+
+  it('context.listeners', async () => {
+    let _listeners
+    const Child = {
+      setup(_, { listeners }) {
+        _listeners = listeners
+        return () => {}
+      }
+    }
+
+    const Parent = {
+      data: () => ({ log: () => 1 }),
+      template: `<Child @foo="log" />`,
+      components: { Child }
+    }
+
+    const vm = new Vue(Parent).$mount()
+
+    expect(_listeners.foo()).toBe(1)
+    vm.log = () => 2
+    await nextTick()
+    expect(_listeners.foo()).toBe(2)
+  })
 })
