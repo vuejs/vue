@@ -149,12 +149,6 @@ export function genElement(el: ASTElement, state: CodegenState): string {
   }
 }
 
-function checkBindingType(bindings: BindingMetadata, key: string) {
-  const type = bindings[key]
-  if (type && type.startsWith('setup')) {
-    return key
-  }
-}
 
 // hoist static sub-trees out
 function genStatic(el: ASTElement, state: CodegenState): string {
