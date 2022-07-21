@@ -1,4 +1,4 @@
-import Vue from '../index'
+import Vue, { defineComponent } from '../index'
 
 declare module '../vue' {
   // add instance property and method
@@ -44,3 +44,10 @@ vm.$instanceMethod()
 
 Vue.staticProperty
 Vue.staticMethod()
+
+defineComponent({
+  mounted() {
+    this.$instanceMethod
+    this.$instanceProperty
+  }
+})

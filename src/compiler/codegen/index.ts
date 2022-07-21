@@ -95,14 +95,15 @@ export function genElement(el: ASTElement, state: CodegenState): string {
       code = genComponent(el.component, el, state)
     } else {
       let data
-      if (!el.plain || (el.pre && state.maybeComponent(el))) {
+      const maybeComponent = state.maybeComponent(el)
+      if (!el.plain || (el.pre && maybeComponent)) {
         data = genData(el, state)
       }
 
       let tag: string | undefined
       // check if this is a component in <script setup>
       const bindings = state.options.bindings
-      if (bindings && bindings.__isScriptSetup !== false) {
+      if (maybeComponent && bindings && bindings.__isScriptSetup !== false) {
         const camelName = camelize(el.tag)
         const PascalName = capitalize(camelName)
         const checkType = (type) => {
@@ -116,7 +117,6 @@ export function genElement(el: ASTElement, state: CodegenState): string {
             return PascalName
           }
         }
-
         const fromConst =
           checkType(BindingTypes.SETUP_CONST) ||
           checkType(BindingTypes.SETUP_REACTIVE_CONST)

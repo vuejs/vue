@@ -3,8 +3,6 @@ import {
   AsyncComponent,
   ComponentOptions,
   FunctionalComponentOptions,
-  WatchOptionsWithHandler,
-  WatchHandler,
   DirectiveOptions,
   DirectiveFunction,
   RecordPropsDefinition,
@@ -14,6 +12,9 @@ import {
 } from './options'
 import { VNode, VNodeData, VNodeChildren, NormalizedScopedSlot } from './vnode'
 import { PluginFunction, PluginObject } from './plugin'
+import { DefineComponent } from './v3-define-component'
+import { nextTick } from './v3-generated'
+import { ComponentPublicInstance } from './v3-component-public-instance'
 
 export interface CreateElement {
   (
@@ -35,20 +36,40 @@ export interface CreateElement {
   ): VNode
 }
 
-export interface Vue {
+type NeverFallback<T, D> = [T] extends [never] ? D : T
+
+export interface Vue<
+  Data = Record<string, any>,
+  Props = Record<string, any>,
+  Parent = never,
+  Root = never,
+  Children = never,
+  Options = never,
+  Emit = (event: string, ...args: any[]) => Vue
+> {
+  // properties with different types in defineComponent()
+  readonly $data: Data
+  readonly $props: Props
+  readonly $parent: NeverFallback<Parent, Vue>
+  readonly $root: NeverFallback<Root, Vue>
+  readonly $children: NeverFallback<Children, Vue[]>
+  readonly $options: NeverFallback<Options, ComponentOptions<Vue>>
+  $emit: Emit
+
+  // Vue 2 only or shared
   readonly $el: Element
-  readonly $options: ComponentOptions<Vue>
-  readonly $parent: Vue
-  readonly $root: Vue
-  readonly $children: Vue[]
   readonly $refs: {
-    [key: string]: Vue | Element | (Vue | Element)[] | undefined
+    [key: string]:
+      | Vue
+      | Element
+      | ComponentPublicInstance
+      | (Vue | Element | ComponentPublicInstance)[]
+      | undefined
   }
   readonly $slots: { [key: string]: VNode[] | undefined }
   readonly $scopedSlots: { [key: string]: NormalizedScopedSlot | undefined }
   readonly $isServer: boolean
-  readonly $data: Record<string, any>
-  readonly $props: Record<string, any>
+
   readonly $ssrContext: any
   readonly $vnode: VNode
   readonly $attrs: Record<string, string>
@@ -72,9 +93,7 @@ export interface Vue {
   $on(event: string | string[], callback: Function): this
   $once(event: string | string[], callback: Function): this
   $off(event?: string | string[], callback?: Function): this
-  $emit(event: string, ...args: any[]): this
-  $nextTick(callback: (this: this) => void): void
-  $nextTick(): Promise<void>
+  $nextTick: typeof nextTick
   $createElement: CreateElement
 }
 
@@ -313,6 +332,10 @@ export interface VueConstructor<V extends Vue = Vue> {
     id: string,
     definition?: ComponentOptions<V>
   ): ExtendedVue<V, {}, {}, {}, {}, {}>
+  component<T extends DefineComponent<any, any, any, any, any, any, any, any>>(
+    id: string,
+    definition?: T
+  ): T
 
   use<T>(
     plugin: PluginObject<T> | PluginFunction<T>,

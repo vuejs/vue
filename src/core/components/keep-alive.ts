@@ -3,6 +3,7 @@ import { getFirstComponentChild } from 'core/vdom/helpers/index'
 import type VNode from 'core/vdom/vnode'
 import type { VNodeComponentOptions } from 'types/vnode'
 import type { Component } from 'types/component'
+import { getComponentName } from '../vdom/create-component'
 
 type CacheEntry = {
   name?: string
@@ -12,8 +13,8 @@ type CacheEntry = {
 
 type CacheEntryMap = Record<string, CacheEntry | null>
 
-function getComponentName(opts?: VNodeComponentOptions): string | null {
-  return opts && (opts.Ctor.options.name || opts.tag)
+function _getComponentName(opts?: VNodeComponentOptions): string | null {
+  return opts && (getComponentName(opts.Ctor.options as any) || opts.tag)
 }
 
 function matches(
@@ -81,7 +82,7 @@ export default {
       if (vnodeToCache) {
         const { tag, componentInstance, componentOptions } = vnodeToCache
         cache[keyToCache] = {
-          name: getComponentName(componentOptions),
+          name: _getComponentName(componentOptions),
           tag,
           componentInstance
         }
@@ -126,7 +127,7 @@ export default {
     const componentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
       // check pattern
-      const name = getComponentName(componentOptions)
+      const name = _getComponentName(componentOptions)
       const { include, exclude } = this
       if (
         // not included

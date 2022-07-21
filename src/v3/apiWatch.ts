@@ -196,12 +196,10 @@ function doWatch(
     getter = () => source.value
     forceTrigger = isShallow(source)
   } else if (isReactive(source)) {
-    getter = isArray(source)
-      ? () => {
-          ;(source as any).__ob__.dep.depend()
-          return source
-        }
-      : () => source
+    getter = () => {
+      ;(source as any).__ob__.dep.depend()
+      return source
+    }
     deep = true
   } else if (isArray(source)) {
     isMultiSource = true
@@ -315,13 +313,13 @@ function doWatch(
   if (flush === 'sync') {
     watcher.update = watcher.run
   } else if (flush === 'post') {
-    watcher.id = Infinity
+    watcher.post = true
     watcher.update = () => queueWatcher(watcher)
   } else {
     // pre
     watcher.update = () => {
-      if (instance && instance === currentInstance) {
-        // pre-watcher triggered inside setup()
+      if (instance && instance === currentInstance && !instance._isMounted) {
+        // pre-watcher triggered before
         const buffer = instance._preWatchers || (instance._preWatchers = [])
         if (buffer.indexOf(watcher) < 0) buffer.push(watcher)
       } else {

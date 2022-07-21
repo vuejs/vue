@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import { Observer } from 'core/observer/index'
-import { isNative, isObject, hasOwn } from 'core/util/index'
+import { isNative, isObject, hasOwn, nextTick } from 'core/util/index'
 import testObjectOption from '../../../helpers/test-object-option'
 
 describe('Options provide/inject', () => {
@@ -676,5 +676,40 @@ describe('Options provide/inject', () => {
       inject: ['constructor']
     })
     expect(`Injection "constructor" not found`).toHaveBeenWarned()
+  })
+
+  // #12667
+  test('provide with getters', async () => {
+    const spy = vi.fn()
+    const Child = {
+      render() {},
+      inject: ['foo'],
+      mounted() {
+        spy(this.foo)
+      }
+    }
+
+    let val = 1
+    const vm = new Vue({
+      components: { Child },
+      template: `<Child v-if="ok" />`,
+      data() {
+        return {
+          ok: false
+        }
+      },
+      provide() {
+        return {
+          get foo() {
+            return val
+          }
+        }
+      }
+    }).$mount()
+
+    val = 2
+    vm.ok = true
+    await nextTick()
+    expect(spy).toHaveBeenCalledWith(2)
   })
 })

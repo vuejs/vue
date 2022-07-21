@@ -1,6 +1,7 @@
 import { _Set as Set, isObject, isArray } from '../util/index'
 import type { SimpleSet } from '../util/index'
 import VNode from '../vdom/vnode'
+import { isRef } from '../../v3'
 
 const seenObjects = new Set()
 
@@ -35,6 +36,8 @@ function _traverse(val: any, seen: SimpleSet) {
   if (isA) {
     i = val.length
     while (i--) _traverse(val[i], seen)
+  } else if (isRef(val)) {
+    _traverse(val.value, seen)
   } else {
     keys = Object.keys(val)
     i = keys.length

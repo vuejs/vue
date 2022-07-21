@@ -165,6 +165,9 @@ describe('api: setup context', () => {
 
     const Child = {
       setup(_props: any, { slots }: any) {
+        // #12672 behavior consistency with Vue 3: should be able to access
+        // slots directly in setup()
+        expect(slots.foo()).toBeTruthy()
         return () => h('div', [...slots.foo(), ...slots.bar()])
       }
     }
@@ -293,5 +296,28 @@ describe('api: setup context', () => {
     msg.value = 'bye'
     await nextTick()
     expect(spy).toHaveBeenCalledTimes(1)
+  })
+
+  it('context.listeners', async () => {
+    let _listeners
+    const Child = {
+      setup(_, { listeners }) {
+        _listeners = listeners
+        return () => {}
+      }
+    }
+
+    const Parent = {
+      data: () => ({ log: () => 1 }),
+      template: `<Child @foo="log" />`,
+      components: { Child }
+    }
+
+    const vm = new Vue(Parent).$mount()
+
+    expect(_listeners.foo()).toBe(1)
+    vm.log = () => 2
+    await nextTick()
+    expect(_listeners.foo()).toBe(2)
   })
 })

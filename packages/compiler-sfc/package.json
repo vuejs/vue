@@ -1,6 +1,6 @@
 {
   "name": "@vue/compiler-sfc",
-  "version": "2.7.3",
+  "version": "2.7.7",
   "description": "compiler-sfc for Vue 2",
   "main": "dist/compiler-sfc.js",
   "types": "dist/compiler-sfc.d.ts",
@@ -29,7 +29,6 @@
     "postcss-selector-parser": "^6.0.10",
     "pug": "^3.0.2",
     "sass": "^1.52.3",
-    "stylus": "^0.58.1",
-    "vue-template-es2015-compiler": "^1.9.1"
+    "stylus": "^0.58.1"
   }
 }

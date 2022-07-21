@@ -18,7 +18,7 @@ export function renderStatic(
   // otherwise, render a fresh tree.
   tree = cached[index] = this.$options.staticRenderFns[index].call(
     this._renderProxy,
-    null,
+    this._c,
     this // for render fns generated for functional component templates
   )
   markStatic(tree, `__static__${index}`, false)

@@ -1,8 +1,7 @@
 import { warn, hasSymbol, isFunction, isObject } from '../util/index'
 import { defineReactive, toggleObserving } from '../observer/index'
 import type { Component } from 'types/component'
-import { provide } from 'v3/apiInject'
-import { setCurrentInstance } from '../../v3/currentInstance'
+import { resolveProvided } from 'v3/apiInject'
 
 export function initProvide(vm: Component) {
   const provideOption = vm.$options.provide
@@ -13,12 +12,18 @@ export function initProvide(vm: Component) {
     if (!isObject(provided)) {
       return
     }
+    const source = resolveProvided(vm)
+    // IE9 doesn't support Object.getOwnPropertyDescriptors so we have to
+    // iterate the keys ourselves.
     const keys = hasSymbol ? Reflect.ownKeys(provided) : Object.keys(provided)
-    setCurrentInstance(vm)
     for (let i = 0; i < keys.length; i++) {
-      provide(keys[i], provided[keys[i]])
+      const key = keys[i]
+      Object.defineProperty(
+        source,
+        key,
+        Object.getOwnPropertyDescriptor(provided, key)!
+      )
     }
-    setCurrentInstance()
   }
 }
 

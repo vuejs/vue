@@ -28,6 +28,9 @@ Vue.extend({
     }
     ctx.emit('foo')
     ctx.slots.default && ctx.slots.default()
+    ctx.expose({
+      a: 123
+    })
   }
 })
 

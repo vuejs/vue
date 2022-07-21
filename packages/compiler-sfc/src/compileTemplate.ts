@@ -144,8 +144,7 @@ function actuallyCompile(
       errors
     }
   } else {
-    // transpile code with vue-template-es2015-compiler, which is a forked
-    // version of Buble that applies ES2015 transforms + stripping `with` usage
+    // stripping `with` usage
     let code =
       `var __render__ = ${prefixIdentifiers(
         `function render(${isFunctional ? `_c,_vm` : ``}){${render}\n}`,

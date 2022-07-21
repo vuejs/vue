@@ -144,6 +144,20 @@ describe('api: watch', () => {
     expect(dummy).toBe(1)
   })
 
+  it('deep watch w/ raw refs', async () => {
+    const count = ref(0)
+    const src = reactive({
+      arr: [count]
+    })
+    let dummy
+    watch(src, ({ arr: [{ value }] }) => {
+      dummy = value
+    })
+    count.value++
+    await nextTick()
+    expect(dummy).toBe(1)
+  })
+
   it('watching multiple sources', async () => {
     const state = reactive({ count: 1 })
     const count = ref(1)
@@ -1115,5 +1129,75 @@ describe('api: watch', () => {
 
     await nextTick()
     expect(order).toMatchObject([`mounted`, `watcher`])
+  })
+
+  // #12624
+  test('pre watch triggered in mounted hook', async () => {
+    const spy = vi.fn()
+    new Vue({
+      setup() {
+        const c = ref(0)
+
+        onMounted(() => {
+          c.value++
+        })
+
+        watchEffect(() => spy(c.value))
+        return () => {}
+      }
+    }).$mount()
+    expect(spy).toHaveBeenCalledTimes(1)
+    await nextTick()
+    expect(spy).toHaveBeenCalledTimes(2)
+  })
+
+  // #12643
+  test('should trigger watch on reactive object when new property is added via set()', () => {
+    const spy = vi.fn()
+    const obj = reactive({})
+    watch(obj, spy, { flush: 'sync' })
+    set(obj, 'foo', 1)
+    expect(spy).toHaveBeenCalled()
+  })
+
+  test('should not trigger watch when calling set() on ref value', () => {
+    const spy = vi.fn()
+    const r = ref({})
+    watch(r, spy, { flush: 'sync' })
+    set(r.value, 'foo', 1)
+    expect(spy).not.toHaveBeenCalled()
+  })
+
+  // #12664
+  it('queueing multiple flush: post watchers', async () => {
+    const parentSpy = vi.fn()
+    const childSpy = vi.fn()
+
+    const Child = {
+      setup() {
+        const el = ref()
+        watch(el, childSpy, { flush: 'post' })
+        return { el }
+      },
+      template: `<div><span ref="el">hello child</span></div>`
+    }
+    const App = {
+      components: { Child },
+      setup() {
+        const el = ref()
+        watch(el, parentSpy, { flush: 'post' })
+        return { el }
+      },
+      template: `<div><Child /><span ref="el">hello app1</span></div>`
+    }
+
+    const container = document.createElement('div')
+    const root = document.createElement('div')
+    container.appendChild(root)
+    new Vue(App).$mount(root)
+
+    await nextTick()
+    expect(parentSpy).toHaveBeenCalledTimes(1)
+    expect(childSpy).toHaveBeenCalledTimes(1)
   })
 })

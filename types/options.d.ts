@@ -20,7 +20,7 @@ export type Component<
   | typeof Vue
   | FunctionalComponentOptions<Props>
   | ComponentOptions<never, Data, Methods, Computed, Props, SetupBindings>
-  | DefineComponent<any, any, any, any, any>
+  | DefineComponent<any, any, any, any, any, any, any, any, any, any, any>
 
 type EsModule<T> = T | { default: T }
 
@@ -201,9 +201,9 @@ export interface ComponentOptions<
   directives?: { [key: string]: DirectiveFunction | DirectiveOptions }
   components?: {
     [key: string]:
-      | Component<any, any, any, any>
+      | {}
+      | Component<any, any, any, any, any>
       | AsyncComponent<any, any, any, any>
-      | DefineComponent<any, any, any, any, any, any, any, any, any, any>
   }
   transitions?: { [key: string]: object }
   filters?: { [key: string]: Function }
@@ -219,6 +219,8 @@ export interface ComponentOptions<
   parent?: Vue
   mixins?: (ComponentOptions<Vue> | typeof Vue)[]
   name?: string
+  // for SFC auto name inference w/ ts-loader check
+  __name?: string
   // TODO: support properly inferred 'extends'
   extends?: ComponentOptions<Vue> | typeof Vue
   delimiters?: [string, string]

@@ -16,6 +16,7 @@ class Test extends Vue {
     this.$isServer
     this.$ssrContext
     this.$vnode
+    this.$root.$children[0].$children[0]
   }
 
   // test property reification

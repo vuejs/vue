@@ -1,3 +1,4 @@
+import Vue, { VueConstructor } from '../../index'
 import {
   Component,
   defineComponent,
@@ -8,12 +9,12 @@ import {
 } from '../../index'
 import { describe, test, expectType, expectError, IsUnion } from '../utils'
 
-defineComponent({
-  props: {
-    foo: Number
-  },
-  render() {
-    this.foo
+describe('compat with v2 APIs', () => {
+  const comp = defineComponent({})
+
+  Vue.component('foo', comp)
+  function install(app: VueConstructor) {
+    app.component('foo', comp)
   }
 })
 
@@ -1078,3 +1079,89 @@ export default {
     }
   })
 }
+
+describe('functional w/ array props', () => {
+  const Foo = defineComponent({
+    functional: true,
+    props: ['foo'],
+    render(h, ctx) {
+      ctx.props.foo
+      // @ts-expect-error
+      ctx.props.bar
+    }
+  })
+
+  ;<Foo foo="hi" />
+  // @ts-expect-error
+  ;<Foo bar={123} />
+})
+
+describe('functional w/ object props', () => {
+  const Foo = defineComponent({
+    functional: true,
+    props: {
+      foo: String
+    },
+    render(h, ctx) {
+      ctx.props.foo
+      // @ts-expect-error
+      ctx.props.bar
+    }
+  })
+
+  ;<Foo foo="hi" />
+  // @ts-expect-error
+  ;<Foo foo={123} />
+  // @ts-expect-error
+  ;<Foo bar={123} />
+})
+
+// #12628
+defineComponent({
+  components: {
+    App: defineComponent({})
+  },
+  data() {
+    return {}
+  },
+  provide(): any {
+    return {
+      fetchData: this.fetchData
+    }
+  },
+  created() {
+    this.fetchData()
+  },
+  methods: {
+    fetchData() {
+      throw new Error('Not implemented.')
+    }
+  }
+})
+
+const X = defineComponent({
+  methods: {
+    foo() {
+      return 123
+    }
+  }
+})
+
+// Missing / mismatching Vue 2 properties
+// https://github.com/vuejs/vue/issues/12628#issuecomment-1177258223
+defineComponent({
+  render(h) {
+    // vue 2
+    this.$listeners
+    this.$on('foo', () => {})
+    this.$ssrContext
+    this.$isServer
+    this.$children[0].$root.$children
+
+    // type casting refs
+    const foo = this.$refs.foo as InstanceType<typeof X>
+    foo.foo().toExponential()
+
+    return h('div', {}, [...this.$slots.default!])
+  }
+})

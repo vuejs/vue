@@ -111,6 +111,7 @@ export declare class Component {
   _setupProxy?: Record<string, any>
   _setupContext?: SetupContext
   _attrsProxy?: Record<string, any>
+  _listenersProxy?: Record<string, Function | Function[]>
   _slotsProxy?: Record<string, () => VNode[]>
   _preWatchers?: Watcher[]
 

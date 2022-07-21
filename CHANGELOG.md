@@ -1,3 +1,65 @@
+## [2.7.7](https://github.com/vuejs/vue/compare/v2.7.6...v2.7.7) (2022-07-16)
+
+
+### Bug Fixes
+
+* **codegen:** script setup should not attempt to resolve native elements as component ([e8d3a7d](https://github.com/vuejs/vue/commit/e8d3a7d7a17f9e66d592fb1ddc4a603af9958d36)), closes [#12674](https://github.com/vuejs/vue/issues/12674)
+* **inject:** fix edge case of provided with async-mutated getters ([ea5d0f3](https://github.com/vuejs/vue/commit/ea5d0f3fbfd983cb0275457cbcef344f926381ea)), closes [#12667](https://github.com/vuejs/vue/issues/12667)
+* **setup:** ensure setup context slots can be accessed immediately ([67760f8](https://github.com/vuejs/vue/commit/67760f8d30778f58afeada3589d4ac4493329ad5)), closes [#12672](https://github.com/vuejs/vue/issues/12672)
+* **types:** vue.d.ts should use relative import to v3-component-public-instance ([#12668](https://github.com/vuejs/vue/issues/12668)) ([46ec648](https://github.com/vuejs/vue/commit/46ec64869479393f95b6abda7a4adecf19867d06)), closes [#12666](https://github.com/vuejs/vue/issues/12666)
+* **watch:** fix queueing multiple post watchers ([25ffdb6](https://github.com/vuejs/vue/commit/25ffdb62d22fe8688aca144d945671d5c82a8887)), closes [#12664](https://github.com/vuejs/vue/issues/12664)
+
+
+
+## [2.7.6](https://github.com/vuejs/vue/compare/v2.7.5...v2.7.6) (2022-07-15)
+
+
+### Bug Fixes
+
+* **types:** $refs can also contain ComponentPublicInstance ([#12659](https://github.com/vuejs/vue/issues/12659)) ([fffbb9e](https://github.com/vuejs/vue/commit/fffbb9e856de5e4b3053a6b4d01d1404bfb6f85e))
+* **types:** fix $children and $root instance types ([52a5979](https://github.com/vuejs/vue/commit/52a59790a5b6e16c9f8cc737fcd784413dda282d)), closes [#12655](https://github.com/vuejs/vue/issues/12655)
+* **types:** fix missing expose() type on setup context ([e0a9546](https://github.com/vuejs/vue/commit/e0a9546ef32fa4bbfc4bede3002b2d6a5be8cf72)), closes [#12660](https://github.com/vuejs/vue/issues/12660)
+
+
+
+## [2.7.5](https://github.com/vuejs/vue/compare/v2.7.4...v2.7.5) (2022-07-13)
+
+
+### Bug Fixes
+
+* add missing export from `vue.runtime.mjs` ([#12648](https://github.com/vuejs/vue/issues/12648)) ([08fb4a2](https://github.com/vuejs/vue/commit/08fb4a222c016c79af77ab96817d2ed9b7abbd80))
+* detect property add/deletion on reactive objects from setup when used in templates ([a6e7498](https://github.com/vuejs/vue/commit/a6e74985cf2eab6f16d03a8eda3bf3fc7950127c))
+* do not set currentInstance in beforeCreate ([0825d30](https://github.com/vuejs/vue/commit/0825d3087f9f39435838329c16adc2a7bfccd51d)), closes [#12636](https://github.com/vuejs/vue/issues/12636)
+* **reactivity:** fix watch behavior inconsistency + deep ref shallow check ([98fb01c](https://github.com/vuejs/vue/commit/98fb01c79c41c3b9f9134f0abb77d233ce4e5b44)), closes [#12643](https://github.com/vuejs/vue/issues/12643)
+* **sfc:** fix sfc name inference type check ([04b4703](https://github.com/vuejs/vue/commit/04b4703de72b1c1e686a3aa81d5b5b56799dabab)), closes [#12637](https://github.com/vuejs/vue/issues/12637)
+* **types:** support Vue interface augmentations in defineComponent ([005e52d](https://github.com/vuejs/vue/commit/005e52d0b6f1a5bf9679789c5c4b90afd442d86b)), closes [#12642](https://github.com/vuejs/vue/issues/12642)
+* **watch:** fix deep watch for structures containing raw refs ([1a2c3c2](https://github.com/vuejs/vue/commit/1a2c3c2d77ba96ef496f4c86329b7798026511ae)), closes [#12652](https://github.com/vuejs/vue/issues/12652)
+
+
+
+## [2.7.4](https://github.com/vuejs/vue/compare/v2.7.3...v2.7.4) (2022-07-08)
+
+
+### Bug Fixes
+
+* **build:** fix mjs dual package hazard ([012e10c](https://github.com/vuejs/vue/commit/012e10c9ca13fcbc9bf67bf2835883edcd4faace)), closes [#12626](https://github.com/vuejs/vue/issues/12626)
+* **compiler-sfc:** use safer deindent default for compatibility with previous behavior ([b70a258](https://github.com/vuejs/vue/commit/b70a2585fcd102def2bb5a3b2b589edf5311122d))
+* pass element creation helper to static render fns for functional components ([dc8a68e](https://github.com/vuejs/vue/commit/dc8a68e8c6c4e8ed4fdde094004fca272d71ef2e)), closes [#12625](https://github.com/vuejs/vue/issues/12625)
+* **ssr/reactivity:** fix array setting error at created in ssr [[#12632](https://github.com/vuejs/vue/issues/12632)] ([#12633](https://github.com/vuejs/vue/issues/12633)) ([ca7daef](https://github.com/vuejs/vue/commit/ca7daefaa15a192046d22d060220cd595a6a275f))
+* **types:** fix missing instance properties on defineComponent this ([f8de4ca](https://github.com/vuejs/vue/commit/f8de4ca9d458a03378e848b1e62d6507f7124871)), closes [#12628](https://github.com/vuejs/vue/issues/12628#issuecomment-1177258223)
+* **types:** fix this.$slots type for defineComponent ([d3add06](https://github.com/vuejs/vue/commit/d3add06e6e18a78a3745240632fecd076eb49d19))
+* **types:** fix type inference when using components option ([1d5a411](https://github.com/vuejs/vue/commit/1d5a411c1e3aa062aa5080432cf3f852f1583ed2))
+* **types:** global component registration type compat w/ defineComponent ([26ff4bc](https://github.com/vuejs/vue/commit/26ff4bc0ed75d8bf7921523a2e546df24ec81d8f)), closes [#12622](https://github.com/vuejs/vue/issues/12622)
+* **watch:** fix watchers triggered in mounted hook ([8904ca7](https://github.com/vuejs/vue/commit/8904ca77c2d675707728e6a50decd3ef3370a428)), closes [#12624](https://github.com/vuejs/vue/issues/12624)
+
+
+### Features
+
+* defineAsyncComponent ([9d12106](https://github.com/vuejs/vue/commit/9d12106e211e0cbf33f9066606a8ff29f8cc8e8d)), closes [#12608](https://github.com/vuejs/vue/issues/12608)
+* support functional components in defineComponent ([559600f](https://github.com/vuejs/vue/commit/559600f13d312915c0a1b54ed4edd41327dbedd6)), closes [#12619](https://github.com/vuejs/vue/issues/12619)
+
+
+
 ## [2.7.3](https://github.com/vuejs/vue/compare/v2.7.2...v2.7.3) (2022-07-06)
 
 
@@ -93,6 +155,12 @@ In addition, the following features are explicitly **NOT** ported:
 - ❌ TypeScript syntax in template expressions (incompatible w/ Vue 2 parser)
 - ❌ Reactivity transform (still experimental)
 - ❌ `expose` option is not supported for options components (but `defineExpose()` is supported in `<script setup>`).
+
+### TypeScript Changes
+
+- `defineComponent` provides improved type inference similar to that of Vue 3. Note the type of `this` inside `defineComponent()` is not interoperable with `this` from `Vue.extend()`.
+
+- Similar to Vue 3, TSX support is now built-in. If your project previously had manual JSX type shims, make sure to remove them.
 
 ## Upgrade Guide
 

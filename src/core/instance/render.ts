@@ -25,7 +25,13 @@ export function initRender(vm: Component) {
   const parentVnode = (vm.$vnode = options._parentVnode!) // the placeholder node in parent tree
   const renderContext = parentVnode && (parentVnode.context as Component)
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
-  vm.$scopedSlots = emptyObject
+  vm.$scopedSlots = parentVnode
+    ? normalizeScopedSlots(
+        vm.$parent!,
+        parentVnode.data!.scopedSlots,
+        vm.$slots
+      )
+    : emptyObject
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
@@ -98,7 +104,7 @@ export function renderMixin(Vue: typeof Component) {
     const vm: Component = this
     const { render, _parentVnode } = vm.$options
 
-    if (_parentVnode) {
+    if (_parentVnode && vm._isMounted) {
       vm.$scopedSlots = normalizeScopedSlots(
         vm.$parent!,
         _parentVnode.data!.scopedSlots,
