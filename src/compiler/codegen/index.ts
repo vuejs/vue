@@ -13,7 +13,7 @@ import {
   ASTText,
   CompilerOptions
 } from 'types/compiler'
-import { BindingMetadata } from 'sfc/types'
+import { BindingMetadata, BindingTypes } from 'sfc/types'
 
 type TransformFunction = (el: ASTElement, code: string) => string
 type DataGenFunction = (el: ASTElement) => string
@@ -103,10 +103,34 @@ export function genElement(el: ASTElement, state: CodegenState): string {
       // check if this is a component in <script setup>
       const bindings = state.options.bindings
       if (bindings && bindings.__isScriptSetup !== false) {
-        tag =
-          checkBindingType(bindings, el.tag) ||
-          checkBindingType(bindings, camelize(el.tag)) ||
-          checkBindingType(bindings, capitalize(camelize(el.tag)))
+        const camelName = camelize(el.tag)
+        const PascalName = capitalize(camelName)
+        const checkType = (type) => {
+          if (bindings[el.tag] === type) {
+            return el.tag
+          }
+          if (bindings[camelName] === type) {
+            return camelName
+          }
+          if (bindings[PascalName] === type) {
+            return PascalName
+          }
+        }
+
+        const fromConst =
+          checkType(BindingTypes.SETUP_CONST) ||
+          checkType(BindingTypes.SETUP_REACTIVE_CONST)
+        if (fromConst) {
+          tag = fromConst
+        } else {
+          const fromMaybeRef =
+            checkType(BindingTypes.SETUP_LET) ||
+            checkType(BindingTypes.SETUP_REF) ||
+            checkType(BindingTypes.SETUP_MAYBE_REF)
+          if (fromMaybeRef) {
+            tag = fromMaybeRef
+          }
+        }
       }
       if (!tag) tag = `'${el.tag}'`
 
