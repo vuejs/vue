@@ -13,7 +13,7 @@ import {
   ASTText,
   CompilerOptions
 } from 'types/compiler'
-import { BindingMetadata, BindingTypes } from 'sfc/types'
+import { BindingTypes } from 'sfc/types'
 
 type TransformFunction = (el: ASTElement, code: string) => string
 type DataGenFunction = (el: ASTElement) => string
