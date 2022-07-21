@@ -45,8 +45,13 @@ export class Observer {
     // this.value = value
     this.dep = new Dep()
     this.vmCount = 0
+
+    // 在对象上标记 __ob__, 表示该对象已经做过响应式处理
     def(value, '__ob__', this)
+
+
     if (isArray(value)) {
+      // 如果对象为数组
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
@@ -56,6 +61,7 @@ export class Observer {
         this.observeArray(value)
       }
     } else {
+      // 如果对象为普通对象
       this.walk(value, shallow)
     }
   }
@@ -64,6 +70,9 @@ export class Observer {
    * Walk through all properties and convert them into
    * getter/setters. This method should only be called when
    * value type is Object.
+   * 
+   * 遍历所有属性并且在 getter、setter 中转化它们
+   * 仅当值类型为 Object 时才应调用此方法。
    */
   walk(obj: object, shallow: boolean) {
     const keys = Object.keys(obj)
@@ -75,6 +84,7 @@ export class Observer {
 
   /**
    * Observe a list of Array items.
+   * 观测数组子项
    */
   observeArray(items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
@@ -113,10 +123,13 @@ function copyAugment(target: Object, src: Object, keys: Array<string>) {
  * or the existing observer if the value already has one.
  */
 export function observe(value: any, shallow?: boolean): Observer | void {
+  // 剔除非对象变量 ref格式对象 vnode对象
   if (!isObject(value) || isRef(value) || value instanceof VNode) {
     return
   }
   let ob: Observer | void
+
+  // 如果已经被处理为响应式数据则不再重复监测
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
@@ -154,7 +167,7 @@ export function defineReactive(
   if (
     (!getter || setter) &&
     (val === NO_INIITIAL_VALUE || arguments.length === 2)
-  ) {
+  ) { 
     val = obj[key]
   }
 
@@ -241,11 +254,15 @@ export function set(
     __DEV__ && warn(`Set operation on key "${key}" failed: target is readonly.`)
     return
   }
+
+  // 是否数组且索引值合法
   if (isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
     return val
   }
+
+  // 属性键不在原型对象上有
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
@@ -263,6 +280,8 @@ export function set(
     target[key] = val
     return val
   }
+
+  // 将数值转成响应式，并通知视图更新
   defineReactive(ob.value, key, val)
   if (__DEV__) {
     ob.dep.notify({
