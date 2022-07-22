@@ -11,7 +11,8 @@ import {
   isReactive,
   isShallow,
   reactive,
-  computed
+  computed,
+  readonly
 } from 'v3'
 import { effect } from 'v3/reactivity/effect'
 
@@ -403,5 +404,18 @@ describe('reactivity/ref', () => {
 
     b.value = obj
     expect(spy2).toBeCalledTimes(1)
+  })
+
+  test('ref should preserve value readonly-ness', () => {
+    const original = {}
+    const r = reactive(original)
+    const rr = readonly(original)
+    const a = ref(original)
+
+    expect(a.value).toBe(r)
+
+    a.value = rr
+    expect(a.value).toBe(rr)
+    expect(a.value).not.toBe(r)
   })
 })

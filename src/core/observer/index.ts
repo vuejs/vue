@@ -191,7 +191,7 @@ export function defineReactive(
       } else if (getter) {
         // #7981: for accessor properties without setter
         return
-      } else if (isRef(value) && !isRef(newVal)) {
+      } else if (!shallow && isRef(value) && !isRef(newVal)) {
         value.value = newVal
         return
       } else {

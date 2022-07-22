@@ -483,7 +483,6 @@ describe('reactivity/readonly', () => {
     const ror = readonly(r)
     const obj = reactive({ ror })
     obj.ror = true
-
     expect(obj.ror).toBe(false)
     expect(`Set operation on key "value" failed`).toHaveBeenWarned()
   })
@@ -492,12 +491,18 @@ describe('reactivity/readonly', () => {
     const r = ref(false)
     const ror = readonly(r)
     const obj = reactive({ ror })
-    try {
-      obj.ror = ref(true) as unknown as boolean
-    } catch (e) {}
-
+    obj.ror = ref(true) as unknown as boolean
     expect(obj.ror).toBe(true)
     expect(toRaw(obj).ror).not.toBe(ror) // ref successfully replaced
+  })
+
+  test('setting readonly object to writable nested ref', () => {
+    const r = ref<any>()
+    const obj = reactive({ r })
+    const ro = readonly({})
+    obj.r = ro
+    expect(obj.r).toBe(ro)
+    expect(r.value).toBe(ro)
   })
 
   test('compatiblity with classes', () => {
