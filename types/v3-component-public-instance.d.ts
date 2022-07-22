@@ -179,9 +179,7 @@ interface Vue3Instance<
         ? Partial<Defaults> & Omit<P & PublicProps, keyof Defaults>
         : P & PublicProps
     >,
-    ComponentPublicInstance | null,
     ComponentPublicInstance,
-    ComponentPublicInstance[],
     Options & MergedComponentOptionsOverride,
     EmitFn<E>
   > {}
