@@ -1,3 +1,20 @@
+## [2.7.8](https://github.com/vuejs/vue/compare/v2.7.7...v2.7.8) (2022-07-22)
+
+
+### Bug Fixes
+
+* **reactivity:** fix shallowReactive nested ref setting edge cases ([2af751b](https://github.com/vuejs/vue/commit/2af751b6efa0cd9cb817ed96af41948e92599837)), closes [#12688](https://github.com/vuejs/vue/issues/12688)
+* **sfc:** align `<script setup>` component resolution edge case with v3 ([#12687](https://github.com/vuejs/vue/issues/12687)) ([a695c5a](https://github.com/vuejs/vue/commit/a695c5a6df415101a5f728e87dbe087b4fbb0b7b)), closes [#12685](https://github.com/vuejs/vue/issues/12685)
+* **types:** avoid circular type inference between v2 and v3 instance types ([fabc1cf](https://github.com/vuejs/vue/commit/fabc1cf89f55dd7f3f95fa7890d2540f40e9f845)), closes [#12683](https://github.com/vuejs/vue/issues/12683)
+* **types:** export `defineAsyncComponent` type ([#12684](https://github.com/vuejs/vue/issues/12684)) ([ba7dd2c](https://github.com/vuejs/vue/commit/ba7dd2c4ed62dba30bde7c1d521f7bfbab529102))
+
+
+### Features
+
+* **setup:** support listeners on setup context + `useListeners()` helper ([adf3ac8](https://github.com/vuejs/vue/commit/adf3ac8adcf204dcc34b851da6ab4d914bd11cf9))
+
+
+
 ## [2.7.7](https://github.com/vuejs/vue/compare/v2.7.6...v2.7.7) (2022-07-16)
 
 
