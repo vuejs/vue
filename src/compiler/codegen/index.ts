@@ -13,7 +13,7 @@ import {
   ASTText,
   CompilerOptions
 } from 'types/compiler'
-import { BindingMetadata } from 'sfc/types'
+import { BindingMetadata, BindingTypes } from 'sfc/types'
 
 type TransformFunction = (el: ASTElement, code: string) => string
 type DataGenFunction = (el: ASTElement) => string
@@ -104,10 +104,7 @@ export function genElement(el: ASTElement, state: CodegenState): string {
       // check if this is a component in <script setup>
       const bindings = state.options.bindings
       if (maybeComponent && bindings && bindings.__isScriptSetup !== false) {
-        tag =
-          checkBindingType(bindings, el.tag) ||
-          checkBindingType(bindings, camelize(el.tag)) ||
-          checkBindingType(bindings, capitalize(camelize(el.tag)))
+        tag = checkBindingType(bindings, el.tag)
       }
       if (!tag) tag = `'${el.tag}'`
 
@@ -127,9 +124,32 @@ export function genElement(el: ASTElement, state: CodegenState): string {
 }
 
 function checkBindingType(bindings: BindingMetadata, key: string) {
-  const type = bindings[key]
-  if (type && type.startsWith('setup')) {
-    return key
+  const camelName = camelize(key)
+  const PascalName = capitalize(camelName)
+  const checkType = (type) => {
+    if (bindings[key] === type) {
+      return key
+    }
+    if (bindings[camelName] === type) {
+      return camelName
+    }
+    if (bindings[PascalName] === type) {
+      return PascalName
+    }
+  }
+  const fromConst =
+    checkType(BindingTypes.SETUP_CONST) ||
+    checkType(BindingTypes.SETUP_REACTIVE_CONST)
+  if (fromConst) {
+    return fromConst
+  }
+
+  const fromMaybeRef =
+    checkType(BindingTypes.SETUP_LET) ||
+    checkType(BindingTypes.SETUP_REF) ||
+    checkType(BindingTypes.SETUP_MAYBE_REF)
+  if (fromMaybeRef) {
+    return fromMaybeRef
   }
 }
 
