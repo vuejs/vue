@@ -181,18 +181,25 @@ export function syncSetupSlots(to: any, from: any) {
 }
 
 /**
- * @internal use manual type def because it relies on legacy VNode types
+ * @internal use manual type def because public setup context type relies on
+ * legacy VNode types
  */
 export function useSlots(): SetupContext['slots'] {
   return getContext().slots
 }
 
+/**
+ * @internal use manual type def because public setup context type relies on
+ * legacy VNode types
+ */
 export function useAttrs(): SetupContext['attrs'] {
   return getContext().attrs
 }
 
 /**
  * Vue 2 only
+ * @internal use manual type def because public setup context type relies on
+ * legacy VNode types
  */
 export function useListeners(): SetupContext['listeners'] {
   return getContext().listeners
