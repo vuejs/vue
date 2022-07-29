@@ -33,3 +33,4 @@ If adding a **new feature**, the PR's description includes:
 - [ ] A convincing reason for adding this feature (to avoid wasting your time, it's best to open a suggestion issue first and wait for approval before working on it)
 
 **Other information:**
+<!-- Provide any information below this line if you have anything else to share about your Pull Request. -->
