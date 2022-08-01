@@ -20,7 +20,7 @@ export function initEvents(vm: Component) {
 }
 
 let target: any
-
+//development
 function add(event, fn) {
   target.$on(event, fn)
 }
