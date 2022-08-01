@@ -8,6 +8,7 @@ export { generateCodeFrame } from 'compiler/codeframe'
 export { rewriteDefault } from './rewriteDefault'
 
 // types
+//static types ?
 export { SFCParseOptions } from './parse'
 export { CompilerOptions, WarningMessage } from 'types/compiler'
 export { TemplateCompiler } from './types'
