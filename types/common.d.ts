@@ -19,3 +19,5 @@ export type HasDefined<T> = Equal<T, unknown> extends true ? false : true
 export type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N
 
 export type LooseRequired<T> = { [P in string & keyof T]: T[P] }
+
+//this is a comment wrote by Pablo
