@@ -100,7 +100,7 @@ export type CombinedVueInstance<
   Methods,
   Computed,
   Props,
-  SetupBindings
+  SetupBindings = {}
 > = Data &
   Methods &
   Computed &
@@ -114,7 +114,7 @@ export type ExtendedVue<
   Methods,
   Computed,
   Props,
-  SetupBindings
+  SetupBindings = {}
 > = VueConstructor<
   CombinedVueInstance<Instance, Data, Methods, Computed, Props, SetupBindings> &
     Vue
