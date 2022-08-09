@@ -31,13 +31,10 @@ export function urlToRequire(
       const basePath = base.path || '/'
       // when packaged in the browser, path will be using the posix-
       // only version provided by rollup-plugin-node-builtins.
-      return (
-        host +
-        `"${(path.posix || path).join(
-          basePath,
-          uriParts.path + (uriParts.hash || '')
-        )}"`
-      )
+      return `"${host}${(path.posix || path).join(
+        basePath,
+        uriParts.path + (uriParts.hash || '')
+      )}"`
     }
   }
 
