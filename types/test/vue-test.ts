@@ -246,3 +246,17 @@ const ComponentWithStyleInVNodeData = Vue.extend({
     ])
   }
 })
+
+// infer mixin type with new Vue() #12730
+new Vue({
+  mixin: [
+    {
+      methods: {
+        hello() {}
+      }
+    }
+  ],
+  created() {
+    this.hello()
+  }
+})

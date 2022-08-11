@@ -93,7 +93,9 @@ export type ThisTypedComponentOptionsWithArrayProps<
   Methods,
   Computed,
   PropNames extends string,
-  SetupBindings
+  SetupBindings,
+  Mixin,
+  Extends
 > = object &
   ComponentOptions<
     V,
@@ -103,15 +105,19 @@ export type ThisTypedComponentOptionsWithArrayProps<
     PropNames[],
     Record<PropNames, any>,
     SetupBindings
-  > &
-  ThisType<
+  > & {
+    mixin?: Mixin[]
+    extends?: Extends
+  } & ThisType<
     CombinedVueInstance<
       V,
       Data,
       Methods,
       Computed,
       Readonly<Record<PropNames, any>>,
-      SetupBindings
+      SetupBindings,
+      Mixin,
+      Extends
     >
   >
 
@@ -124,7 +130,9 @@ export type ThisTypedComponentOptionsWithRecordProps<
   Methods,
   Computed,
   Props,
-  SetupBindings
+  SetupBindings,
+  Mixin,
+  Extends
 > = object &
   ComponentOptions<
     V,
@@ -134,15 +142,19 @@ export type ThisTypedComponentOptionsWithRecordProps<
     RecordPropsDefinition<Props>,
     Props,
     SetupBindings
-  > &
-  ThisType<
+  > & {
+    mixin?: Mixin[]
+    extends?: Extends
+  } & ThisType<
     CombinedVueInstance<
       V,
       Data,
       Methods,
       Computed,
       Readonly<Props>,
-      SetupBindings
+      SetupBindings,
+      Mixin,
+      Extends
     >
   >
 
