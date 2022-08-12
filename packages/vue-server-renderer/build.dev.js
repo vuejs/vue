@@ -8854,7 +8854,9 @@ function createMapper (
       var mapped = map.get(moduleIds[i]);
       if (mapped) {
         for (var j = 0; j < mapped.length; j++) {
-          res.add(mapped[j]);
+          if (mapped[j]) {
+            res.add(mapped[j]);
+          }
         }
       }
     }
