@@ -68,30 +68,6 @@ type DefineComponent<
   }
 
 /**
- * overload 0.0: functional component with array props
- */
-export function defineComponent<
-  PropNames extends string,
-  Props = Readonly<{ [key in PropNames]?: any }>
->(options: {
-  functional: true
-  props?: PropNames[]
-  render?: (h: CreateElement, context: RenderContext<Props>) => any
-}): DefineComponent<Props>
-
-/**
- * overload 0.1: functional component with object props
- */
-export function defineComponent<
-  PropsOptions extends ComponentPropsOptions = ComponentPropsOptions,
-  Props = ExtractPropTypes<PropsOptions>
->(options: {
-  functional: true
-  props?: PropsOptions
-  render?: (h: CreateElement, context: RenderContext<Props>) => any
-}): DefineComponent<PropsOptions>
-
-/**
  * overload 1: object format with no props
  */
 export function defineComponent<
@@ -104,7 +80,7 @@ export function defineComponent<
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string
 >(
-  options: ComponentOptionsWithoutProps<
+  options: { functional?: never } & ComponentOptionsWithoutProps<
     {},
     RawBindings,
     D,
@@ -135,7 +111,7 @@ export function defineComponent<
   EmitsNames extends string = string,
   PropsOptions extends ComponentPropsOptions = ComponentPropsOptions
 >(
-  options: ComponentOptionsWithArrayProps<
+  options: { functional?: never } & ComponentOptionsWithArrayProps<
     PropNames,
     RawBindings,
     D,
@@ -175,7 +151,7 @@ export function defineComponent<
   PropsOptions extends ComponentPropsOptions = ComponentPropsOptions
 >(
   options: HasDefined<Props> extends true
-    ? ComponentOptionsWithProps<
+    ? { functional?: never } & ComponentOptionsWithProps<
         PropsOptions,
         RawBindings,
         D,
@@ -187,7 +163,7 @@ export function defineComponent<
         EmitsNames,
         Props
       >
-    : ComponentOptionsWithProps<
+    : { functional?: never } & ComponentOptionsWithProps<
         PropsOptions,
         RawBindings,
         D,
@@ -199,3 +175,27 @@ export function defineComponent<
         EmitsNames
       >
 ): DefineComponent<PropsOptions, RawBindings, D, C, M, Mixin, Extends, Emits>
+
+/**
+ * overload 4.1: functional component with array props
+ */
+export function defineComponent<
+  PropNames extends string,
+  Props = Readonly<{ [key in PropNames]?: any }>
+>(options: {
+  functional: true
+  props?: PropNames[]
+  render?: (h: CreateElement, context: RenderContext<Props>) => any
+}): DefineComponent<Props>
+
+/**
+ * overload 4.2: functional component with object props
+ */
+export function defineComponent<
+  PropsOptions extends ComponentPropsOptions = ComponentPropsOptions,
+  Props = ExtractPropTypes<PropsOptions>
+>(options: {
+  functional: true
+  props?: PropsOptions
+  render?: (h: CreateElement, context: RenderContext<Props>) => any
+}): DefineComponent<PropsOptions>
