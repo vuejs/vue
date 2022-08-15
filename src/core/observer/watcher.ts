@@ -72,10 +72,8 @@ export default class Watcher implements DepTarget {
     isRenderWatcher?: boolean
   ) {
     recordEffectScope(this, activeEffectScope || (vm ? vm._scope : undefined))
-    if ((this.vm = vm)) {
-      if (isRenderWatcher) {
-        vm._watcher = this
-      }
+    if ((this.vm = vm) && isRenderWatcher) {
+      vm._watcher = this
     }
     // options
     if (options) {
