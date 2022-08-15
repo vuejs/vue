@@ -106,8 +106,8 @@ export type ThisTypedComponentOptionsWithArrayProps<
     Record<PropNames, any>,
     SetupBindings
   > & {
-    mixins?: Mixin[]
-    extends?: Extends
+    mixins?: (Mixin | typeof Vue)[]
+    extends?: Extends | typeof Vue
   } & ThisType<
     CombinedVueInstance<
       V,
@@ -143,8 +143,8 @@ export type ThisTypedComponentOptionsWithRecordProps<
     Props,
     SetupBindings
   > & {
-    mixins?: Mixin[]
-    extends?: Extends
+    mixins?: (Mixin | typeof Vue)[]
+    extends?: Extends | typeof Vue
   } & ThisType<
     CombinedVueInstance<
       V,
