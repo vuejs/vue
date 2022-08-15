@@ -106,7 +106,7 @@ export type ThisTypedComponentOptionsWithArrayProps<
     Record<PropNames, any>,
     SetupBindings
   > & {
-    mixin?: Mixin[]
+    mixins?: Mixin[]
     extends?: Extends
   } & ThisType<
     CombinedVueInstance<
@@ -143,7 +143,7 @@ export type ThisTypedComponentOptionsWithRecordProps<
     Props,
     SetupBindings
   > & {
-    mixin?: Mixin[]
+    mixins?: Mixin[]
     extends?: Extends
   } & ThisType<
     CombinedVueInstance<
