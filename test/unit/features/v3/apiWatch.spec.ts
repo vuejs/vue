@@ -542,7 +542,7 @@ describe('api: watch', () => {
     expect(cb).not.toHaveBeenCalled()
   })
 
-  it('should fire on component unmount w/ flush: pre', async () => {
+  it('should not fire on component unmount w/ flush: pre', async () => {
     const toggle = ref(true)
     const cb = vi.fn()
     const Comp = {
@@ -560,7 +560,7 @@ describe('api: watch', () => {
     expect(cb).not.toHaveBeenCalled()
     toggle.value = false
     await nextTick()
-    expect(cb).toHaveBeenCalledTimes(1)
+    expect(cb).not.toHaveBeenCalled()
   })
 
   // vuejs/core#1763

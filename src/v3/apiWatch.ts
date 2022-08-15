@@ -274,10 +274,7 @@ function doWatch(
   let oldValue = isMultiSource ? [] : INITIAL_WATCHER_VALUE
   // overwrite default run
   watcher.run = () => {
-    if (
-      !watcher.active &&
-      !(flush === 'pre' && instance && instance._isBeingDestroyed)
-    ) {
+    if (!watcher.active) {
       return
     }
     if (cb) {
