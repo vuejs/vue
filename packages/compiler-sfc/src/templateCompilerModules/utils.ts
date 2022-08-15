@@ -24,10 +24,15 @@ export function urlToRequire(
     // does not apply to absolute urls or urls that start with `@`
     // since they are aliases
     if (firstChar === '.' || firstChar === '~') {
+      // Allow for full hostnames provided in options.base
+      const base = parseUriParts(transformAssetUrlsOption.base)
+      const protocol = base.protocol || ''
+      const host = base.host ? protocol + '//' + base.host : ''
+      const basePath = base.path || '/'
       // when packaged in the browser, path will be using the posix-
       // only version provided by rollup-plugin-node-builtins.
-      return `"${(path.posix || path).join(
-        transformAssetUrlsOption.base,
+      return `"${host}${(path.posix || path).join(
+        basePath,
         uriParts.path + (uriParts.hash || '')
       )}"`
     }
@@ -64,7 +69,7 @@ function parseUriParts(urlString: string): UrlWithStringQuery {
     // @see https://nodejs.org/api/url.html#url_url_parse_urlstring_parsequerystring_slashesdenotehost
     if ('string' === typeof urlString) {
       // check is an uri
-      return uriParse(urlString) // take apart the uri
+      return uriParse(urlString, false, true) // take apart the uri
     }
   }
   return returnValue
