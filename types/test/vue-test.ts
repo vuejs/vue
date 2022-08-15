@@ -255,6 +255,11 @@ new Vue({
         return {
           foo: 123
         }
+      },
+      computed: {
+        bar() {
+          return 123
+        }
       }
     },
     {
@@ -265,5 +270,6 @@ new Vue({
   ],
   created() {
     this.hello(this.foo)
+    this.hello(this.bar)
   }
 })

@@ -3,7 +3,7 @@ import {
   ShallowUnwrapRef,
   UnwrapNestedRefs
 } from './v3-generated'
-import { UnionToIntersection } from './common'
+import { IfAny, UnionToIntersection } from './common'
 
 import { Vue, VueConstructor } from './vue'
 import {
@@ -57,6 +57,12 @@ type IsDefaultMixinComponent<T> = T extends ComponentOptionsMixin
     : false
   : false
 
+type inferData<T> = T extends { data?: infer D }
+  ? D extends (this: Vue) => infer R
+    ? IfAny<R, {}, R>
+    : IfAny<D, {}, D>
+  : {}
+
 type MixinToOptionTypes<T> = T extends ComponentOptionsBase<
   infer P,
   infer B,
@@ -70,6 +76,29 @@ type MixinToOptionTypes<T> = T extends ComponentOptionsBase<
   infer Defaults
 >
   ? OptionTypesType<P & {}, B & {}, D & {}, C & {}, M & {}, Defaults & {}> &
+      IntersectionMixin<Mixin> &
+      IntersectionMixin<Extends>
+  : // V3 data not assignable to V2 data
+  Omit<T, 'data'> extends ComponentOptionsBase<
+      infer P,
+      infer B,
+      any,
+      infer C,
+      infer M,
+      infer Mixin,
+      infer Extends,
+      any,
+      any,
+      infer Defaults
+    >
+  ? OptionTypesType<
+      P & {},
+      B & {},
+      inferData<T> & {},
+      C & {},
+      M & {},
+      Defaults & {}
+    > &
       IntersectionMixin<Mixin> &
       IntersectionMixin<Extends>
   : never

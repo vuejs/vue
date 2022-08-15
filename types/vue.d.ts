@@ -18,6 +18,7 @@ import {
   UnwrapMixinsType,
   IntersectionMixin
 } from './v3-component-public-instance'
+import { ExtractComputedReturns } from './v3-component-options'
 
 export interface CreateElement {
   (
@@ -100,14 +101,6 @@ export interface Vue<
 
 type ComponentMixin = ComponentOptions<any, any, any, any, any>
 
-// IntersectionMixin cannot infer `data` from ComponentOptions<...>
-type PrepareMixinData<M extends ComponentMixin, D = Required<M>['data']> = {
-  [K in keyof M]: K extends 'data'
-    ? D extends (...args: any) => infer R
-      ? (this: any) => R
-      : (this: any) => D
-    : M[K]
-}
 export type CombinedVueInstance<
   Instance extends Vue,
   Data,
@@ -117,14 +110,14 @@ export type CombinedVueInstance<
   SetupBindings = {},
   Mixin extends ComponentMixin = ComponentMixin,
   Extends extends ComponentMixin = ComponentMixin,
-  PublicMixin = IntersectionMixin<PrepareMixinData<Mixin>> &
+  PublicMixin = IntersectionMixin<Mixin> &
     IntersectionMixin<Extends> &
     IntersectionMixin<ComponentOptions<any, any, any, any, any>> // prevent produce `never` in UnwrapMixinsType
 > = UnwrapMixinsType<PublicMixin, 'D'> &
   Data &
   UnwrapMixinsType<PublicMixin, 'M'> &
   Methods &
-  UnwrapMixinsType<PublicMixin, 'C'> &
+  ExtractComputedReturns<UnwrapMixinsType<PublicMixin, 'C'>> &
   Computed &
   UnwrapMixinsType<PublicMixin, 'P'> &
   Props &
