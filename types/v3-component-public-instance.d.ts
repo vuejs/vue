@@ -3,7 +3,7 @@ import {
   ShallowUnwrapRef,
   UnwrapNestedRefs
 } from './v3-generated'
-import { IfAny, UnionToIntersection } from './common'
+import { UnionToIntersection } from './common'
 
 import { Vue, VueConstructor } from './vue'
 import {
