@@ -13,12 +13,15 @@ import {
 import { VNode, VNodeData, VNodeChildren, NormalizedScopedSlot } from './vnode'
 import { PluginFunction, PluginObject } from './plugin'
 import { DefineComponent } from './v3-define-component'
-import { nextTick } from './v3-generated'
+import { nextTick, UnwrapNestedRefs, ShallowUnwrapRef } from './v3-generated'
 import {
   UnwrapMixinsType,
   IntersectionMixin
 } from './v3-component-public-instance'
-import { ExtractComputedReturns } from './v3-component-options'
+import {
+  ExtractComputedReturns,
+  ComponentOptionsMixin
+} from './v3-component-options'
 
 export interface CreateElement {
   (
@@ -99,8 +102,6 @@ export interface Vue<
   $createElement: CreateElement
 }
 
-type ComponentMixin = ComponentOptions<any, any, any, any, any>
-
 export type CombinedVueInstance<
   Instance extends Vue,
   Data,
@@ -108,12 +109,10 @@ export type CombinedVueInstance<
   Computed,
   Props,
   SetupBindings = {},
-  Mixin extends ComponentMixin = ComponentMixin,
-  Extends extends ComponentMixin = ComponentMixin,
-  PublicMixin = IntersectionMixin<Mixin> &
-    IntersectionMixin<Extends> &
-    IntersectionMixin<ComponentOptions<any, any, any, any, any>> // prevent produce `never` in UnwrapMixinsType
-> = UnwrapMixinsType<PublicMixin, 'D'> &
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
+  PublicMixin = IntersectionMixin<Mixin> & IntersectionMixin<Extends>
+> = UnwrapNestedRefs<UnwrapMixinsType<PublicMixin, 'D'>> &
   Data &
   UnwrapMixinsType<PublicMixin, 'M'> &
   Methods &
@@ -122,7 +121,7 @@ export type CombinedVueInstance<
   UnwrapMixinsType<PublicMixin, 'P'> &
   Props &
   Instance &
-  UnwrapMixinsType<PublicMixin, 'B'> &
+  ShallowUnwrapRef<UnwrapMixinsType<PublicMixin, 'B'>> &
   (SetupBindings extends void ? {} : SetupBindings)
 
 export type ExtendedVue<
@@ -132,8 +131,8 @@ export type ExtendedVue<
   Computed,
   Props,
   SetupBindings = {},
-  Mixin extends ComponentMixin = ComponentMixin,
-  Extends extends ComponentMixin = ComponentMixin
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin
 > = VueConstructor<
   CombinedVueInstance<
     Instance,
@@ -171,8 +170,8 @@ export interface VueConstructor<V extends Vue = Vue> {
     Computed = object,
     PropNames extends string = never,
     SetupBindings = {},
-    Mixin extends ComponentMixin = ComponentMixin,
-    Extends extends ComponentMixin = ComponentMixin
+    Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+    Extends extends ComponentOptionsMixin = ComponentOptionsMixin
   >(
     options?: ThisTypedComponentOptionsWithArrayProps<
       V,
@@ -207,8 +206,8 @@ export interface VueConstructor<V extends Vue = Vue> {
     Computed = object,
     Props = object,
     SetupBindings = {},
-    Mixin extends ComponentMixin = ComponentMixin,
-    Extends extends ComponentMixin = ComponentMixin
+    Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+    Extends extends ComponentOptionsMixin = ComponentOptionsMixin
   >(
     options?: ThisTypedComponentOptionsWithRecordProps<
       V,
@@ -252,8 +251,8 @@ export interface VueConstructor<V extends Vue = Vue> {
     Computed,
     PropNames extends string = never,
     SetupBindings = {},
-    Mixin extends ComponentMixin = ComponentMixin,
-    Extends extends ComponentMixin = ComponentMixin
+    Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+    Extends extends ComponentOptionsMixin = ComponentOptionsMixin
   >(
     options?: ThisTypedComponentOptionsWithArrayProps<
       V,
@@ -285,8 +284,8 @@ export interface VueConstructor<V extends Vue = Vue> {
     Computed,
     Props,
     SetupBindings = {},
-    Mixin extends ComponentMixin = ComponentMixin,
-    Extends extends ComponentMixin = ComponentMixin
+    Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+    Extends extends ComponentOptionsMixin = ComponentOptionsMixin
   >(
     options?: ThisTypedComponentOptionsWithRecordProps<
       V,
@@ -353,8 +352,8 @@ export interface VueConstructor<V extends Vue = Vue> {
     Computed,
     PropNames extends string = never,
     SetupBindings = {},
-    Mixin extends ComponentMixin = ComponentMixin,
-    Extends extends ComponentMixin = ComponentMixin
+    Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+    Extends extends ComponentOptionsMixin = ComponentOptionsMixin
   >(
     id: string,
     definition?: ThisTypedComponentOptionsWithArrayProps<
@@ -383,8 +382,8 @@ export interface VueConstructor<V extends Vue = Vue> {
     Computed,
     Props,
     SetupBindings,
-    Mixin extends ComponentMixin = ComponentMixin,
-    Extends extends ComponentMixin = ComponentMixin
+    Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+    Extends extends ComponentOptionsMixin = ComponentOptionsMixin
   >(
     id: string,
     definition?: ThisTypedComponentOptionsWithRecordProps<

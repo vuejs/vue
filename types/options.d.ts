@@ -3,6 +3,7 @@ import { VNode, VNodeData, VNodeDirective, NormalizedScopedSlot } from './vnode'
 import { SetupContext } from './v3-setup-context'
 import { DebuggerEvent } from './v3-generated'
 import { DefineComponent } from './v3-define-component'
+import { ComponentOptionsMixin } from './v3-component-options'
 
 type Constructor = {
   new (...args: any[]): any
@@ -104,11 +105,11 @@ export type ThisTypedComponentOptionsWithArrayProps<
     Computed,
     PropNames[],
     Record<PropNames, any>,
-    SetupBindings
-  > & {
-    mixins?: (Mixin | typeof Vue)[]
-    extends?: Extends | typeof Vue
-  } & ThisType<
+    SetupBindings,
+    Mixin,
+    Extends
+  > &
+  ThisType<
     CombinedVueInstance<
       V,
       Data,
@@ -141,11 +142,11 @@ export type ThisTypedComponentOptionsWithRecordProps<
     Computed,
     RecordPropsDefinition<Props>,
     Props,
-    SetupBindings
-  > & {
-    mixins?: (Mixin | typeof Vue)[]
-    extends?: Extends | typeof Vue
-  } & ThisType<
+    SetupBindings,
+    Mixin,
+    Extends
+  > &
+  ThisType<
     CombinedVueInstance<
       V,
       Data,
@@ -170,7 +171,9 @@ export interface ComponentOptions<
   Computed = DefaultComputed,
   PropsDef = PropsDefinition<DefaultProps>,
   Props = DefaultProps,
-  RawBindings = {}
+  RawBindings = {},
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin
 > {
   data?: Data
   props?: PropsDef
@@ -229,12 +232,12 @@ export interface ComponentOptions<
   }
 
   parent?: Vue
-  mixins?: (ComponentOptions<Vue> | typeof Vue)[]
+  mixins?: (Mixin | ComponentOptions<Vue> | typeof Vue)[]
   name?: string
   // for SFC auto name inference w/ ts-loader check
   __name?: string
   // TODO: support properly inferred 'extends'
-  extends?: ComponentOptions<Vue> | typeof Vue
+  extends?: Extends | ComponentOptions<Vue> | typeof Vue
   delimiters?: [string, string]
   comments?: boolean
   inheritAttrs?: boolean
