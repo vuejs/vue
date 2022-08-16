@@ -251,6 +251,19 @@ describe('api: setup context', () => {
     expect(spy).toHaveBeenCalled()
   })
 
+  // #12743
+  it('directive resolution for shorthand', () => {
+    const spy = vi.fn()
+    new Vue({
+      setup: () => ({
+        __sfc: true,
+        vDir: spy
+      }),
+      template: `<div v-dir />`
+    }).$mount()
+    expect(spy).toHaveBeenCalled()
+  })
+  
   // #12561
   it('setup props should be reactive', () => {
     const msg = ref('hi')
