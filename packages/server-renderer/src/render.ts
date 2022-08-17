@@ -77,22 +77,23 @@ function waitForServerPrefetch(vm, resolve, reject) {
 }
 
 function renderNode(node, isRoot, context) {
-  if (node.isString) {
+  const {asyncFactory, componentOptions, isComment, isString, raw, text, tag } = node
+  if (isString) {
     renderStringNode(node, context)
-  } else if (isDef(node.componentOptions)) {
+  } else if (isDef(componentOptions)) {
     renderComponent(node, isRoot, context)
-  } else if (isDef(node.tag)) {
+  } else if (isDef(tag)) {
     renderElement(node, isRoot, context)
-  } else if (isTrue(node.isComment)) {
-    if (isDef(node.asyncFactory)) {
+  } else if (isTrue(isComment)) {
+    if (isDef(asyncFactory)) {
       // async component
       renderAsyncComponent(node, isRoot, context)
     } else {
-      context.write(`<!--${node.text}-->`, context.next)
+      context.write(`<!--${text}-->`, context.next)
     }
   } else {
     context.write(
-      node.raw ? node.text : escape(String(node.text)),
+      raw ? text : escape(String(text)),
       context.next
     )
   }
@@ -109,23 +110,17 @@ function registerComponentForCache(options, write) {
 }
 
 function renderComponent(node, isRoot, context) {
-  const { write, next, userContext } = context
-
+  const { write, next, userContext, has, get, cache } = context
   // check cache hit
-  const Ctor = node.componentOptions.Ctor
-  const getKey = Ctor.options.serverCacheKey
-  const name = Ctor.options.name
-  const cache = context.cache
-  const registerComponent = registerComponentForCache(Ctor.options, write)
-
+  const { Ctor: { options, options: { serverCacheKey: getKey, name } }, propsData } = node.componentOptions
+  const registerComponent = registerComponentForCache(options, write)
   if (isDef(getKey) && isDef(cache) && isDef(name)) {
-    const rawKey = getKey(node.componentOptions.propsData)
+    const rawKey = getKey(propsData)
     if (rawKey === false) {
       renderComponentInner(node, isRoot, context)
       return
     }
     const key = name + '::' + rawKey
-    const { has, get } = context
     if (isDef(has)) {
       has(key, hit => {
         if (hit === true && isDef(get)) {
@@ -157,7 +152,7 @@ function renderComponent(node, isRoot, context) {
     if (isDef(getKey) && isUndef(cache)) {
       warnOnce(
         `[vue-server-renderer] Component ${
-          Ctor.options.name || '(anonymous)'
+          name || '(anonymous)'
         } implemented serverCacheKey, ` +
           'but no cache was provided to the renderer.'
       )
@@ -215,14 +210,12 @@ function renderComponentInner(node, isRoot, context) {
 }
 
 function renderAsyncComponent(node, isRoot, context) {
-  const factory = node.asyncFactory
+  const { asyncFactory: factory, asyncMeta: { data, children, tag, context: nodeContext } } = node
 
   const resolve = comp => {
     if (comp.__esModule && comp.default) {
       comp = comp.default
     }
-    const { data, children, tag } = node.asyncMeta
-    const nodeContext = node.asyncMeta.context
     const resolvedNode: any = createComponent(
       comp,
       data,
@@ -281,23 +274,25 @@ function renderAsyncComponent(node, isRoot, context) {
 
 function renderStringNode(el, context) {
   const { write, next } = context
-  if (isUndef(el.children) || el.children.length === 0) {
-    write(el.open + (el.close || ''), next)
+  const { children: elChildren, open, close } = el
+  if (isUndef(elChildren) || elChildren.length === 0) {
+    write(open + (close || ''), next)
   } else {
-    const children: Array<VNode> = el.children
+    const children: Array<VNode> = elChildren
     context.renderStates.push({
       type: 'Element',
       children,
       rendered: 0,
       total: children.length,
-      endTag: el.close
+      endTag: close
     })
-    write(el.open, next)
+    write(open, next)
   }
 }
 
 function renderElement(el, isRoot, context) {
   const { write, next } = context
+  const { children: elChildren, fnOptions, tag } = el
 
   if (isTrue(isRoot)) {
     if (!el.data) el.data = {}
@@ -305,18 +300,18 @@ function renderElement(el, isRoot, context) {
     el.data.attrs[SSR_ATTR] = 'true'
   }
 
-  if (el.fnOptions) {
-    registerComponentForCache(el.fnOptions, write)
+  if (fnOptions) {
+    registerComponentForCache(fnOptions, write)
   }
 
   const startTag = renderStartingTag(el, context)
-  const endTag = `</${el.tag}>`
-  if (context.isUnaryTag(el.tag)) {
+  const endTag = `</${tag}>`
+  if (context.isUnaryTag(tag)) {
     write(startTag, next)
-  } else if (isUndef(el.children) || el.children.length === 0) {
+  } else if (isUndef(elChildren) || elChildren.length === 0) {
     write(startTag + endTag, next)
   } else {
-    const children: Array<VNode> = el.children
+    const children: Array<VNode> = elChildren
     context.renderStates.push({
       type: 'Element',
       children,
@@ -355,6 +350,7 @@ function getVShowDirectiveInfo(node: VNode): VNodeDirective | undefined {
 function renderStartingTag(node: VNode, context) {
   let markup = `<${node.tag}`
   const { directives, modules } = context
+  const { context: nodeContext, fnScopeId, parent } = node
 
   // construct synthetic data for module processing
   // because modules like style also produce code by parent VNode data
@@ -397,20 +393,20 @@ function renderStartingTag(node: VNode, context) {
   const activeInstance = context.activeInstance
   if (
     isDef(activeInstance) &&
-    activeInstance !== node.context &&
+    activeInstance !== nodeContext &&
     isDef((scopeId = activeInstance.$options._scopeId))
   ) {
     markup += ` ${scopeId as any}`
   }
-  if (isDef(node.fnScopeId)) {
-    markup += ` ${node.fnScopeId}`
+  if (isDef(fnScopeId)) {
+    markup += ` ${fnScopeId}`
   } else {
     while (isDef(node)) {
       //@ts-expect-error
-      if (isDef((scopeId = node.context.$options._scopeId))) {
+      if (isDef((scopeId = nodeContext.$options._scopeId))) {
         markup += ` ${scopeId}`
       }
-      node = node.parent!
+      node = parent!
     }
   }
   return markup + '>'
