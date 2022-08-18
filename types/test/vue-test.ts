@@ -1,4 +1,4 @@
-import Vue, { VNode } from '../index'
+import Vue, { VNode, defineComponent } from '../index'
 import { ComponentOptions } from '../options'
 
 class Test extends Vue {
@@ -244,5 +244,42 @@ const ComponentWithStyleInVNodeData = Vue.extend({
       elementWithStyleAsObject,
       elementWithStyleAsArrayOfObjects
     ])
+  }
+})
+
+// infer mixin type with new Vue() #12730
+new Vue({
+  mixins: [
+    defineComponent({
+      props: {
+        p1: String,
+        p2: {
+          type: Number,
+          default: 0
+        }
+      },
+      data() {
+        return {
+          foo: 123
+        }
+      },
+      computed: {
+        bar() {
+          return 123
+        }
+      }
+    }),
+    {
+      methods: {
+        hello(n: number) {}
+      }
+    }
+  ],
+  created() {
+    this.hello(this.foo)
+    this.hello(this.bar)
+    // @ts-expect-error
+    this.hello(this.p1)
+    this.hello(this.p2)
   }
 })

@@ -3,6 +3,7 @@ import { VNode, VNodeData, VNodeDirective, NormalizedScopedSlot } from './vnode'
 import { SetupContext } from './v3-setup-context'
 import { DebuggerEvent } from './v3-generated'
 import { DefineComponent } from './v3-define-component'
+import { ComponentOptionsMixin } from './v3-component-options'
 
 type Constructor = {
   new (...args: any[]): any
@@ -93,7 +94,9 @@ export type ThisTypedComponentOptionsWithArrayProps<
   Methods,
   Computed,
   PropNames extends string,
-  SetupBindings
+  SetupBindings,
+  Mixin,
+  Extends
 > = object &
   ComponentOptions<
     V,
@@ -102,7 +105,9 @@ export type ThisTypedComponentOptionsWithArrayProps<
     Computed,
     PropNames[],
     Record<PropNames, any>,
-    SetupBindings
+    SetupBindings,
+    Mixin,
+    Extends
   > &
   ThisType<
     CombinedVueInstance<
@@ -111,7 +116,9 @@ export type ThisTypedComponentOptionsWithArrayProps<
       Methods,
       Computed,
       Readonly<Record<PropNames, any>>,
-      SetupBindings
+      SetupBindings,
+      Mixin,
+      Extends
     >
   >
 
@@ -124,7 +131,9 @@ export type ThisTypedComponentOptionsWithRecordProps<
   Methods,
   Computed,
   Props,
-  SetupBindings
+  SetupBindings,
+  Mixin,
+  Extends
 > = object &
   ComponentOptions<
     V,
@@ -133,7 +142,9 @@ export type ThisTypedComponentOptionsWithRecordProps<
     Computed,
     RecordPropsDefinition<Props>,
     Props,
-    SetupBindings
+    SetupBindings,
+    Mixin,
+    Extends
   > &
   ThisType<
     CombinedVueInstance<
@@ -142,7 +153,9 @@ export type ThisTypedComponentOptionsWithRecordProps<
       Methods,
       Computed,
       Readonly<Props>,
-      SetupBindings
+      SetupBindings,
+      Mixin,
+      Extends
     >
   >
 
@@ -158,7 +171,9 @@ export interface ComponentOptions<
   Computed = DefaultComputed,
   PropsDef = PropsDefinition<DefaultProps>,
   Props = DefaultProps,
-  RawBindings = {}
+  RawBindings = {},
+  Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin
 > {
   data?: Data
   props?: PropsDef
@@ -217,12 +232,12 @@ export interface ComponentOptions<
   }
 
   parent?: Vue
-  mixins?: (ComponentOptions<Vue> | typeof Vue)[]
+  mixins?: (Mixin | ComponentOptions<Vue> | typeof Vue)[]
   name?: string
   // for SFC auto name inference w/ ts-loader check
   __name?: string
   // TODO: support properly inferred 'extends'
-  extends?: ComponentOptions<Vue> | typeof Vue
+  extends?: Extends | ComponentOptions<Vue> | typeof Vue
   delimiters?: [string, string]
   comments?: boolean
   inheritAttrs?: boolean

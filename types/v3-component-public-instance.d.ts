@@ -79,11 +79,11 @@ type ExtractMixin<T> = {
   Mixin: MixinToOptionTypes<T>
 }[T extends ComponentOptionsMixin ? 'Mixin' : never]
 
-type IntersectionMixin<T> = IsDefaultMixinComponent<T> extends true
+export type IntersectionMixin<T> = IsDefaultMixinComponent<T> extends true
   ? OptionTypesType<{}, {}, {}, {}, {}, {}>
   : UnionToIntersection<ExtractMixin<T>>
 
-type UnwrapMixinsType<
+export type UnwrapMixinsType<
   T,
   Type extends OptionTypesKeys
 > = T extends OptionTypesType ? T[Type] : never
