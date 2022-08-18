@@ -20,7 +20,7 @@ import { Data, HasDefined } from './common'
 import { EmitsOptions } from './v3-setup-context'
 import { CreateElement, RenderContext } from './umd'
 
-type DefineComponent<
+export type DefineComponent<
   PropsOrPropOptions = {},
   RawBindings = {},
   D = {},

@@ -41,7 +41,7 @@ export * from './v3-setup-helpers'
 
 export { Data } from './common'
 export { SetupContext } from './v3-setup-context'
-export { defineComponent } from './v3-define-component'
+export { defineComponent, DefineComponent } from './v3-define-component'
 export { defineAsyncComponent } from './v3-define-async-component'
 export {
   SetupFunction,
