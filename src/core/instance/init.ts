@@ -34,6 +34,7 @@ export function initMixin(Vue: typeof Component) {
     vm.__v_skip = true
     // effect scope
     vm._scope = new EffectScope(true /* detached */)
+    vm._scope._vm = true
     // merge options
     if (options && options._isComponent) {
       // optimize internal component instantiation
