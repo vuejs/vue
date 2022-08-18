@@ -42,7 +42,12 @@ export function rewriteDefault(
   }).program.body
   ast.forEach(node => {
     if (node.type === 'ExportDefaultDeclaration') {
-      s.overwrite(node.start!, node.declaration.start!, `const ${as} = `)
+      if (node.declaration.type === 'ClassDeclaration') {
+        s.overwrite(node.start!, node.declaration.id.start!, `class `)
+        s.append(`\nconst ${as} = ${node.declaration.id.name}`)
+      } else {
+        s.overwrite(node.start!, node.declaration.start!, `const ${as} = `)
+      }
     }
     if (node.type === 'ExportNamedDeclaration') {
       for (const specifier of node.specifiers) {
