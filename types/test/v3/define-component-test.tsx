@@ -1165,3 +1165,7 @@ defineComponent({
     return h('div', {}, [...this.$slots.default!])
   }
 })
+
+// #12742 allow attaching custom properties (consistent with v3)
+const Foo = defineComponent({})
+Foo.foobar = 123

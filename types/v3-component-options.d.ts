@@ -88,6 +88,9 @@ export interface ComponentOptionsBase<
       'data' | 'computed' | 'methods' | 'setup' | 'props' | 'mixins' | 'extends'
     >,
     ComponentCustomOptions {
+  // allow any options
+  [key: string]: any
+
   // rewrite options api types
   data?: (
     this: CreateComponentPublicInstance<Props, {}, {}, {}, M, Mixin, Extends>,
