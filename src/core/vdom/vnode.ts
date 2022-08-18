@@ -33,6 +33,7 @@ export default class VNode {
   fnOptions?: ComponentOptions | null // for SSR caching
   devtoolsMeta?: Object | null // used to store functional render context for devtools
   fnScopeId?: string | null // functional scope id support
+  isComponentRootElement?: boolean | null // for SSR directives
 
   constructor(
     tag?: string,

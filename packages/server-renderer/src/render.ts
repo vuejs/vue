@@ -206,6 +206,11 @@ function renderComponentInner(node, isRoot, context) {
       type: 'Component',
       prevActive
     })
+    if (isDef(node.data) && isDef(node.data.directives)) {
+      childNode.data = childNode.data || {}
+      childNode.data.directives = node.data.directives
+      childNode.isComponentRootElement = true
+    }
     renderNode(childNode, isRoot, context)
   }
 
@@ -372,7 +377,10 @@ function renderStartingTag(node: VNode, context) {
           if (dirRenderer) {
             // directives mutate the node's data
             // which then gets rendered by modules
-            dirRenderer(node, dirs[i])
+            dirRenderer(
+              node.isComponentRootElement ? node.parent : node,
+              dirs[i]
+            )
           }
         }
       }
