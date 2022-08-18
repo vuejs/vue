@@ -127,7 +127,7 @@ function initData(vm: Component) {
     __DEV__ &&
       warn(
         'data functions should return an object:\n' +
-          'https://vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
+          'https://v2.vuejs.org/v2/guide/components.html#data-Must-Be-a-Function',
         vm
       )
   }

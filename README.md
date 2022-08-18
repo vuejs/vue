@@ -73,7 +73,7 @@ Vue.js supports all browsers that are [ES5-compliant](https://kangax.github.io/c
 
 ## Documentation
 
-To check out [live examples](https://vuejs.org/v2/examples/) and docs, visit [vuejs.org](https://vuejs.org).
+To check out [live examples](https://v2.vuejs.org/v2/examples/) and docs, visit [vuejs.org](https://v2.vuejs.org).
 
 ## Questions
 
