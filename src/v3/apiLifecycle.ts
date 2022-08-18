@@ -42,7 +42,6 @@ export const onBeforeUpdate = createLifeCycle('beforeUpdate')
 export const onUpdated = createLifeCycle('updated')
 export const onBeforeUnmount = createLifeCycle('beforeDestroy')
 export const onUnmounted = createLifeCycle('destroyed')
-export const onErrorCaptured = createLifeCycle('errorCaptured')
 export const onActivated = createLifeCycle('activated')
 export const onDeactivated = createLifeCycle('deactivated')
 export const onServerPrefetch = createLifeCycle('serverPrefetch')
@@ -51,3 +50,19 @@ export const onRenderTracked =
   createLifeCycle<(e: DebuggerEvent) => any>('renderTracked')
 export const onRenderTriggered =
   createLifeCycle<(e: DebuggerEvent) => any>('renderTriggered')
+
+export type ErrorCapturedHook<TError = unknown> = (
+  err: TError,
+  instance: any,
+  info: string
+) => boolean | void
+
+const injectErrorCapturedHook =
+  createLifeCycle<ErrorCapturedHook<any>>('errorCaptured')
+
+export function onErrorCaptured<TError = Error>(
+  hook: ErrorCapturedHook<TError>,
+  target: any = currentInstance
+) {
+  injectErrorCapturedHook(hook, target)
+}
