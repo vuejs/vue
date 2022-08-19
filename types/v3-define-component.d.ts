@@ -72,7 +72,7 @@ export type DefineComponent<
  */
 export function defineComponent<
   RawBindings,
-  D = Data,
+  D = {},
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
@@ -101,8 +101,8 @@ export function defineComponent<
  */
 export function defineComponent<
   PropNames extends string,
-  RawBindings = Data,
-  D = Data,
+  RawBindings = {},
+  D = {},
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
@@ -140,8 +140,8 @@ export function defineComponent<
  */
 export function defineComponent<
   Props,
-  RawBindings = Data,
-  D = Data,
+  RawBindings = {},
+  D = {},
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,

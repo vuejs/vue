@@ -1166,6 +1166,62 @@ defineComponent({
   }
 })
 
-// #12742 allow attaching custom properties (consistent with v3)
-const Foo = defineComponent({})
-Foo.foobar = 123
+describe('constructor attach custom properties', () => {
+  // #12742 allow attaching custom properties (consistent with v3)
+  const Foo = defineComponent({})
+  Foo.foobar = 123
+})
+
+describe('constructor instance type', () => {
+  const Comp = defineComponent({
+    data() {
+      return {
+        a: 1
+      }
+    },
+
+    computed: {
+      ac() {
+        return 1
+      }
+    },
+
+    methods: {
+      callA(b: number) {
+        return b
+      }
+    },
+
+    setup() {
+      return {
+        sa: '1'
+      }
+    }
+  })
+
+  const comp = new Comp()
+
+  expectType<number>(comp.a)
+  expectType<number>(comp.ac)
+  expectType<string>(comp.sa)
+  expectType<(b: number) => number>(comp.callA)
+})
+
+describe('should report non-existent properties in instance', () => {
+  const Foo = defineComponent({})
+  const instance = new Foo()
+  // @ts-expect-error
+  instance.foo
+
+  const Foo2 = defineComponent({
+    data() {
+      return {}
+    },
+    methods: {
+      example() {}
+    }
+  })
+  const instance2 = new Foo2()
+  // @ts-expect-error
+  instance2.foo
+})
