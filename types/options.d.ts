@@ -95,8 +95,8 @@ export type ThisTypedComponentOptionsWithArrayProps<
   Computed,
   PropNames extends string,
   SetupBindings,
-  Mixin,
-  Extends
+  Mixin extends ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin
 > = object &
   ComponentOptions<
     V,
@@ -132,8 +132,8 @@ export type ThisTypedComponentOptionsWithRecordProps<
   Computed,
   Props,
   SetupBindings,
-  Mixin,
-  Extends
+  Mixin extends ComponentOptionsMixin,
+  Extends extends ComponentOptionsMixin
 > = object &
   ComponentOptions<
     V,
