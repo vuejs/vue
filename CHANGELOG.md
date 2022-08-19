@@ -1,3 +1,29 @@
+## [2.7.9](https://github.com/vuejs/vue/compare/v2.7.8...v2.7.9) (2022-08-19)
+
+
+### Bug Fixes
+
+* **compiler-sfc:** allow full hostnames in asset url base ([#12732](https://github.com/vuejs/vue/issues/12732)) ([5c742eb](https://github.com/vuejs/vue/commit/5c742eb2e0d8dad268fb29ed4f92d286b5e0f4b5)), closes [#12731](https://github.com/vuejs/vue/issues/12731)
+* **compiler-sfc:** rewriteDefault for class with decorators ([#12747](https://github.com/vuejs/vue/issues/12747)) ([5221d4d](https://github.com/vuejs/vue/commit/5221d4d3b6049c87d196d99dbb64bcd3f3b07279))
+* directives shorthand normalize error ([#12744](https://github.com/vuejs/vue/issues/12744)) ([2263948](https://github.com/vuejs/vue/commit/2263948c249e7486403bc5880712e6d9fd15c17f)), closes [#12743](https://github.com/vuejs/vue/issues/12743)
+* ensure render watcher of manually created instance is correctly tracked in owner scope ([bd89ce5](https://github.com/vuejs/vue/commit/bd89ce53a9de417a9372630bb5d433a40acc1a53)), closes [#12701](https://github.com/vuejs/vue/issues/12701)
+* fix effect scope tracking for manually created instances ([7161176](https://github.com/vuejs/vue/commit/7161176cd0dff10d65ab58e266018aff2660610f)), closes [#12705](https://github.com/vuejs/vue/issues/12705)
+* **ssr:** fix on-component directives rendering ([#12661](https://github.com/vuejs/vue/issues/12661)) ([165a14a](https://github.com/vuejs/vue/commit/165a14a6c6c406176037465d2961259c5c980399)), closes [#10733](https://github.com/vuejs/vue/issues/10733)
+* **types:** allow attaching unknown options to defined component ([b4bf4c5](https://github.com/vuejs/vue/commit/b4bf4c52ad31e02307cfd4d643dc5610c893e3ba)), closes [#12742](https://github.com/vuejs/vue/issues/12742)
+* **types:** fix missing error for accessing undefined instance properties ([8521f9d](https://github.com/vuejs/vue/commit/8521f9d3f63d26bde99b747f0cb14d0ac5ba5971)), closes [#12718](https://github.com/vuejs/vue/issues/12718)
+* **types:** fix options suggestions when using defineComponent ([4b37b56](https://github.com/vuejs/vue/commit/4b37b568c7c3fd238aa61fcc956f882223f8e87f)), closes [#12736](https://github.com/vuejs/vue/issues/12736)
+* **types:** Make SetupBindings optional on ExtendedVue and CombinedVueInstance ([#12727](https://github.com/vuejs/vue/issues/12727)) ([00458cd](https://github.com/vuejs/vue/commit/00458cd38d209410d3c675729230a42a0a34a4b9)), closes [#12726](https://github.com/vuejs/vue/issues/12726) [#12717](https://github.com/vuejs/vue/issues/12717)
+* **watch:** avoid pre watcher firing on unmount ([f0057b1](https://github.com/vuejs/vue/commit/f0057b101e6451d5095cdb7fd6308fd31ac0450c)), closes [#12703](https://github.com/vuejs/vue/issues/12703)
+
+
+### Features
+
+* **types:** enhance type for onErrorCaptured ([#12735](https://github.com/vuejs/vue/issues/12735)) ([bba6b3d](https://github.com/vuejs/vue/commit/bba6b3d6b4e3e26d28abbf20e74ec2f3e64f1a92))
+* **types:** export DefineComponent ([80d1baf](https://github.com/vuejs/vue/commit/80d1baf92050da411fb1bfe714401c498001dd36)), closes [#12748](https://github.com/vuejs/vue/issues/12748)
+* **types:** support mixins inference for new Vue() ([#12737](https://github.com/vuejs/vue/issues/12737)) ([89a6b5e](https://github.com/vuejs/vue/commit/89a6b5e8658a6e3ae2cf649829901784ac9deb3c)), closes [#12730](https://github.com/vuejs/vue/issues/12730)
+
+
+
 ## [2.7.8](https://github.com/vuejs/vue/compare/v2.7.7...v2.7.8) (2022-07-22)
 
 
