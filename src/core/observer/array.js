@@ -25,7 +25,9 @@ methodsToPatch.forEach(function (method) {
   // cache original method
   const original = arrayProto[method]
   def(arrayMethods, method, function mutator (...args) {
+    // this表示调用数组方法的数组
     const result = original.apply(this, args)
+    // 拿到Observer实例
     const ob = this.__ob__
     let inserted
     switch (method) {

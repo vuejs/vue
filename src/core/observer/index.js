@@ -41,7 +41,7 @@ export class Observer {
 
   constructor (value: any) {
     this.value = value
-    this.dep = new Dep()
+    this.dep = new Dep() // 用于收集数组的依赖
     this.vmCount = 0
     def(value, '__ob__', this)
     if (Array.isArray(value)) {
@@ -86,6 +86,7 @@ export class Observer {
  */
 function protoAugment (target, src: Object) {
   /* eslint-disable no-proto */
+  // 覆盖数组的原型
   target.__proto__ = src
   /* eslint-enable no-proto */
 }
@@ -173,6 +174,7 @@ export function defineReactive (
     set: function reactiveSetter (newVal) {
       const value = getter ? getter.call(obj) : val
       /* eslint-disable no-self-compare */
+      // 数据没有变化或者NaN => NaN
       if (newVal === value || (newVal !== newVal && value !== value)) {
         return
       }
