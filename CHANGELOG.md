@@ -1,3 +1,14 @@
+## [2.7.10](https://github.com/vuejs/vue/compare/v2.7.9...v2.7.10) (2022-08-23)
+
+
+### Bug Fixes
+
+* **compiler-sfc:** avoid deindent when lang is jsx/tsx ([46ca7bc](https://github.com/vuejs/vue/commit/46ca7bcddc06c50796ccff82d8c45693f1f14f47)), closes [#12755](https://github.com/vuejs/vue/issues/12755)
+* fix parent of multi-nested HOC $el not updating ([#12757](https://github.com/vuejs/vue/issues/12757)) ([e0b26c4](https://github.com/vuejs/vue/commit/e0b26c483a1ba407a818b1fcba1a439df24e84a8)), closes [#12589](https://github.com/vuejs/vue/issues/12589)
+* **types:** Add missing type parameter constraints ([#12754](https://github.com/vuejs/vue/issues/12754)) ([810f6d1](https://github.com/vuejs/vue/commit/810f6d12edea47cde7f39eaf7ec3ae1b7300d40c))
+
+
+
 ## [2.7.9](https://github.com/vuejs/vue/compare/v2.7.8...v2.7.9) (2022-08-19)
 
 
