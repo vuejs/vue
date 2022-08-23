@@ -257,11 +257,15 @@ describe('vdom patch: edge cases', () => {
 
     expect(vm.$refs.foo.$refs.bar.$el.tagName).toBe('DIV')
     expect(vm.$refs.foo.$refs.bar.$el.className).toBe(`hello`)
+    expect(vm.$el.tagName).toBe('DIV')
+    expect(vm.$el.className).toBe(`hello`)
 
     vm.$refs.foo.$refs.bar.ok = false
     waitForUpdate(() => {
       expect(vm.$refs.foo.$refs.bar.$el.tagName).toBe('SPAN')
       expect(vm.$refs.foo.$refs.bar.$el.className).toBe(`hello`)
+      expect(vm.$el.tagName).toBe('SPAN')
+      expect(vm.$el.className).toBe(`hello`)
     }).then(done)
   })
 
