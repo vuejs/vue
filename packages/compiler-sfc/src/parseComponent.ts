@@ -179,11 +179,11 @@ export function parseComponent(
       let text = source.slice(currentBlock.start, currentBlock.end)
       if (
         options.deindent === true ||
-        // by default, deindent unless it's script with default lang or ts
+        // by default, deindent unless it's script with default lang or (j/t)sx?
         (options.deindent !== false &&
           !(
             currentBlock.type === 'script' &&
-            (!currentBlock.lang || currentBlock.lang === 'ts')
+            (!currentBlock.lang || /^(j|t)sx?$/.test(currentBlock.lang))
           ))
       ) {
         text = deindent(text)
