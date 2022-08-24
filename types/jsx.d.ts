@@ -24,6 +24,7 @@
 //      Sebastian Silbermann <https://github.com/eps1lon>
 
 import * as CSS from 'csstype'
+import { Ref } from './v3-generated' 
 
 export interface CSSProperties
   extends CSS.Properties<string | number>,
@@ -1302,7 +1303,7 @@ type EventHandlers<E> = {
 
 type ReservedProps = {
   key?: string | number | symbol
-  ref?: VNodeData['ref']
+  ref?: VNodeData['ref'] | Ref
   /**
    * @deprecated Old named slot syntax has been deprecated, use the new syntax
    * instead: `<template v-slot:name>`
