@@ -69,7 +69,7 @@ export interface VNodeData {
   key?: string | number
   slot?: string
   scopedSlots?: { [key: string]: ScopedSlot | undefined }
-  ref?: string
+  ref?: string | Function
   refInFor?: boolean
   tag?: string
   staticClass?: string
