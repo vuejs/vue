@@ -20,7 +20,6 @@ let warned = Object.create(null)
 const warnOnce = msg => {
   if (!warned[msg]) {
     warned[msg] = true
-    // eslint-disable-next-line no-console
     console.warn(`\n\u001b[31m${msg}\u001b[39m\n`)
   }
 }

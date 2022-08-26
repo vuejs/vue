@@ -234,14 +234,12 @@ describe('Options props', () => {
     })
 
     it('primitive wrapper objects', () => {
-      /* eslint-disable no-new-wrappers */
       makeInstance(new String('s'), String)
       expect((console.error as any).mock.calls.length).toBe(0)
       makeInstance(new Number(1), Number)
       expect((console.error as any).mock.calls.length).toBe(0)
       makeInstance(new Boolean(true), Boolean)
       expect((console.error as any).mock.calls.length).toBe(0)
-      /* eslint-enable no-new-wrappers */
     })
 
     if (hasSymbol) {

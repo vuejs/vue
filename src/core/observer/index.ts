@@ -58,9 +58,7 @@ export class Observer {
     if (isArray(value)) {
       if (!mock) {
         if (hasProto) {
-          /* eslint-disable no-proto */
           ;(value as any).__proto__ = arrayMethods
-          /* eslint-enable no-proto */
         } else {
           for (let i = 0, l = arrayKeys.length; i < l; i++) {
             const key = arrayKeys[i]

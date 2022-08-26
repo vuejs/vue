@@ -33,7 +33,7 @@ importers:
       marked: ^4.0.16
       minimist: ^1.2.6
       postcss: ^8.4.14
-      prettier: ^2.6.2
+      prettier: ^2.7.1
       puppeteer: ^14.3.0
       rimraf: ^3.0.2
       rollup: ^2.75.6
@@ -78,7 +78,7 @@ importers:
       marked: 4.0.16
       minimist: 1.2.6
       postcss: 8.4.14
-      prettier: 2.6.2
+      prettier: 2.7.1
       puppeteer: 14.3.0
       rimraf: 3.0.2
       rollup: 2.75.6
@@ -1650,8 +1650,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
-      is-text-path: 1.0.1
       JSONStream: 1.3.5
+      is-text-path: 1.0.1
       lodash: 4.17.21
       meow: 8.1.2
       split2: 3.2.2
@@ -4668,8 +4668,8 @@ packages:
     engines: {node: '>= 0.8.0'}
     dev: true
 
-  /prettier/2.6.2:
-    resolution: {integrity: sha512-PkUpF+qoXTqhOeWL9fu7As8LXsIUZ1WYaJiY/a7McAQzxjk82OF0tibkFXVCDImZtWxbvojFjerkiLb0/q8mew==}
+  /prettier/2.7.1:
+    resolution: {integrity: sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g==}
     engines: {node: '>=10.13.0'}
     hasBin: true
     dev: true
@@ -6535,7 +6535,7 @@ packages:
   'file:':
     resolution: {directory: '', type: directory}
     name: vue
-    version: 2.7.0-alpha.6
+    version: 2.7.10
     dependencies:
       '@vue/compiler-sfc': link:packages/compiler-sfc
       csstype: 3.1.0

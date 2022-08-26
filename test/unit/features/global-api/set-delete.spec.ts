@@ -45,7 +45,6 @@ describe('Global API: set/delete', () => {
           expect(vm.$el.innerHTML).toBe(
             '<div>0-a</div><div>1-d</div><div>2-e</div>'
           )
-          /* eslint-disable no-new-wrappers */
           Vue.set(vm.list, new Number(1), 'f')
         })
         .then(() => {
@@ -178,7 +177,6 @@ describe('Global API: set/delete', () => {
         })
         .then(() => {
           expect(vm.$el.innerHTML).toBe('<p>A</p>')
-          /* eslint-disable no-new-wrappers */
           Vue.delete(vm.lists, new Number(0) as number)
         })
         .then(() => {

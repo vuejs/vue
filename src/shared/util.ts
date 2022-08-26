@@ -252,8 +252,6 @@ export function toObject(arr: Array<any>): object {
   return res
 }
 
-/* eslint-disable no-unused-vars */
-
 /**
  * Perform no operation.
  * Stubbing args to make Flow happy without leaving useless transpiled code
@@ -265,8 +263,6 @@ export function noop(a?: any, b?: any, c?: any) {}
  * Always return false.
  */
 export const no = (a?: any, b?: any, c?: any) => false
-
-/* eslint-enable no-unused-vars */
 
 /**
  * Return the same value.

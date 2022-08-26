@@ -131,7 +131,6 @@ describe('Observer', () => {
     const obj: any = {}
     let val = 10
     Object.defineProperty(obj, 'a', {
-      // eslint-disable-line accessor-pairs
       configurable: true,
       enumerable: true,
       set(v) {
@@ -230,7 +229,6 @@ describe('Observer', () => {
       },
       set(v) {
         this.val = v
-        // eslint-disable-next-line no-setter-return
         return this.val
       }
     })

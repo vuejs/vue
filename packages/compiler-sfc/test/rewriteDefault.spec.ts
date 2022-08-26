@@ -206,7 +206,10 @@ describe('compiler sfc: rewriteDefault', () => {
 
   test('@Component\nexport default class w/ comments', async () => {
     expect(
-      rewriteDefault(`// export default\n@Component\nexport default class Foo {}`, 'script')
+      rewriteDefault(
+        `// export default\n@Component\nexport default class Foo {}`,
+        'script'
+      )
     ).toMatchInlineSnapshot(`
       "// export default
       @Component
@@ -231,7 +234,8 @@ describe('compiler sfc: rewriteDefault', () => {
   test('@Component\nexport default class w/ comments 3', async () => {
     expect(
       rewriteDefault(
-        `/*\n@Component\nexport default class Foo {}*/\n` + `export default class Bar {}`,
+        `/*\n@Component\nexport default class Foo {}*/\n` +
+          `export default class Bar {}`,
         'script'
       )
     ).toMatchInlineSnapshot(`

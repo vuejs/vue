@@ -4,11 +4,9 @@ import { parseFilters } from './parser/filter-parser'
 
 type Range = { start?: number; end?: number }
 
-/* eslint-disable no-unused-vars */
 export function baseWarn(msg: string, range?: Range) {
   console.error(`[Vue compiler]: ${msg}`)
 }
-/* eslint-enable no-unused-vars */
 
 export function pluckModuleFunction<T, K extends keyof T>(
   modules: Array<T> | undefined,

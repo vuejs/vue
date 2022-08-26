@@ -263,7 +263,7 @@ describe('api: setup context', () => {
     }).$mount()
     expect(spy).toHaveBeenCalled()
   })
-  
+
   // #12561
   it('setup props should be reactive', () => {
     const msg = ref('hi')

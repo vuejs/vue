@@ -1,6 +1,6 @@
 'use strict'
 
-const self = (global || root) // eslint-disable-line
+const self = (global || root)
 
 self.performance = {
   now: function () {

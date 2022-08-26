@@ -14,17 +14,13 @@ describe('Options name', () => {
       name: 'Hyper*Vue'
     })
 
-    /* eslint-disable */
     expect(`Invalid component name: "Hyper*Vue".`).toHaveBeenWarned()
-    /* eslint-enable */
 
     Vue.extend({
       name: '2Cool2BValid'
     })
 
-    /* eslint-disable */
     expect(`Invalid component name: "2Cool2BValid".`).toHaveBeenWarned()
-    /* eslint-enable */
   })
 
   it('id should not override given name when using Vue.component', () => {

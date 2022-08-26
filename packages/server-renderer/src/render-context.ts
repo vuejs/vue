@@ -73,13 +73,11 @@ export class RenderContext {
 
   //@ts-expect-error
   next() {
-    // eslint-disable-next-line
     while (true) {
       const lastState = this.renderStates[this.renderStates.length - 1]
       if (isUndef(lastState)) {
         return this.done()
       }
-      /* eslint-disable no-case-declarations */
       switch (lastState.type) {
         case 'Element':
         case 'Fragment':

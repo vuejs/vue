@@ -1,5 +1,3 @@
-/* eslint-disable no-unused-vars */
-
 'use strict'
 
 process.env.NODE_ENV = 'production'

@@ -39,9 +39,7 @@ export function generateCodeFrame(
 function repeat(str: string, n: number) {
   let result = ''
   if (n > 0) {
-    // eslint-disable-next-line no-constant-condition
     while (true) {
-      // eslint-disable-line
       if (n & 1) result += str
       n >>>= 1
       if (n <= 0) break
