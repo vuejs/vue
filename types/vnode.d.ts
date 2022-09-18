@@ -1,3 +1,4 @@
+import { StyleValue } from './jsx'
 import { Vue } from './vue'
 import { DirectiveFunction, DirectiveOptions } from './options'
 
@@ -75,7 +76,7 @@ export interface VNodeData {
   staticClass?: string
   class?: any
   staticStyle?: { [key: string]: any }
-  style?: string | object[] | object
+  style?: StyleValue
   props?: { [key: string]: any }
   attrs?: { [key: string]: any }
   domProps?: { [key: string]: any }
