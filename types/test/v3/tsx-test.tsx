@@ -1,5 +1,5 @@
 import { VNode, defineComponent, ref } from '../../index'
-import { expectType } from '../utils'
+import { expectType, expectError } from '../utils'
 
 expectType<VNode>(<div />)
 expectType<JSX.Element>(<div />)
@@ -47,7 +47,7 @@ const Foo = defineComponent({
 })
 
 // @ts-expect-error
-;<Foo />
+;<Foo foo="bax" />
 // @ts-expect-error
 ;<Foo bar="1" />
 // @ts-expect-error
