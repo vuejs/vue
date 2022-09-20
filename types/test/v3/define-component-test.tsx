@@ -5,7 +5,8 @@ import {
   PropType,
   ref,
   reactive,
-  ComponentPublicInstance
+  ComponentPublicInstance,
+  DefineComponent
 } from '../../index'
 import { describe, test, expectType, expectError, IsUnion } from '../utils'
 
@@ -828,6 +829,21 @@ describe('defineComponent', () => {
     })
   })
 })
+
+describe('union props DefineComponent', () => {
+  type Props = { a: string, b: number } | { a: number }
+  const MyComponent = {} as DefineComponent<Props>
+  expectType<JSX.Element>(<MyComponent a="1" b={9} />)
+  expectType<JSX.Element>(<MyComponent a={0} />)
+  // @ts-expect-error
+  expectError(<MyComponent a="2" />)
+  // @ts-expect-error
+  expectError(<MyComponent a={2} b />)
+  // @ts-expect-error
+  expectError(<MyComponent b={2} />)
+})
+
+
 
 describe('emits', () => {
   // Note: for TSX inference, ideally we want to map emits to onXXX props,

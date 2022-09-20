@@ -48,7 +48,7 @@ export type DefineComponent<
     E,
     Props,
     Defaults,
-    true
+    PropsOrPropOptions extends ComponentPropsOptions ? true : false
   > &
     Props
 > &
