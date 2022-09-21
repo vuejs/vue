@@ -70,7 +70,11 @@ function createReadonly(target: any, shallow: boolean) {
   }
 
   const proxy = Object.create(Object.getPrototypeOf(target))
-  def(target, existingFlag, proxy)
+  
+  // skip frozen object
+  if (Object.isExtensible(target)) {
+    def(target, existingFlag, proxy)
+  }
 
   def(proxy, ReactiveFlags.IS_READONLY, true)
   def(proxy, ReactiveFlags.RAW, target)
