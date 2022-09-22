@@ -21,7 +21,7 @@ export default class Dep {
   }
 
   addSub (sub: Watcher) {
-    this.subs.push(sub)
+    this.subs.push(sub) // dep收集watcher
   }
 
   removeSub (sub: Watcher) {
@@ -30,7 +30,7 @@ export default class Dep {
 
   depend () {
     if (Dep.target) {
-      Dep.target.addDep(this)
+      Dep.target.addDep(this)   // watcher收集dep
     }
   }
 
