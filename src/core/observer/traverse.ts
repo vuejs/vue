@@ -21,6 +21,7 @@ function _traverse(val: any, seen: SimpleSet) {
   const isA = isArray(val)
   if (
     (!isA && !isObject(val)) ||
+    val.__v_skip /* ReactiveFlags.SKIP */ ||
     Object.isFrozen(val) ||
     val instanceof VNode
   ) {
