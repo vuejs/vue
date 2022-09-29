@@ -24,7 +24,6 @@
 //      Sebastian Silbermann <https://github.com/eps1lon>
 
 import * as CSS from 'csstype'
-import { Ref } from './v3-generated' 
 
 export interface CSSProperties
   extends CSS.Properties<string | number>,
