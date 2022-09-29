@@ -25,6 +25,7 @@ expectType<JSX.Element>(<div ref="bar" />)
 // allow Ref type type on arbitrary element
 const fooRef = ref<HTMLElement>()
 expectType<JSX.Element>(<div ref={fooRef} />)
+expectType<JSX.Element>(<div ref={(el) => {fooRef.value = el as HTMLElement}} />)
 
 expectType<JSX.Element>(
   <input

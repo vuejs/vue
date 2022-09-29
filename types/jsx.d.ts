@@ -1303,7 +1303,7 @@ type EventHandlers<E> = {
 
 type ReservedProps = {
   key?: string | number | symbol
-  ref?: VNodeData['ref'] | Ref
+  ref?: VNodeData['ref']
   /**
    * @deprecated Old named slot syntax has been deprecated, use the new syntax
    * instead: `<template v-slot:name>`
