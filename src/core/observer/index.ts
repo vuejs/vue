@@ -107,7 +107,12 @@ export function observe(
   shallow?: boolean,
   ssrMockReactivity?: boolean
 ): Observer | void {
-  if (!isObject(value) || isRef(value) || value instanceof VNode) {
+  if (
+    !isObject(value) ||
+    value.__v_skip ||
+    isRef(value) ||
+    value instanceof VNode
+  ) {
     return
   }
   let ob: Observer | void
