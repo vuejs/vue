@@ -140,6 +140,7 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // defineReactive中的闭包dep，用于收集对象中每个常规属性的watcher
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -258,10 +259,12 @@ export function del (target: Array<any> | Object, key: any) {
     )
     return
   }
+  // key不在target中
   if (!hasOwn(target, key)) {
     return
   }
   delete target[key]
+  // 非响应式对象，不需要向依赖发送通知
   if (!ob) {
     return
   }
