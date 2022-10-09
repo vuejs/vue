@@ -13,6 +13,18 @@
     </style>
     <!-- Delete ".min" for console warnings in development -->
     <script src="../../dist/vue.js"></script>
+    <script type="text/x-template" id="hello-template">
+      <div>
+        <div>
+          <span>name1: </span>
+          <span>{{ myName }}</span>
+        </div>
+        <div>
+          <span>name2: </span>
+          <span>{{ myName }}</span>
+        </div>
+    </div>
+    </script>
   </head>
   <body>
     <div id="demo">
@@ -23,30 +35,33 @@
         </ul>
       </template>
       <button @click="handleClick">click</button>
+      <hello />
     </div>
     <script>
-      let arr = [1]
+      Vue.component('hello', {
+        template: '#hello-template',
+        data() {
+          return {
+            myName: 'Li'
+          }
+        }
+      })
+
       new Vue({
         el: '#demo',
         data: {
-          arr,
-          list: [
-            { name: 'jax' },
-            { name: 'bob' },
-            { name: 'tina' },
-          ]
+
         },
         mounted() {
-          this.insert()
+          /* this.$watch(this.name, function(newVal) {
+            console.log('newVal: ', newVal)
+          }, {
+            immediate: true
+          }) */
         },
         methods: {
-          insert() {
-            this.arr.push(2)
-            console.log('arr', this.arr)
-          },
           handleClick() {
-            this.list[1] = { name: 'test' }
-            console.log('list: ', this.list)
+
           }
         }
       })
