@@ -7,7 +7,6 @@ import {
   hasOwn,
   isArray,
   hasProto,
-  isObject,
   isPlainObject,
   isPrimitive,
   isUndef,
