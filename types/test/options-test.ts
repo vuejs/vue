@@ -172,7 +172,14 @@ Vue.component('component', {
     d: {
       handler: 'someMethod',
       immediate: true
-    }
+    },
+    e: [
+      'handle1',
+      function handle2 (val, oldVal) {},
+      {
+        handler: function handle3 (val, oldVal) {},
+      }
+    ],
   },
   el: '#app',
   template: '<div>{{ message }}</div>',

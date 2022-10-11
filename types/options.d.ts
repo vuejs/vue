@@ -181,7 +181,7 @@ export interface ComponentOptions<
   propsData?: object
   computed?: Accessors<Computed>
   methods?: Methods
-  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any>>
+  watch?: Record<string, WatchOptionsWithHandler<any> | WatchHandler<any> | Array<WatchOptionsWithHandler<any> | WatchHandler<any>>>
 
   setup?: (
     this: void,
