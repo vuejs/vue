@@ -227,6 +227,9 @@ const builds = {
 
 function genConfig(name) {
   const opts = builds[name]
+  const isTargetingBrowser = !(
+    opts.transpile === false || opts.format === 'cjs'
+  )
 
   // console.log('__dir', __dirname)
   const config = {
@@ -243,11 +246,9 @@ function genConfig(name) {
           compilerOptions: {
             // if targeting browser, target es5
             // if targeting node, es2017 means Node 8
-            target:
-              opts.transpile === false || opts.format === 'cjs'
-                ? 'es2017'
-                : 'es5'
+            target: isTargetingBrowser ? 'es5' : 'es2017'
           },
+          include: isTargetingBrowser ? ['src'] : ['src', 'packages/*/src'],
           exclude: ['test', 'test-dts']
         }
       })

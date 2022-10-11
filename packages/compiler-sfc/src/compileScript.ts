@@ -780,7 +780,7 @@ export function compileScript(
     if (node.trailingComments && node.trailingComments.length > 0) {
       const lastCommentNode =
         node.trailingComments[node.trailingComments.length - 1]
-      end = lastCommentNode.end + startOffset
+      end = lastCommentNode.end! + startOffset
     }
     // locate the end of whitespace between this statement and the next
     while (end <= source.length) {
@@ -1582,14 +1582,18 @@ function extractEventNames(
   ) {
     const typeNode = eventName.typeAnnotation.typeAnnotation
     if (typeNode.type === 'TSLiteralType') {
-      if (typeNode.literal.type !== 'UnaryExpression') {
+      if (
+        typeNode.literal.type !== 'UnaryExpression' &&
+        typeNode.literal.type !== 'TemplateLiteral'
+      ) {
         emits.add(String(typeNode.literal.value))
       }
     } else if (typeNode.type === 'TSUnionType') {
       for (const t of typeNode.types) {
         if (
           t.type === 'TSLiteralType' &&
-          t.literal.type !== 'UnaryExpression'
+          t.literal.type !== 'UnaryExpression' &&
+          t.literal.type !== 'TemplateLiteral'
         ) {
           emits.add(String(t.literal.value))
         }
