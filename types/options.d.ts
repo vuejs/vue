@@ -4,6 +4,7 @@ import { SetupContext } from './v3-setup-context'
 import { DebuggerEvent } from './v3-generated'
 import { DefineComponent } from './v3-define-component'
 import { ComponentOptionsMixin } from './v3-component-options'
+import { ObjectDirective, FunctionDirective } from './v3-directive'
 
 type Constructor = {
   new (...args: any[]): any
@@ -318,6 +319,9 @@ export interface DirectiveBinding extends Readonly<VNodeDirective> {
   readonly modifiers: { [key: string]: boolean }
 }
 
+/**
+ * @deprecated use {@link FunctionDirective} instead
+ */
 export type DirectiveFunction = (
   el: HTMLElement,
   binding: DirectiveBinding,
@@ -325,6 +329,9 @@ export type DirectiveFunction = (
   oldVnode: VNode
 ) => void
 
+/**
+ * @deprecated use {@link ObjectDirective} instead
+ */
 export interface DirectiveOptions {
   bind?: DirectiveFunction
   inserted?: DirectiveFunction
