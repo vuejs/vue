@@ -284,11 +284,9 @@ export function compileScript(
       userImportAlias[imported] = local
     }
 
-    // template usage check is only needed in non-inline mode, so we can skip
-    // the work if inlineTemplate is true.
     let isUsedInTemplate = true
-    if (isTS && sfc.template && !sfc.template.src && !sfc.template.lang) {
-      isUsedInTemplate = isImportUsed(local, sfc)
+    if (sfc.template && !sfc.template.src && !sfc.template.lang) {
+      isUsedInTemplate = isImportUsed(local, sfc, isTS)
     }
 
     userImports[local] = {
@@ -1782,7 +1780,7 @@ function getObjectOrArrayExpressionKeys(value: Node): string[] {
 
 const templateUsageCheckCache = new LRU<string, string>(512)
 
-function resolveTemplateUsageCheckString(sfc: SFCDescriptor) {
+function resolveTemplateUsageCheckString(sfc: SFCDescriptor, isTS: boolean) {
   const { content } = sfc.template!
   const cached = templateUsageCheckCache.get(content)
   if (cached) {
@@ -1809,7 +1807,7 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor) {
             code += `,v${capitalize(camelize(baseName))}`
           }
           if (value) {
-            code += `,${processExp(value, baseName)}`
+            code += `,${processExp(value, isTS, baseName)}`
           }
         }
       }
@@ -1817,7 +1815,7 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor) {
     chars(text) {
       const res = parseText(text)
       if (res) {
-        code += `,${processExp(res.expression)}`
+        code += `,${processExp(res.expression, isTS)}`
       }
     }
   })
@@ -1829,8 +1827,8 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor) {
 
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 
-function processExp(exp: string, dir?: string): string {
-  if (/ as\s+\w|<.*>|:/.test(exp)) {
+function processExp(exp: string, isTS: boolean, dir?: string): string {
+  if (isTS && / as\s+\w|<.*>|:/.test(exp)) {
     if (dir === 'slot') {
       exp = `(${exp})=>{}`
     } else if (dir === 'on') {
@@ -1839,7 +1837,7 @@ function processExp(exp: string, dir?: string): string {
       const inMatch = exp.match(forAliasRE)
       if (inMatch) {
         const [, LHS, RHS] = inMatch
-        return processExp(`(${LHS})=>{}`) + processExp(RHS)
+        return processExp(`(${LHS})=>{}`, true) + processExp(RHS, true)
       }
     }
     let ret = ''
@@ -1867,36 +1865,38 @@ function stripTemplateString(str: string): string {
   return ''
 }
 
-function isImportUsed(local: string, sfc: SFCDescriptor): boolean {
+function isImportUsed(
+  local: string,
+  sfc: SFCDescriptor,
+  isTS: boolean
+): boolean {
   return new RegExp(
     // #4274 escape $ since it's a special char in regex
     // (and is the only regex special char that is valid in identifiers)
     `[^\\w$_]${local.replace(/\$/g, '\\$')}[^\\w$_]`
-  ).test(resolveTemplateUsageCheckString(sfc))
+  ).test(resolveTemplateUsageCheckString(sfc, isTS))
 }
 
 /**
  * Note: this comparison assumes the prev/next script are already identical,
- * and only checks the special case where <script setup lang="ts"> unused import
+ * and only checks the special case where <script setup> unused import
  * pruning result changes due to template changes.
  */
 export function hmrShouldReload(
   prevImports: Record<string, ImportBinding>,
   next: SFCDescriptor
 ): boolean {
-  if (
-    !next.scriptSetup ||
-    (next.scriptSetup.lang !== 'ts' && next.scriptSetup.lang !== 'tsx')
-  ) {
+  if (!next.scriptSetup) {
     return false
   }
 
+  const isTS = next.scriptSetup.lang === 'ts' || next.scriptSetup.lang === 'tsx'
   // for each previous import, check if its used status remain the same based on
   // the next descriptor's template
   for (const key in prevImports) {
     // if an import was previous unused, but now is used, we need to force
     // reload so that the script now includes that import.
-    if (!prevImports[key].isUsedInTemplate && isImportUsed(key, next)) {
+    if (!prevImports[key].isUsedInTemplate && isImportUsed(key, next, isTS)) {
       return true
     }
   }
