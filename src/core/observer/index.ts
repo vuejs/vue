@@ -17,6 +17,7 @@ import {
   noop
 } from '../util/index'
 import { isReadonly, isRef, TrackOpTypes, TriggerOpTypes } from '../../v3'
+import { rawMap } from '../../v3/reactivity/reactive'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 

@@ -1,6 +1,5 @@
 import { PluginCreator, Rule, AtRule } from 'postcss'
 import selectorParser from 'postcss-selector-parser'
-import { warn } from '../warn'
 
 const animationNameRE = /^(-\w+-)?animation-name$/
 const animationRE = /^(-\w+-)?animation$/
@@ -94,10 +93,10 @@ function rewriteSelector(
     ) {
       n.value = ' '
       n.spaces.before = n.spaces.after = ''
-      warn(
-        `the >>> and /deep/ combinators have been deprecated. ` +
-          `Use :deep() instead.`
-      )
+      // warn(
+      //   `the >>> and /deep/ combinators have been deprecated. ` +
+      //     `Use :deep() instead.`
+      // )
       return false
     }
 
@@ -126,12 +125,12 @@ function rewriteSelector(
           }
           selector.removeChild(n)
         } else {
-          // DEPRECATED usage
+          // DEPRECATED usage in v3
           // .foo ::v-deep .bar -> .foo[xxxxxxx] .bar
-          warn(
-            `::v-deep usage as a combinator has ` +
-              `been deprecated. Use :deep(<inner-selector>) instead.`
-          )
+          // warn(
+          //   `::v-deep usage as a combinator has ` +
+          //     `been deprecated. Use :deep(<inner-selector>) instead.`
+          // )
           const prev = selector.at(selector.index(n) - 1)
           if (prev && isSpaceCombinator(prev)) {
             selector.removeChild(prev)
