@@ -1,6 +1,6 @@
 import config from '../config'
 import { initProxy } from './proxy'
-import { initState } from './state'
+import { initProps, initState } from './state'
 import { initRender } from './render'
 import { initEvents } from './events'
 import { mark, measure } from '../util/perf'
@@ -10,6 +10,7 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 import type { Component } from 'types/component'
 import type { InternalComponentOptions } from 'types/options'
 import { EffectScope } from 'v3/reactivity/effectScope'
+import { initSetup } from '../../v3/apiSetup'
 
 let uid = 0
 
@@ -59,8 +60,12 @@ export function initMixin(Vue: typeof Component) {
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
-    callHook(vm, 'beforeCreate', undefined, false /* setContext */)
+
+    const opts = vm.$options
     initInjections(vm) // resolve injections before data/props
+    initProps(vm, opts.props)
+    initSetup(vm)
+    callHook(vm, 'beforeCreate', undefined, false /* setContext */)
     initState(vm)
     initProvide(vm) // resolve provide after data/props
     callHook(vm, 'created')
