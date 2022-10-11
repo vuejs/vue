@@ -1,3 +1,26 @@
+## [2.7.11](https://github.com/vuejs/vue/compare/v2.7.10...v2.7.11) (2022-10-11)
+
+
+### Bug Fixes
+
+* **build:** enforce LF line ending in built files ([738f4b3](https://github.com/vuejs/vue/commit/738f4b3c570dc3a1818924a203a9f8e4b1ec90f0)), closes [#12819](https://github.com/vuejs/vue/issues/12819)
+* **compiler-sfc:** export parseComponent for compat with fork-ts-checker-webpack-plugin ([0d6d972](https://github.com/vuejs/vue/commit/0d6d972b32521fd18eb853b1073c0a19859a499a)), closes [#12719](https://github.com/vuejs/vue/issues/12719)
+* **reactivity:** check skip first before checking ref when creating observer ([#12813](https://github.com/vuejs/vue/issues/12813)) ([5d26f81](https://github.com/vuejs/vue/commit/5d26f815c643d41e6ca6f29329593223b981fc24)), closes [#12812](https://github.com/vuejs/vue/issues/12812)
+* **reactivity:** use WeakMap for proxy/raw checks, compat with non-extensible objects ([4a0d88e](https://github.com/vuejs/vue/commit/4a0d88e46e4180edc7f22e36c25df3f8ac5d60d2)), closes [#12799](https://github.com/vuejs/vue/issues/12799) [#12798](https://github.com/vuejs/vue/issues/12798)
+* **setup:** setup hook should be called before beforeCreate ([e1342df](https://github.com/vuejs/vue/commit/e1342df7847a51c75192fec74e94378178e046b0)), closes [#12802](https://github.com/vuejs/vue/issues/12802)
+* **sfc:** prune returned bindings for non-TS as well ([fb13930](https://github.com/vuejs/vue/commit/fb1393009660b38046b1f6dfb532b481cc53b3b7)), closes [#12765](https://github.com/vuejs/vue/issues/12765)
+* **sfc:** remove sfc scoped deep syntax deprecation warnings ([2f335b2](https://github.com/vuejs/vue/commit/2f335b2f9d09b962f40e38740826d444e4fff073))
+* **types:** fix error with options watch ([#12779](https://github.com/vuejs/vue/issues/12779)) ([bc5b92a](https://github.com/vuejs/vue/commit/bc5b92adde147436f2adb25e457f0c967829467f)), closes [#12780](https://github.com/vuejs/vue/issues/12780)
+* **types:** support Ref and function types in tsx ref attribute ([#12759](https://github.com/vuejs/vue/issues/12759)) ([87f69aa](https://github.com/vuejs/vue/commit/87f69aa26f195390b948fbb0ff62cf954b58c82c)), closes [#12758](https://github.com/vuejs/vue/issues/12758)
+* **types:** vue 3 directive type compatibility ([#12792](https://github.com/vuejs/vue/issues/12792)) ([27eed82](https://github.com/vuejs/vue/commit/27eed829ccf9978a63b8cd989ff4c03897276bc2))
+
+
+### Performance Improvements
+
+* improve unsub perf for deps with massive amount of subs ([8880b55](https://github.com/vuejs/vue/commit/8880b55d52f8d873f79ef67436217c8752cddef5)), closes [#12696](https://github.com/vuejs/vue/issues/12696)
+
+
+
 ## [2.7.10](https://github.com/vuejs/vue/compare/v2.7.9...v2.7.10) (2022-08-23)
 
 
