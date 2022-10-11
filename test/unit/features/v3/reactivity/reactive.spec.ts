@@ -258,6 +258,12 @@ describe('reactivity/reactive', () => {
     expect(isReactive(obj.bar)).toBe(false)
   })
 
+  test('markRaw on non-extensible objects', () => {
+    const foo = Object.freeze({})
+    markRaw(foo)
+    expect(isReactive(reactive(foo))).toBe(false)
+  })
+
   test('should not observe non-extensible objects', () => {
     const obj = reactive({
       foo: Object.preventExtensions({ a: 1 }),
