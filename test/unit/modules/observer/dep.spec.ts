@@ -1,4 +1,4 @@
-import Dep from 'core/observer/dep'
+import Dep, { cleanupDeps } from 'core/observer/dep'
 
 describe('Dep', () => {
   let dep
@@ -24,8 +24,13 @@ describe('Dep', () => {
 
   describe('removeSub()', () => {
     it('should remove sub', () => {
-      dep.subs.push(null)
-      dep.removeSub(null)
+      const sub = {}
+      dep.subs.push(sub)
+      dep.removeSub(sub)
+      expect(dep.subs.includes(sub)).toBe(false)
+
+      // nulled subs are cleared on next flush
+      cleanupDeps()
       expect(dep.subs.length).toBe(0)
     })
   })
