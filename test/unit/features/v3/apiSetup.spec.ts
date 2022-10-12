@@ -263,7 +263,7 @@ describe('api: setup context', () => {
     }).$mount()
     expect(spy).toHaveBeenCalled()
   })
-
+  
   // #12561
   it('setup props should be reactive', () => {
     const msg = ref('hi')
@@ -332,31 +332,5 @@ describe('api: setup context', () => {
     vm.log = () => 2
     await nextTick()
     expect(_listeners.foo()).toBe(2)
-  })
-
-  // #12802
-  it('should be called before all lifecycle hooks', () => {
-    const calls: string[] = []
-
-    Vue.mixin({
-      beforeCreate() {
-        calls.push('global beforeCreate')
-      }
-    })
-
-    new Vue({
-      beforeCreate() {
-        calls.push('component beforeCreate')
-      },
-      setup() {
-        calls.push('setup')
-      }
-    })
-
-    expect(calls).toEqual([
-      'setup',
-      'global beforeCreate',
-      'component beforeCreate'
-    ])
   })
 })

@@ -2,6 +2,7 @@ import config from '../config'
 import Watcher from '../observer/watcher'
 import Dep, { pushTarget, popTarget } from '../observer/dep'
 import { isUpdatingChildComponent } from './lifecycle'
+import { initSetup } from 'v3/apiSetup'
 
 import {
   set,
@@ -50,6 +51,11 @@ export function proxy(target: Object, sourceKey: string, key: string) {
 
 export function initState(vm: Component) {
   const opts = vm.$options
+  if (opts.props) initProps(vm, opts.props)
+
+  // Composition API
+  initSetup(vm)
+
   if (opts.methods) initMethods(vm, opts.methods)
   if (opts.data) {
     initData(vm)
@@ -63,8 +69,7 @@ export function initState(vm: Component) {
   }
 }
 
-export function initProps(vm: Component, propsOptions: Object | undefined) {
-  if (!propsOptions) return
+function initProps(vm: Component, propsOptions: Object) {
   const propsData = vm.$options.propsData || {}
   const props = (vm._props = shallowReactive({}))
   // cache prop keys so that future props updates can iterate using Array
