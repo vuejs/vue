@@ -1,3 +1,12 @@
+## [2.7.12](https://github.com/vuejs/vue/compare/v2.7.11...v2.7.12) (2022-10-12)
+
+
+### Reverts
+
+* Revert "fix(setup): setup hook should be called before beforeCreate" ([e80cd09](https://github.com/vuejs/vue/commit/e80cd09fff570df57d608f8f5aaccee6d7f31917)), closes [#12802](https://github.com/vuejs/vue/issues/12802) [#12821](https://github.com/vuejs/vue/issues/12821) [#12822](https://github.com/vuejs/vue/issues/12822)
+
+
+
 ## [2.7.11](https://github.com/vuejs/vue/compare/v2.7.10...v2.7.11) (2022-10-11)
 
 
