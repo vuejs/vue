@@ -525,4 +525,11 @@ describe('reactivity/readonly', () => {
     expect(readonlyFoo.x).toBe(1)
     expect(`et operation on key "x" failed`).toHaveBeenWarned()
   })
+
+  test('compatibility with non-extensible objects', () => {
+    const foo = Object.freeze({ a: 1 })
+    const bar = readonly(foo)
+    expect(isReadonly(bar)).toBe(true)
+    expect(readonly(foo)).toBe(bar)
+  })
 })

@@ -1,8 +1,18 @@
-import { remove } from '../util/index'
 import config from '../config'
 import { DebuggerOptions, DebuggerEventExtraInfo } from 'v3'
 
 let uid = 0
+
+const pendingCleanupDeps: Dep[] = []
+
+export const cleanupDeps = () => {
+  for (let i = 0; i < pendingCleanupDeps.length; i++) {
+    const dep = pendingCleanupDeps[i]
+    dep.subs = dep.subs.filter(s => s)
+    dep._pending = false
+  }
+  pendingCleanupDeps.length = 0
+}
 
 /**
  * @internal
@@ -21,7 +31,9 @@ export interface DepTarget extends DebuggerOptions {
 export default class Dep {
   static target?: DepTarget | null
   id: number
-  subs: Array<DepTarget>
+  subs: Array<DepTarget | null>
+  // pending subs cleanup
+  _pending = false
 
   constructor() {
     this.id = uid++
@@ -33,7 +45,15 @@ export default class Dep {
   }
 
   removeSub(sub: DepTarget) {
-    remove(this.subs, sub)
+    // #12696 deps with massive amount of subscribers are extremely slow to
+    // clean up in Chromium
+    // to workaround this, we unset the sub for now, and clear them on
+    // next scheduler flush.
+    this.subs[this.subs.indexOf(sub)] = null
+    if (!this._pending) {
+      this._pending = true
+      pendingCleanupDeps.push(this)
+    }
   }
 
   depend(info?: DebuggerEventExtraInfo) {
@@ -50,7 +70,7 @@ export default class Dep {
 
   notify(info?: DebuggerEventExtraInfo) {
     // stabilize the subscriber list first
-    const subs = this.subs.slice()
+    const subs = this.subs.filter(s => s) as DepTarget[]
     if (__DEV__ && !config.async) {
       // subs aren't sorted in scheduler if not running async
       // we need to sort them now to make sure they fire in correct
@@ -58,15 +78,15 @@ export default class Dep {
       subs.sort((a, b) => a.id - b.id)
     }
     for (let i = 0, l = subs.length; i < l; i++) {
+      const sub = subs[i]
       if (__DEV__ && info) {
-        const sub = subs[i]
         sub.onTrigger &&
           sub.onTrigger({
             effect: subs[i],
             ...info
           })
       }
-      subs[i].update()
+      sub.update()
     }
   }
 }

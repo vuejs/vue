@@ -1,6 +1,6 @@
 import type Watcher from './watcher'
 import config from '../config'
-import Dep from './dep'
+import Dep, { cleanupDeps } from './dep'
 import { callHook, activateChildComponent } from '../instance/lifecycle'
 
 import { warn, nextTick, devtools, inBrowser, isIE } from '../util/index'
@@ -121,6 +121,7 @@ function flushSchedulerQueue() {
   // call component updated and activated hooks
   callActivatedHooks(activatedQueue)
   callUpdatedHooks(updatedQueue)
+  cleanupDeps()
 
   // devtool hook
   /* istanbul ignore if */

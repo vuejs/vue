@@ -1,6 +1,6 @@
 {
   "name": "@vue/compiler-sfc",
-  "version": "2.7.10",
+  "version": "2.7.12",
   "description": "compiler-sfc for Vue 2",
   "main": "dist/compiler-sfc.js",
   "types": "dist/compiler-sfc.d.ts",
@@ -13,7 +13,7 @@
     "source-map": "^0.6.1"
   },
   "devDependencies": {
-    "@babel/types": "^7.18.4",
+    "@babel/types": "^7.19.4",
     "@types/estree": "^0.0.48",
     "@types/hash-sum": "^1.0.0",
     "@types/lru-cache": "^5.1.1",

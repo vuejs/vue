@@ -5,9 +5,12 @@ import {
   isPrimitive,
   warn,
   toRawType,
-  isServerRendering
+  isServerRendering,
+  isObject
 } from 'core/util'
 import type { Ref, UnwrapRefSimple, RawSymbol } from './ref'
+
+export const rawMap = new WeakMap()
 
 export const enum ReactiveFlags {
   SKIP = '__v_skip',
@@ -119,7 +122,9 @@ export function toRaw<T>(observed: T): T {
 export function markRaw<T extends object>(
   value: T
 ): T & { [RawSymbol]?: true } {
-  def(value, ReactiveFlags.SKIP, true)
+  if (isObject(value)) {
+    rawMap.set(value, true)
+  }
   return value
 }
 

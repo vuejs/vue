@@ -7,7 +7,6 @@ import {
   hasOwn,
   isArray,
   hasProto,
-  isObject,
   isPlainObject,
   isPrimitive,
   isUndef,
@@ -17,6 +16,7 @@ import {
   noop
 } from '../util/index'
 import { isReadonly, isRef, TrackOpTypes, TriggerOpTypes } from '../../v3'
+import { rawMap } from '../../v3/reactivity/reactive'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
@@ -105,22 +105,21 @@ export function observe(
   shallow?: boolean,
   ssrMockReactivity?: boolean
 ): Observer | void {
-  if (!isObject(value) || isRef(value) || value instanceof VNode) {
-    return
+  if (value && hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
+    return value.__ob__
   }
-  let ob: Observer | void
-  if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
-    ob = value.__ob__
-  } else if (
+  if (
     shouldObserve &&
     (ssrMockReactivity || !isServerRendering()) &&
     (isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
-    !value.__v_skip /* ReactiveFlags.SKIP */
+    !value.__v_skip /* ReactiveFlags.SKIP */ &&
+    !rawMap.has(value) &&
+    !isRef(value) &&
+    !(value instanceof VNode)
   ) {
-    ob = new Observer(value, shallow, ssrMockReactivity)
+    return new Observer(value, shallow, ssrMockReactivity)
   }
-  return ob
 }
 
 /**

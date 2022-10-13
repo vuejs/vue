@@ -1,4 +1,4 @@
-import { VNode, defineComponent } from '../../index'
+import { VNode, defineComponent, ref } from '../../index'
 import { expectType } from '../utils'
 
 expectType<VNode>(<div />)
@@ -21,6 +21,11 @@ expectError(<div foo="bar" />)
 // allow key/ref on arbitrary element
 expectType<JSX.Element>(<div key="foo" />)
 expectType<JSX.Element>(<div ref="bar" />)
+
+// allow Ref type type on arbitrary element
+const fooRef = ref<HTMLElement>()
+expectType<JSX.Element>(<div ref={fooRef} />)
+expectType<JSX.Element>(<div ref={(el) => {fooRef.value = el as HTMLElement}} />)
 
 expectType<JSX.Element>(
   <input

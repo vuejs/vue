@@ -20,7 +20,7 @@ exports[`SFC analyze <script> bindings > auto name inference > do not overwrite 
 export default /*#__PURE__*/Object.assign(__default__, {
   setup(__props) {
 const a = 1
-return { a, defineComponent }
+return { a }
 }
 
 })"
