@@ -1,3 +1,14 @@
+## [2.7.13](https://github.com/vuejs/vue/compare/v2.7.12...v2.7.13) (2022-10-14)
+
+
+### Bug Fixes
+
+* **effectScope:** calling off() of a detached scope should not break currentScope ([800207c](https://github.com/vuejs/vue/commit/800207c473c7d6dfcdc883100a3d443fc5ad2e39)), closes [#12825](https://github.com/vuejs/vue/issues/12825)
+* **types:** style attribute svg ([#12800](https://github.com/vuejs/vue/issues/12800)) ([8e26261](https://github.com/vuejs/vue/commit/8e262618cdc3251ca9630b17de4a000567ffb007))
+* **watch:** avoid traversing objects that are marked non-reactive ([#12806](https://github.com/vuejs/vue/issues/12806)) ([5960f05](https://github.com/vuejs/vue/commit/5960f05c69099c174062b6672c7a21d717a3bccf))
+
+
+
 ## [2.7.12](https://github.com/vuejs/vue/compare/v2.7.11...v2.7.12) (2022-10-12)
 
 
