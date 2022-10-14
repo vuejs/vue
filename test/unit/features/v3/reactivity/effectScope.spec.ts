@@ -279,4 +279,15 @@ describe('reactivity/effectScope', () => {
       expect(getCurrentScope()).toBe(currentScope)
     })
   })
+
+  it('calling .off() of a detached scope inside an active scope should not break currentScope', () => {
+    const parentScope = new EffectScope()
+
+    parentScope.run(() => {
+      const childScope = new EffectScope(true)
+      childScope.on()
+      childScope.off()
+      expect(getCurrentScope()).toBe(parentScope)
+    })
+  })
 })
