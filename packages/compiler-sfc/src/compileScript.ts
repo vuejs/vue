@@ -39,7 +39,7 @@ import { walk } from 'estree-walker'
 import { RawSourceMap } from 'source-map'
 import { warnOnce } from './warn'
 import { isReservedTag } from 'web/util'
-import { bindRE, dirRE, onRE } from 'compiler/parser'
+import { bindRE, dirRE, onRE, slotRE } from 'compiler/parser'
 import { parseText } from 'compiler/parser/text-parser'
 import { DEFAULT_FILENAME } from './parseComponent'
 import {
@@ -1804,6 +1804,8 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor, isTS: boolean) {
         if (dirRE.test(name)) {
           const baseName = onRE.test(name)
             ? 'on'
+            : slotRE.test(name)
+            ? 'slot'
             : bindRE.test(name)
             ? 'bind'
             : name.replace(dirRE, '')
