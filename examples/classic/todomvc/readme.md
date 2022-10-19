@@ -3,16 +3,16 @@
 > Vue.js is a library for building interactive web interfaces. 
 It provides data-driven, nestable view components with a simple and flexible API.
 
-> _[Vue.js - vuejs.org](https://vuejs.org)_
+> _[Vue.js - v2.vuejs.org](https://v2.vuejs.org)_
 
 ## Learning Vue.js
-The [Vue.js website](https://vuejs.org/) is a great resource to get started.
+The [Vue.js website](https://v2.vuejs.org/) is a great resource to get started.
 
 Here are some links you may find helpful:
 
-* [Official Guide](https://vuejs.org/guide/)
-* [API Reference](https://vuejs.org/api/)
-* [Examples](https://vuejs.org/examples/)
+* [Official Guide](https://v2.vuejs.org/guide/)
+* [API Reference](https://v2.vuejs.org/api/)
+* [Examples](https://v2.vuejs.org/examples/)
 
 Get help from other Vue.js users:
 
