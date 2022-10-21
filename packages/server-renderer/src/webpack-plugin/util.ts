@@ -1,4 +1,4 @@
-const { red, yellow } = require('chalk')
+const { red, yellow } = require('picocolors')
 const webpack = require('webpack')
 
 const prefix = `[vue-server-renderer-webpack-plugin]`

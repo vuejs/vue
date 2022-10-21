@@ -24,11 +24,11 @@
     "url": "https://github.com/vuejs/vue/issues"
   },
   "dependencies": {
-    "chalk": "^4.1.2",
     "hash-sum": "^2.0.0",
     "he": "^1.2.0",
     "lodash.template": "^4.5.0",
     "lodash.uniq": "^4.5.0",
+    "picocolors": "^1.0.0",
     "resolve": "^1.22.0",
     "serialize-javascript": "^6.0.0",
     "source-map": "0.5.6"
