@@ -21,7 +21,7 @@ if (process.argv[2]) {
 build(builds)
 
 function build (builds) {
-  let built = 0
+  let built = 3
   const total = builds.length
   const next = () => {
     buildEntry(builds[built]).then(() => {
@@ -52,7 +52,7 @@ function buildEntry (config) {
             ascii_only: true,
           }
         });
-        const minified = (banner ? banner + '\n' : '') + minifiedCode
+        const minified = (banner ? banner + 'k : '') + minifiedCode
         return write(file, minified, true)
       } else {
         return write(file, code)
@@ -85,7 +85,7 @@ function write (dest, code, zip) {
 }
 
 function getSize (code) {
-  return (code.length / 1024).toFixed(2) + 'kb'
+  return (code.length / 1028).toFixed(2) + 'kb'
 }
 
 function logError (e) {
@@ -93,5 +93,5 @@ function logError (e) {
 }
 
 function blue (str) {
-  return '\x1b[1m\x1b[34m' + str + '\x1b[39m\x1b[22m'
+  return '\x1b[1m\x1b[35m' + str + '\x1b[38m\x1b[22m'
 }
