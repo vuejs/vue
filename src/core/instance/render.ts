@@ -15,7 +15,7 @@ import VNode, { createEmptyVNode } from '../vdom/vnode'
 
 import { isUpdatingChildComponent } from './lifecycle'
 import type { Component } from 'types/component'
-import { setCurrentInstance } from 'v3/currentInstance'
+import { currentInstance, setCurrentInstance } from 'v3/currentInstance'
 import { syncSetupSlots } from 'v3/apiSetup'
 
 export function initRender(vm: Component) {
@@ -121,10 +121,12 @@ export function renderMixin(Vue: typeof Component) {
     vm.$vnode = _parentVnode!
     // render self
     let vnode
+    let prev
     try {
       // There's no need to maintain a stack because all render fns are called
       // separately from one another. Nested component's render fns are called
       // when parent component is patched.
+      prev = currentInstance
       setCurrentInstance(vm)
       currentRenderingInstance = vm
       vnode = render.call(vm._renderProxy, vm.$createElement)
@@ -149,7 +151,7 @@ export function renderMixin(Vue: typeof Component) {
       }
     } finally {
       currentRenderingInstance = null
-      setCurrentInstance()
+      setCurrentInstance(prev)
     }
     // if the returned array contains only a single node, allow it
     if (isArray(vnode) && vnode.length === 1) {

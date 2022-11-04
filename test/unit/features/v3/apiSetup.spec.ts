@@ -1,4 +1,13 @@
-import { h, ref, reactive, isReactive, toRef, isRef } from 'v3'
+import {
+  h,
+  ref,
+  reactive,
+  isReactive,
+  toRef,
+  isRef,
+  getCurrentInstance,
+  onMounted
+} from 'v3'
 import { nextTick } from 'core/util'
 import { effect } from 'v3/reactivity/effect'
 import Vue from 'vue'
@@ -263,7 +272,7 @@ describe('api: setup context', () => {
     }).$mount()
     expect(spy).toHaveBeenCalled()
   })
-  
+
   // #12561
   it('setup props should be reactive', () => {
     const msg = ref('hi')
@@ -332,5 +341,57 @@ describe('api: setup context', () => {
     vm.log = () => 2
     await nextTick()
     expect(_listeners.foo()).toBe(2)
+  })
+
+  it('onMounted should called when child component mount during parent component setup', async () => {
+    let tag1 = 2
+    let tag2 = 4
+    let tag3 = 3
+
+    const Comp3 = {
+      render() {},
+      setup() {
+        const instance = getCurrentInstance()
+        onMounted(() => {
+          expect(instance).toEqual(getCurrentInstance())
+          tag3 = 1
+        })
+      }
+    }
+
+    const show3 = () => new (Vue.extend(Comp3))().$mount()
+
+    const Comp2 = {
+      render() {},
+      setup() {
+        const instance = getCurrentInstance()
+        show3()
+        onMounted(() => {
+          expect(instance).toEqual(getCurrentInstance())
+          tag2 = 1
+        })
+      }
+    }
+
+    const show2 = () => new (Vue.extend(Comp2))().$mount()
+
+    const Comp1 = {
+      render() {},
+      setup() {
+        const instance = getCurrentInstance()
+        show2()
+        onMounted(() => {
+          expect(instance).toEqual(getCurrentInstance())
+          tag1 = 1
+        })
+      }
+    }
+
+    new Vue({
+      render: h => h(Comp1)
+    }).$mount()
+
+    expect(tag1).toEqual(tag2)
+    expect(tag2).toEqual(tag3)
   })
 })
