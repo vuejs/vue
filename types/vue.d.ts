@@ -339,10 +339,7 @@ export interface VueConstructor<V extends Vue = Vue> {
     id: string,
     definition?: DirectiveOptions | DirectiveFunction
   ): DirectiveOptions
-  directive(
-    id: string,
-    definition?: Directive
-  ): ObjectDirective
+  directive(id: string, definition?: Directive): ObjectDirective
   filter(id: string, definition?: Function): Function
 
   component(id: string): VueConstructor

@@ -10,7 +10,13 @@ import {
   ParserPlugin
 } from '@babel/parser'
 import { generateCodeFrame } from 'compiler/codeframe'
-import { camelize, capitalize, isBuiltInTag, makeMap } from 'shared/util'
+import {
+  camelize,
+  capitalize,
+  isBuiltInTag,
+  makeMap,
+  isString
+} from 'shared/util'
 import { parseHTML } from 'compiler/parser/html-parser'
 import { baseOptions as webCompilerOptions } from 'web/compiler/options'
 import {
@@ -104,9 +110,9 @@ export function compileScript(
   const genSourceMap = options.sourceMap !== false
   let refBindings: string[] | undefined
 
-  const cssVars = sfc.cssVars
+  const { cssVars } = sfc
   const scopeId = options.id ? options.id.replace(/^data-v-/, '') : ''
-  const scriptLang = script && script.lang
+  const scriptLang = script?.lang
   const scriptSetupLang = scriptSetup && scriptSetup.lang
   const isTS =
     scriptLang === 'ts' ||
@@ -118,12 +124,11 @@ export function compileScript(
   const plugins: ParserPlugin[] = []
   if (!isTS || scriptLang === 'tsx' || scriptSetupLang === 'tsx') {
     plugins.push('jsx')
-  } else {
+  } else if (options.babelParserPlugins) {
     // If don't match the case of adding jsx, should remove the jsx from the babelParserPlugins
-    if (options.babelParserPlugins)
-      options.babelParserPlugins = options.babelParserPlugins.filter(
-        n => n !== 'jsx'
-      )
+    options.babelParserPlugins = options.babelParserPlugins.filter(
+      n => n !== 'jsx'
+    )
   }
   if (options.babelParserPlugins) plugins.push(...options.babelParserPlugins)
   if (isTS) {
@@ -134,21 +139,19 @@ export function compileScript(
   }
 
   if (!scriptSetup) {
-    if (!script) {
+    if (!script)
       throw new Error(`[@vue/compiler-sfc] SFC contains no <script> tags.`)
-    }
-    if (scriptLang && !isTS && scriptLang !== 'jsx') {
-      // do not process non js/ts script blocks
-      return script
-    }
+
+    // do not process non js/ts script blocks
+    if (scriptLang && !isTS && scriptLang !== 'jsx') return script
     try {
       let content = script.content
       let map = script.map
-      const scriptAst = _parse(content, {
+      const { body: scriptAst } = _parse(content, {
         plugins,
         sourceType: 'module'
       }).program
-      const bindings = analyzeScriptBindings(scriptAst.body)
+      const bindings = analyzeScriptBindings(scriptAst)
       if (cssVars.length) {
         content = rewriteDefault(content, DEFAULT_VAR, plugins)
         content += genNormalScriptCssVarsCode(
@@ -164,7 +167,7 @@ export function compileScript(
         content,
         map,
         bindings,
-        scriptAst: scriptAst.body
+        scriptAst
       }
     } catch (e: any) {
       // silently fallback if parse fails since user may be using custom
@@ -299,13 +302,10 @@ export function compileScript(
   }
 
   function processDefineProps(node: Node, declId?: LVal): boolean {
-    if (!isCallOf(node, DEFINE_PROPS)) {
-      return false
-    }
+    if (!isCallOf(node, DEFINE_PROPS)) return false
 
-    if (hasDefinePropsCall) {
-      error(`duplicate ${DEFINE_PROPS}() call`, node)
-    }
+    if (hasDefinePropsCall) error(`duplicate ${DEFINE_PROPS}() call`, node)
+
     hasDefinePropsCall = true
 
     propsRuntimeDecl = node.arguments[0]
@@ -343,9 +343,7 @@ export function compileScript(
   }
 
   function processWithDefaults(node: Node, declId?: LVal): boolean {
-    if (!isCallOf(node, WITH_DEFAULTS)) {
-      return false
-    }
+    if (!isCallOf(node, WITH_DEFAULTS)) return false
     if (processDefineProps(node.arguments[0], declId)) {
       if (propsRuntimeDecl) {
         error(
@@ -381,12 +379,8 @@ export function compileScript(
   }
 
   function processDefineEmits(node: Node, declId?: LVal): boolean {
-    if (!isCallOf(node, DEFINE_EMITS)) {
-      return false
-    }
-    if (hasDefineEmitCall) {
-      error(`duplicate ${DEFINE_EMITS}() call`, node)
-    }
+    if (!isCallOf(node, DEFINE_EMITS)) return false
+    if (hasDefineEmitCall) error(`duplicate ${DEFINE_EMITS}() call`, node)
     hasDefineEmitCall = true
     emitsRuntimeDecl = node.arguments[0]
     if (node.typeParameters) {
@@ -461,14 +455,12 @@ export function compileScript(
   }
 
   function processDefineExpose(node: Node): boolean {
-    if (isCallOf(node, DEFINE_EXPOSE)) {
-      if (hasDefineExposeCall) {
-        error(`duplicate ${DEFINE_EXPOSE}() call`, node)
-      }
-      hasDefineExposeCall = true
-      return true
+    if (!isCallOf(node, DEFINE_EXPOSE)) return false
+    if (hasDefineExposeCall) {
+      error(`duplicate ${DEFINE_EXPOSE}() call`, node)
     }
-    return false
+    hasDefineExposeCall = true
+    return true
   }
 
   function checkInvalidScopeReference(node: Node | undefined, method: string) {
@@ -585,41 +577,41 @@ export function compileScript(
 
   function genSetupPropsType(node: TSTypeLiteral | TSInterfaceBody) {
     const scriptSetupSource = scriptSetup!.content
-    if (hasStaticWithDefaults()) {
-      // if withDefaults() is used, we need to remove the optional flags
-      // on props that have default values
-      let res = `{ `
-      const members = node.type === 'TSTypeLiteral' ? node.members : node.body
-      for (const m of members) {
-        if (
+    if (!hasStaticWithDefaults())
+      return scriptSetupSource.slice(node.start!, node.end!)
+
+    // if withDefaults() is used, we need to remove the optional flags
+    // on props that have default values
+    let res = `{ `
+    const members = node.type === 'TSTypeLiteral' ? node.members : node.body
+    for (const m of members) {
+      if (
+        !(
           (m.type === 'TSPropertySignature' ||
             m.type === 'TSMethodSignature') &&
           m.typeAnnotation &&
           m.key.type === 'Identifier'
-        ) {
-          if (
-            propsRuntimeDefaults!.properties.some(
-              (p: any) => p.key.name === (m.key as Identifier).name
-            )
-          ) {
-            res +=
-              m.key.name +
-              (m.type === 'TSMethodSignature' ? '()' : '') +
-              scriptSetupSource.slice(
-                m.typeAnnotation.start!,
-                m.typeAnnotation.end!
-              ) +
-              ', '
-          } else {
-            res +=
-              scriptSetupSource.slice(m.start!, m.typeAnnotation.end!) + `, `
-          }
-        }
+        )
+      )
+        continue
+      if (
+        propsRuntimeDefaults!.properties.some(
+          (p: any) => p.key.name === (m.key as Identifier).name
+        )
+      ) {
+        res +=
+          m.key.name +
+          (m.type === 'TSMethodSignature' ? '()' : '') +
+          scriptSetupSource.slice(
+            m.typeAnnotation.start!,
+            m.typeAnnotation.end!
+          ) +
+          ', '
+      } else {
+        res += scriptSetupSource.slice(m.start!, m.typeAnnotation.end!) + `, `
       }
-      return (res.length ? res.slice(0, -2) : res) + ` }`
-    } else {
-      return scriptSetupSource.slice(node.start!, node.end!)
     }
+    return (res.length ? res.slice(0, -2) : res) + ` }`
   }
 
   // 1. process normal <script> first if it exists
@@ -895,29 +887,27 @@ export function compileScript(
       let left = total
       for (let i = 0; i < total; i++) {
         const decl = node.declarations[i]
-        if (decl.init) {
-          // defineProps / defineEmits
-          const isDefineProps =
-            processDefineProps(decl.init, decl.id) ||
-            processWithDefaults(decl.init, decl.id)
-          const isDefineEmits = processDefineEmits(decl.init, decl.id)
-          if (isDefineProps || isDefineEmits) {
-            if (left === 1) {
-              s.remove(node.start! + startOffset, node.end! + startOffset)
-            } else {
-              let start = decl.start! + startOffset
-              let end = decl.end! + startOffset
-              if (i < total - 1) {
-                // not the last one, locate the start of the next
-                end = node.declarations[i + 1].start! + startOffset
-              } else {
-                // last one, locate the end of the prev
-                start = node.declarations[i - 1].end! + startOffset
-              }
-              s.remove(start, end)
-              left--
-            }
+        if (!decl.init) continue
+        // defineProps / defineEmits
+        const isDefineProps =
+          processDefineProps(decl.init, decl.id) ||
+          processWithDefaults(decl.init, decl.id)
+        const isDefineEmits = processDefineEmits(decl.init, decl.id)
+        if (!isDefineProps && !isDefineEmits) continue
+        if (left === 1) {
+          s.remove(node.start! + startOffset, node.end! + startOffset)
+        } else {
+          let start = decl.start! + startOffset
+          let end = decl.end! + startOffset
+          if (i < total - 1) {
+            // not the last one, locate the start of the next
+            end = node.declarations[i + 1].start! + startOffset
+          } else {
+            // last one, locate the end of the prev
+            start = node.declarations[i - 1].end! + startOffset
           }
+          s.remove(start, end)
+          left--
         }
       }
     }
@@ -1222,23 +1212,21 @@ export function compileScript(
       )}({${def}${runtimeOptions}\n  setup(${args}) {\n`
     )
     s.appendRight(endOffset, `})`)
+  } else if (defaultExport) {
+    // without TS, can't rely on rest spread, so we use Object.assign
+    // export default Object.assign(__default__, { ... })
+    s.prependLeft(
+      startOffset,
+      `\nexport default /*#__PURE__*/Object.assign(${DEFAULT_VAR}, {${runtimeOptions}\n  ` +
+        `setup(${args}) {\n`
+    )
+    s.appendRight(endOffset, `})`)
   } else {
-    if (defaultExport) {
-      // without TS, can't rely on rest spread, so we use Object.assign
-      // export default Object.assign(__default__, { ... })
-      s.prependLeft(
-        startOffset,
-        `\nexport default /*#__PURE__*/Object.assign(${DEFAULT_VAR}, {${runtimeOptions}\n  ` +
-          `setup(${args}) {\n`
-      )
-      s.appendRight(endOffset, `})`)
-    } else {
-      s.prependLeft(
-        startOffset,
-        `\nexport default {${runtimeOptions}\n  setup(${args}) {\n`
-      )
-      s.appendRight(endOffset, `}`)
-    }
+    s.prependLeft(
+      startOffset,
+      `\nexport default {${runtimeOptions}\n  setup(${args}) {\n`
+    )
+    s.appendRight(endOffset, `}`)
   }
 
   // 12. finalize Vue helper imports
@@ -1311,11 +1299,9 @@ function walkDeclaration(
             ? BindingTypes.SETUP_REACTIVE_CONST
             : BindingTypes.SETUP_CONST
         } else if (isConst) {
-          if (isCallOf(init, userImportAlias['ref'] || 'ref')) {
-            bindingType = BindingTypes.SETUP_REF
-          } else {
-            bindingType = BindingTypes.SETUP_MAYBE_REF
-          }
+          bindingType = isCallOf(init, userImportAlias['ref'] || 'ref')
+            ? BindingTypes.SETUP_REF
+            : BindingTypes.SETUP_MAYBE_REF
         } else {
           bindingType = BindingTypes.SETUP_LET
         }
@@ -1565,7 +1551,6 @@ function extractRuntimeEmits(
         extractEventNames(t.parameters[0], emits)
       }
     }
-    return
   } else {
     extractEventNames(node.parameters[0], emits)
   }
@@ -1576,27 +1561,26 @@ function extractEventNames(
   emits: Set<string>
 ) {
   if (
-    eventName.type === 'Identifier' &&
-    eventName.typeAnnotation &&
-    eventName.typeAnnotation.type === 'TSTypeAnnotation'
+    eventName.type !== 'Identifier' ||
+    !eventName.typeAnnotation ||
+    eventName.typeAnnotation.type !== 'TSTypeAnnotation'
+  )
+    return
+  const typeNode = eventName.typeAnnotation.typeAnnotation
+  if (
+    typeNode.type === 'TSLiteralType' &&
+    typeNode.literal.type !== 'UnaryExpression' &&
+    typeNode.literal.type !== 'TemplateLiteral'
   ) {
-    const typeNode = eventName.typeAnnotation.typeAnnotation
-    if (typeNode.type === 'TSLiteralType') {
+    emits.add(String(typeNode.literal.value))
+  } else if (typeNode.type === 'TSUnionType') {
+    for (const t of typeNode.types) {
       if (
-        typeNode.literal.type !== 'UnaryExpression' &&
-        typeNode.literal.type !== 'TemplateLiteral'
+        t.type === 'TSLiteralType' &&
+        t.literal.type !== 'UnaryExpression' &&
+        t.literal.type !== 'TemplateLiteral'
       ) {
-        emits.add(String(typeNode.literal.value))
-      }
-    } else if (typeNode.type === 'TSUnionType') {
-      for (const t of typeNode.types) {
-        if (
-          t.type === 'TSLiteralType' &&
-          t.literal.type !== 'UnaryExpression' &&
-          t.literal.type !== 'TemplateLiteral'
-        ) {
-          emits.add(String(t.literal.value))
-        }
+        emits.add(String(t.literal.value))
       }
     }
   }
@@ -1618,9 +1602,7 @@ function isCallOf(
     node &&
     node.type === 'CallExpression' &&
     node.callee.type === 'Identifier' &&
-    (typeof test === 'string'
-      ? node.callee.name === test
-      : test(node.callee.name))
+    (isString(test) ? node.callee.name === test : test(node.callee.name))
   )
 }
 
@@ -1645,10 +1627,7 @@ function canNeverBeRef(node: Node, userReactiveImport: string): boolean {
         userReactiveImport
       )
     default:
-      if (node.type.endsWith('Literal')) {
-        return true
-      }
-      return false
+      return node.type.endsWith('Literal')
   }
 }
 
@@ -1666,6 +1645,7 @@ function analyzeScriptBindings(ast: Statement[]): BindingMetadata {
       return analyzeBindingsFromOptions(node.declaration)
     }
   }
+
   return {}
 }
 
@@ -1763,13 +1743,12 @@ function getObjectExpressionKeys(node: ObjectExpression): string[] {
 }
 
 function getArrayExpressionKeys(node: ArrayExpression): string[] {
-  const keys: string[] = []
-  for (const element of node.elements) {
+  return node.elements.reduce((keys, element) => {
     if (element && element.type === 'StringLiteral') {
       keys.push(element.value)
     }
-  }
-  return keys
+    return keys
+  }, [] as string[])
 }
 
 function getObjectOrArrayExpressionKeys(value: Node): string[] {
@@ -1801,18 +1780,17 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor, isTS: boolean) {
       }
       for (let i = 0; i < attrs.length; i++) {
         const { name, value } = attrs[i]
-        if (dirRE.test(name)) {
-          const baseName = onRE.test(name)
-            ? 'on'
-            : bindRE.test(name)
-            ? 'bind'
-            : name.replace(dirRE, '')
-          if (!isBuiltInDir(baseName)) {
-            code += `,v${capitalize(camelize(baseName))}`
-          }
-          if (value) {
-            code += `,${processExp(value, isTS, baseName)}`
-          }
+        if (!dirRE.test(name)) continue
+        const baseName = onRE.test(name)
+          ? 'on'
+          : bindRE.test(name)
+          ? 'bind'
+          : name.replace(dirRE, '')
+        if (!isBuiltInDir(baseName)) {
+          code += `,v${capitalize(camelize(baseName))}`
+        }
+        if (value) {
+          code += `,${processExp(value, isTS, baseName)}`
         }
       }
     },
@@ -1832,27 +1810,26 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor, isTS: boolean) {
 const forAliasRE = /([\s\S]*?)\s+(?:in|of)\s+([\s\S]*)/
 
 function processExp(exp: string, isTS: boolean, dir?: string): string {
-  if (isTS && / as\s+\w|<.*>|:/.test(exp)) {
-    if (dir === 'slot') {
-      exp = `(${exp})=>{}`
-    } else if (dir === 'on') {
-      exp = `()=>{${exp}}`
-    } else if (dir === 'for') {
-      const inMatch = exp.match(forAliasRE)
-      if (inMatch) {
-        const [, LHS, RHS] = inMatch
-        return processExp(`(${LHS})=>{}`, true) + processExp(RHS, true)
-      }
+  if (!isTS || !/ as\s+\w|<.*>|:/.test(exp)) return stripStrings(exp)
+
+  if (dir === 'slot') {
+    exp = `(${exp})=>{}`
+  } else if (dir === 'on') {
+    exp = `()=>{${exp}}`
+  } else if (dir === 'for') {
+    const inMatch = exp.match(forAliasRE)
+    if (inMatch) {
+      const [, LHS, RHS] = inMatch
+      return processExp(`(${LHS})=>{}`, true) + processExp(RHS, true)
     }
-    let ret = ''
-    // has potential type cast or generic arguments that uses types
-    const ast = parseExpression(exp, { plugins: ['typescript'] })
-    walkIdentifiers(ast, node => {
-      ret += `,` + node.name
-    })
-    return ret
   }
-  return stripStrings(exp)
+  let ret = ''
+  // has potential type cast or generic arguments that uses types
+  const ast = parseExpression(exp, { plugins: ['typescript'] })
+  walkIdentifiers(ast, node => {
+    ret += `,` + node.name
+  })
+  return ret
 }
 
 function stripStrings(exp: string) {
@@ -1863,10 +1840,7 @@ function stripStrings(exp: string) {
 
 function stripTemplateString(str: string): string {
   const interpMatch = str.match(/\${[^}]+}/g)
-  if (interpMatch) {
-    return interpMatch.map(m => m.slice(2, -1)).join(',')
-  }
-  return ''
+  return interpMatch ? interpMatch.map(m => m.slice(2, -1)).join(',') : ''
 }
 
 function isImportUsed(
@@ -1897,13 +1871,7 @@ export function hmrShouldReload(
   const isTS = next.scriptSetup.lang === 'ts' || next.scriptSetup.lang === 'tsx'
   // for each previous import, check if its used status remain the same based on
   // the next descriptor's template
-  for (const key in prevImports) {
-    // if an import was previous unused, but now is used, we need to force
-    // reload so that the script now includes that import.
-    if (!prevImports[key].isUsedInTemplate && isImportUsed(key, next, isTS)) {
-      return true
-    }
-  }
-
-  return false
+  return Object.keys(prevImports).some(
+    key => !prevImports[key].isUsedInTemplate && isImportUsed(key, next, isTS)
+  )
 }

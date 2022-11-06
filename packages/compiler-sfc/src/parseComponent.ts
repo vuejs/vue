@@ -1,6 +1,6 @@
 import deindent from 'de-indent'
 import { parseHTML } from 'compiler/parser/html-parser'
-import { makeMap } from 'shared/util'
+import { makeMap, isString } from 'shared/util'
 import { ASTAttr, WarningMessage } from 'types/compiler'
 import { BindingMetadata, RawSourceMap } from './types'
 import type { ImportBinding } from './compileScript'
@@ -129,7 +129,7 @@ export function parseComponent(
         }, {})
       }
 
-      if (typeof currentBlock.attrs.src === 'string') {
+      if (isString(currentBlock.attrs.src)) {
         currentBlock.src = currentBlock.attrs.src
       }
 

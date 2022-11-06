@@ -46,15 +46,15 @@ export function walkIdentifiers(
       }
 
       if (onNode) onNode(node)
-
-      if (node.type === 'Identifier') {
+      const nodeType = node.type
+      if (nodeType === 'Identifier') {
         const isLocal = !!knownIds[node.name]
         const isRefed = isReferencedIdentifier(node, parent!, parentStack)
         if (includeAll || (isRefed && !isLocal)) {
           onIdentifier(node, parent!, parentStack, isRefed, isLocal)
         }
       } else if (
-        node.type === 'ObjectProperty' &&
+        nodeType === 'ObjectProperty' &&
         parent!.type === 'ObjectPattern'
       ) {
         // mark property in destructure pattern
@@ -63,7 +63,7 @@ export function walkIdentifiers(
         // walk function expressions and add its arguments to known identifiers
         // so that we don't prefix them
         walkFunctionParams(node, id => markScopeIdentifier(node, id, knownIds))
-      } else if (node.type === 'BlockStatement') {
+      } else if (nodeType === 'BlockStatement') {
         // #3445 record block-level local variables
         walkBlockDeclarations(node, id =>
           markScopeIdentifier(node, id, knownIds)
@@ -72,12 +72,11 @@ export function walkIdentifiers(
     },
     leave(node: Node & { scopeIds?: Set<string> }, parent: Node | undefined) {
       parent && parentStack.pop()
-      if (node !== rootExp && node.scopeIds) {
-        for (const id of node.scopeIds) {
-          knownIds[id]--
-          if (knownIds[id] === 0) {
-            delete knownIds[id]
-          }
+      if (node === rootExp || !node.scopeIds) return
+      for (const id of node.scopeIds) {
+        knownIds[id]--
+        if (knownIds[id] === 0) {
+          delete knownIds[id]
         }
       }
     }
@@ -89,18 +88,12 @@ export function isReferencedIdentifier(
   parent: Node | null,
   parentStack: Node[]
 ) {
-  if (!parent) {
-    return true
-  }
+  if (!parent) return true
 
   // is a special keyword but parsed as identifier
-  if (id.name === 'arguments') {
-    return false
-  }
+  if (id.name === 'arguments') return false
 
-  if (isReferenced(id, parent)) {
-    return true
-  }
+  if (isReferenced(id, parent)) return true
 
   // babel's isReferenced check returns false for ids being assigned to, so we
   // need to cover those cases here
@@ -126,12 +119,9 @@ export function isInDestructureAssignment(
   ) {
     let i = parentStack.length
     while (i--) {
-      const p = parentStack[i]
-      if (p.type === 'AssignmentExpression') {
-        return true
-      } else if (p.type !== 'ObjectProperty' && !p.type.endsWith('Pattern')) {
-        break
-      }
+      const { type } = parentStack[i]
+      if (type === 'AssignmentExpression') return true
+      if (type !== 'ObjectProperty' && !type.endsWith('Pattern')) break
     }
   }
   return false
@@ -189,18 +179,17 @@ export function extractIdentifiers(
 
     case 'ObjectPattern':
       for (const prop of param.properties) {
-        if (prop.type === 'RestElement') {
-          extractIdentifiers(prop.argument, nodes)
-        } else {
-          extractIdentifiers(prop.value, nodes)
-        }
+        extractIdentifiers(
+          prop.type === 'RestElement' ? prop.argument : prop.value,
+          nodes
+        )
       }
       break
 
     case 'ArrayPattern':
-      param.elements.forEach(element => {
-        if (element) extractIdentifiers(element, nodes)
-      })
+      param.elements.forEach(
+        element => element && extractIdentifiers(element, nodes)
+      )
       break
 
     case 'RestElement':
@@ -221,9 +210,7 @@ function markScopeIdentifier(
   knownIds: Record<string, number>
 ) {
   const { name } = child
-  if (node.scopeIds && node.scopeIds.has(name)) {
-    return
-  }
+  if (node.scopeIds && node.scopeIds.has(name)) return
   if (name in knownIds) {
     knownIds[name]++
   } else {
@@ -260,10 +247,9 @@ function isReferenced(node: Node, parent: Node, grandparent?: Node): boolean {
     // no: parent.NODE
     case 'MemberExpression':
     case 'OptionalMemberExpression':
-      if (parent.property === node) {
-        return !!parent.computed
-      }
-      return parent.object === node
+      return parent.property === node
+        ? !!parent.computed
+        : parent.object === node
 
     case 'JSXMemberExpression':
       return parent.object === node
@@ -290,29 +276,22 @@ function isReferenced(node: Node, parent: Node, grandparent?: Node): boolean {
     case 'ClassMethod':
     case 'ClassPrivateMethod':
     case 'ObjectMethod':
-      if (parent.key === node) {
-        return !!parent.computed
-      }
-      return false
+      return parent.key === node ? !!parent.computed : false
 
     // yes: { [NODE]: "" }
     // no: { NODE: "" }
     // depends: { NODE }
     // depends: { key: NODE }
     case 'ObjectProperty':
-      if (parent.key === node) {
-        return !!parent.computed
-      }
       // parent.value === node
-      return !grandparent || grandparent.type !== 'ObjectPattern'
+      return parent.key === node
+        ? !!parent.computed
+        : !grandparent || grandparent.type !== 'ObjectPattern'
     // no: class { NODE = value; }
     // yes: class { [NODE] = value; }
     // yes: class { key = NODE; }
     case 'ClassProperty':
-      if (parent.key === node) {
-        return !!parent.computed
-      }
-      return true
+      return parent.key === node ? !!parent.computed : true
     case 'ClassPrivateProperty':
       return parent.key !== node
 
@@ -365,10 +344,7 @@ function isReferenced(node: Node, parent: Node, grandparent?: Node): boolean {
     // no: export { NODE as foo } from "foo";
     case 'ExportSpecifier':
       // @ts-expect-error
-      if (grandparent?.source) {
-        return false
-      }
-      return parent.local === node
+      return grandparent?.source ? false : parent.local === node
 
     // no: import NODE from "foo";
     // no: import * as NODE from "foo";
@@ -412,11 +388,7 @@ function isReferenced(node: Node, parent: Node, grandparent?: Node): boolean {
     // yes: { [NODE]: value }
     // no: { NODE: value }
     case 'TSPropertySignature':
-      if (parent.key === node) {
-        return !!parent.computed
-      }
-
-      return true
+      return parent.key === node ? !!parent.computed : true
   }
 
   return true

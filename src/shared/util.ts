@@ -20,6 +20,10 @@ export function isFalse(v: any): boolean {
   return v === false
 }
 
+export function isString(str: any): str is string {
+  return typeof str === 'string'
+}
+
 /**
  * Check if value is primitive.
  */

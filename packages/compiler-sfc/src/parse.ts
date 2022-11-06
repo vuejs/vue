@@ -49,13 +49,9 @@ export function parse(options: SFCParseOptions): SFCDescriptor {
     return output
   }
 
-  if (compiler) {
-    // user-provided compiler
-    output = compiler.parseComponent(source, compilerParseOptions)
-  } else {
-    // use built-in compiler
-    output = parseComponent(source, compilerParseOptions)
-  }
+  output = compiler
+    ? compiler.parseComponent(source, compilerParseOptions)
+    : parseComponent(source, compilerParseOptions)
 
   output.filename = filename
 

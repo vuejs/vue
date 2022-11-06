@@ -20,44 +20,35 @@ export function genCssVarsFromList(
 }
 
 function genVarName(id: string, raw: string, isProd: boolean): string {
-  if (isProd) {
-    return hash(id + raw)
-  } else {
-    return `${id}-${raw.replace(/([^\w-])/g, '_')}`
-  }
+  return isProd ? hash(id + raw) : `${id}-${raw.replace(/([^\w-])/g, '_')}`
 }
 
 function normalizeExpression(exp: string) {
   exp = exp.trim()
-  if (
-    (exp[0] === `'` && exp[exp.length - 1] === `'`) ||
+  return (exp[0] === `'` && exp[exp.length - 1] === `'`) ||
     (exp[0] === `"` && exp[exp.length - 1] === `"`)
-  ) {
-    return exp.slice(1, -1)
-  }
-  return exp
+    ? exp.slice(1, -1)
+    : exp
 }
 
 const vBindRE = /v-bind\s*\(/g
 
 export function parseCssVars(sfc: SFCDescriptor): string[] {
-  const vars: string[] = []
-  sfc.styles.forEach(style => {
+  return sfc.styles.reduce((vars, style) => {
     let match
     // ignore v-bind() in comments /* ... */
     const content = style.content.replace(/\/\*([\s\S]*?)\*\//g, '')
     while ((match = vBindRE.exec(content))) {
       const start = match.index + match[0].length
       const end = lexBinding(content, start)
-      if (end !== null) {
-        const variable = normalizeExpression(content.slice(start, end))
-        if (!vars.includes(variable)) {
-          vars.push(variable)
-        }
+      if (end === null) continue
+      const variable = normalizeExpression(content.slice(start, end))
+      if (!vars.includes(variable)) {
+        vars.push(variable)
       }
     }
-  })
-  return vars
+    return vars
+  }, [] as string[])
 }
 
 const enum LexerState {
@@ -116,24 +107,22 @@ export const cssVarsPlugin: PluginCreator<CssVarsPluginOptions> = opts => {
     Declaration(decl) {
       // rewrite CSS variables
       const value = decl.value
-      if (vBindRE.test(value)) {
-        vBindRE.lastIndex = 0
-        let transformed = ''
-        let lastIndex = 0
-        let match
-        while ((match = vBindRE.exec(value))) {
-          const start = match.index + match[0].length
-          const end = lexBinding(value, start)
-          if (end !== null) {
-            const variable = normalizeExpression(value.slice(start, end))
-            transformed +=
-              value.slice(lastIndex, match.index) +
-              `var(--${genVarName(id, variable, isProd)})`
-            lastIndex = end + 1
-          }
-        }
-        decl.value = transformed + value.slice(lastIndex)
+      if (!vBindRE.test(value)) return
+      vBindRE.lastIndex = 0
+      let transformed = ''
+      let lastIndex = 0
+      let match
+      while ((match = vBindRE.exec(value))) {
+        const start = match.index + match[0].length
+        const end = lexBinding(value, start)
+        if (end === null) continue
+        const variable = normalizeExpression(value.slice(start, end))
+        transformed +=
+          value.slice(lastIndex, match.index) +
+          `var(--${genVarName(id, variable, isProd)})`
+        lastIndex = end + 1
       }
+      decl.value = transformed + value.slice(lastIndex)
     }
   }
 }
