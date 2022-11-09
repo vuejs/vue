@@ -41,9 +41,7 @@ export function prefixIdentifiers(
     ast,
     (ident, parent) => {
       const { name } = ident
-      if (doNotPrefix(name)) {
-        return
-      }
+      if (doNotPrefix(name)) return
 
       let prefix = `_vm.`
       if (isScriptSetup) {
@@ -53,27 +51,21 @@ export function prefixIdentifiers(
         }
       }
 
-      if (isStaticProperty(parent) && parent.shorthand) {
-        // property shorthand like { foo }, we need to add the key since
-        // we rewrite the value
-        // { foo } -> { foo: _vm.foo }
-        s.appendLeft(ident.end!, `: ${prefix}${name}`)
-      } else {
-        s.prependRight(ident.start!, prefix)
-      }
+      isStaticProperty(parent) && parent.shorthand
+        ? s.appendLeft(ident.end!, `: ${prefix}${name}`)
+        : s.prependRight(ident.start!, prefix)
     },
     node => {
-      if (node.type === 'WithStatement') {
-        s.remove(node.start!, node.body.start! + 1)
-        s.remove(node.end! - 1, node.end!)
-        if (!isFunctional) {
-          s.prependRight(
-            node.start!,
-            `var _vm=this,_c=_vm._self._c${
-              isScriptSetup ? `,_setup=_vm._self._setupProxy;` : `;`
-            }`
-          )
-        }
+      if (node.type !== 'WithStatement') return
+      s.remove(node.start!, node.body.start! + 1)
+      s.remove(node.end! - 1, node.end!)
+      if (!isFunctional) {
+        s.prependRight(
+          node.start!,
+          `var _vm=this,_c=_vm._self._c${
+            isScriptSetup ? `,_setup=_vm._self._setupProxy;` : `;`
+          }`
+        )
       }
     }
   )

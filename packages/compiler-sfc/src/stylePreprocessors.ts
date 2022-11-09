@@ -118,10 +118,9 @@ function getSource(
   additionalData?: string | ((source: string, filename: string) => string)
 ) {
   if (!additionalData) return source
-  if (isFunction(additionalData)) {
-    return additionalData(source, filename)
-  }
-  return additionalData + source
+  return isFunction(additionalData)
+    ? additionalData(source, filename)
+    : additionalData + source
 }
 
 export type PreprocessLang = 'less' | 'sass' | 'scss' | 'styl' | 'stylus'

@@ -22,55 +22,53 @@ function transform(
   node: ASTNode,
   transformAssetUrlsOptions?: TransformAssetUrlsOptions
 ) {
-  if (node.type !== 1 || !node.attrs) {
+  if (
+    node.type !== 1 ||
+    !node.attrs ||
+    (node.tag !== 'img' && node.tag !== 'source')
+  )
     return
-  }
 
-  if (node.tag === 'img' || node.tag === 'source') {
-    node.attrs.forEach(attr => {
-      if (attr.name === 'srcset') {
-        // same logic as in transform-require.js
-        const value = attr.value
-        const isStatic =
-          value.charAt(0) === '"' && value.charAt(value.length - 1) === '"'
-        if (!isStatic) {
-          return
+  node.attrs.forEach(attr => {
+    if (attr.name !== 'srcset') return
+    // same logic as in transform-require.js
+    const value = attr.value
+    const isStatic =
+      value.charAt(0) === '"' && value.charAt(value.length - 1) === '"'
+    if (!isStatic) return
+
+    const imageCandidates: ImageCandidate[] = value
+      .slice(1, -1)
+      .split(',')
+      .map(s => {
+        // The attribute value arrives here with all whitespace, except
+        // normal spaces, represented by escape sequences
+        const [url, descriptor] = s
+          .replace(escapedSpaceCharacters, ' ')
+          .trim()
+          .split(' ', 2)
+        return {
+          require: urlToRequire(url, transformAssetUrlsOptions),
+          descriptor
         }
+      })
 
-        const imageCandidates: ImageCandidate[] = value
-          .slice(1, -1)
-          .split(',')
-          .map(s => {
-            // The attribute value arrives here with all whitespace, except
-            // normal spaces, represented by escape sequences
-            const [url, descriptor] = s
-              .replace(escapedSpaceCharacters, ' ')
-              .trim()
-              .split(' ', 2)
-            return {
-              require: urlToRequire(url, transformAssetUrlsOptions),
-              descriptor
-            }
-          })
+    // "require(url1)"
+    // "require(url1) 1x"
+    // "require(url1), require(url2)"
+    // "require(url1), require(url2) 2x"
+    // "require(url1) 1x, require(url2)"
+    // "require(url1) 1x, require(url2) 2x"
+    const code = imageCandidates
+      .map(
+        ({ require, descriptor }) =>
+          `${require} + "${descriptor ? ' ' + descriptor : ''}, " + `
+      )
+      .join('')
+      .slice(0, -6)
+      .concat('"')
+      .replace(/ \+ ""$/, '')
 
-        // "require(url1)"
-        // "require(url1) 1x"
-        // "require(url1), require(url2)"
-        // "require(url1), require(url2) 2x"
-        // "require(url1) 1x, require(url2)"
-        // "require(url1) 1x, require(url2) 2x"
-        const code = imageCandidates
-          .map(
-            ({ require, descriptor }) =>
-              `${require} + "${descriptor ? ' ' + descriptor : ''}, " + `
-          )
-          .join('')
-          .slice(0, -6)
-          .concat('"')
-          .replace(/ \+ ""$/, '')
-
-        attr.value = code
-      }
-    })
-  }
+    attr.value = code
+  })
 }

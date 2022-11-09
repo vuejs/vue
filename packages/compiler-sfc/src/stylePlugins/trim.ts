@@ -5,10 +5,9 @@ const trimPlugin: PluginCreator<{}> = () => {
     postcssPlugin: 'vue-sfc-trim',
     Once(root) {
       root.walk(({ type, raws }) => {
-        if (type === 'rule' || type === 'atrule') {
-          if (raws.before) raws.before = '\n'
-          if ('after' in raws && raws.after) raws.after = '\n'
-        }
+        if (type !== 'rule' && type !== 'atrule') return
+        if (raws.before) raws.before = '\n'
+        if ('after' in raws && raws.after) raws.after = '\n'
       })
     }
   }

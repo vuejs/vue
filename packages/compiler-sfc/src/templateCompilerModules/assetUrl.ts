@@ -2,6 +2,7 @@
 
 import { urlToRequire } from './utils'
 import { ASTNode, ASTAttr } from 'types/compiler'
+import { isString, isArray } from 'shared/util'
 
 export interface AssetURLOptions {
   [name: string]: string | string[]
@@ -50,19 +51,16 @@ function transform(
 ) {
   if (node.type !== 1 || !node.attrs) return
   for (const tag in options) {
-    if (tag === '*' || node.tag === tag) {
-      const attributes = options[tag]
-      if (typeof attributes === 'string') {
-        node.attrs!.some(attr =>
-          rewrite(attr, attributes, transformAssetUrlsOption)
-        )
-      } else if (Array.isArray(attributes)) {
-        attributes.forEach(item =>
-          node.attrs!.some(attr =>
-            rewrite(attr, item, transformAssetUrlsOption)
-          )
-        )
-      }
+    if (tag !== '*' && node.tag !== tag) continue
+    const attributes = options[tag]
+    if (isString(attributes)) {
+      node.attrs!.some(attr =>
+        rewrite(attr, attributes, transformAssetUrlsOption)
+      )
+    } else if (isArray(attributes)) {
+      attributes.forEach(item =>
+        node.attrs!.some(attr => rewrite(attr, item, transformAssetUrlsOption))
+      )
     }
   }
 }
@@ -72,13 +70,11 @@ function rewrite(
   name: string,
   transformAssetUrlsOption?: TransformAssetUrlsOptions
 ) {
-  if (attr.name === name) {
-    const value = attr.value
-    // only transform static URLs
-    if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
-      attr.value = urlToRequire(value.slice(1, -1), transformAssetUrlsOption)
-      return true
-    }
+  if (attr.name !== name) return false
+  const value = attr.value
+  // only transform static URLs
+  if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') {
+    attr.value = urlToRequire(value.slice(1, -1), transformAssetUrlsOption)
+    return true
   }
-  return false
 }

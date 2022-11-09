@@ -103,11 +103,12 @@ function normalizeDirectives(
     }
     res[getRawDirName(dir)] = dir
     if (vm._setupState && vm._setupState.__sfc) {
-      const setupDef = dir.def || resolveAsset(vm, '_setupState', 'v-' + dir.name)
+      const setupDef =
+        dir.def || resolveAsset(vm, '_setupState', 'v-' + dir.name)
       if (typeof setupDef === 'function') {
         dir.def = {
           bind: setupDef,
-          update: setupDef,
+          update: setupDef
         }
       } else {
         dir.def = setupDef

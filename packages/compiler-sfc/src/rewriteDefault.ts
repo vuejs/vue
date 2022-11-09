@@ -19,73 +19,73 @@ export function rewriteDefault(
     return input + `\nconst ${as} = {}`
   }
 
-  let replaced: string | undefined
-
   const classMatch = input.match(exportDefaultClassRE)
-  if (classMatch) {
-    replaced =
-      input.replace(exportDefaultClassRE, '$1class $2') +
+  const replaced = classMatch
+    ? input.replace(exportDefaultClassRE, '$1class $2') +
       `\nconst ${as} = ${classMatch[2]}`
-  } else {
-    replaced = input.replace(defaultExportRE, `$1const ${as} =`)
-  }
+    : input.replace(defaultExportRE, `$1const ${as} =`)
   if (!hasDefaultExport(replaced)) {
     return replaced
   }
 
   // if the script somehow still contains `default export`, it probably has
   // multi-line comments or template strings. fallback to a full parse.
-  const s = new MagicString(input)
   const ast = parse(input, {
     sourceType: 'module',
     plugins: parserPlugins
   }).program.body
-  ast.forEach(node => {
-    if (node.type === 'ExportDefaultDeclaration') {
-      if (node.declaration.type === 'ClassDeclaration') {
-        s.overwrite(node.start!, node.declaration.id.start!, `class `)
-        s.append(`\nconst ${as} = ${node.declaration.id.name}`)
-      } else {
-        s.overwrite(node.start!, node.declaration.start!, `const ${as} = `)
-      }
-    }
-    if (node.type === 'ExportNamedDeclaration') {
-      for (const specifier of node.specifiers) {
-        if (
-          specifier.type === 'ExportSpecifier' &&
-          specifier.exported.type === 'Identifier' &&
-          specifier.exported.name === 'default'
-        ) {
-          if (node.source) {
-            if (specifier.local.name === 'default') {
-              const end = specifierEnd(input, specifier.local.end!, node.end)
-              s.prepend(
-                `import { default as __VUE_DEFAULT__ } from '${node.source.value}'\n`
-              )
-              s.overwrite(specifier.start!, end, ``)
-              s.append(`\nconst ${as} = __VUE_DEFAULT__`)
-              continue
-            } else {
-              const end = specifierEnd(input, specifier.exported.end!, node.end)
-              s.prepend(
-                `import { ${input.slice(
-                  specifier.local.start!,
-                  specifier.local.end!
-                )} } from '${node.source.value}'\n`
-              )
-              s.overwrite(specifier.start!, end, ``)
-              s.append(`\nconst ${as} = ${specifier.local.name}`)
-              continue
-            }
-          }
-          const end = specifierEnd(input, specifier.end!, node.end)
-          s.overwrite(specifier.start!, end, ``)
-          s.append(`\nconst ${as} = ${specifier.local.name}`)
+  return ast
+    .reduce((s, node) => {
+      if (node.type === 'ExportDefaultDeclaration') {
+        if (node.declaration.type === 'ClassDeclaration') {
+          s.overwrite(node.start!, node.declaration.id.start!, `class `)
+          s.append(`\nconst ${as} = ${node.declaration.id.name}`)
+        } else {
+          s.overwrite(node.start!, node.declaration.start!, `const ${as} = `)
         }
       }
-    }
-  })
-  return s.toString()
+      if (node.type === 'ExportNamedDeclaration') {
+        for (const specifier of node.specifiers) {
+          if (
+            specifier.type === 'ExportSpecifier' &&
+            specifier.exported.type === 'Identifier' &&
+            specifier.exported.name === 'default'
+          ) {
+            if (node.source) {
+              if (specifier.local.name === 'default') {
+                const end = specifierEnd(input, specifier.local.end!, node.end)
+                s.prepend(
+                  `import { default as __VUE_DEFAULT__ } from '${node.source.value}'\n`
+                )
+                s.overwrite(specifier.start!, end, ``)
+                s.append(`\nconst ${as} = __VUE_DEFAULT__`)
+                continue
+              } else {
+                const end = specifierEnd(
+                  input,
+                  specifier.exported.end!,
+                  node.end
+                )
+                s.prepend(
+                  `import { ${input.slice(
+                    specifier.local.start!,
+                    specifier.local.end!
+                  )} } from '${node.source.value}'\n`
+                )
+                s.overwrite(specifier.start!, end, ``)
+                s.append(`\nconst ${as} = ${specifier.local.name}`)
+                continue
+              }
+            }
+            const end = specifierEnd(input, specifier.end!, node.end)
+            s.overwrite(specifier.start!, end, ``)
+            s.append(`\nconst ${as} = ${specifier.local.name}`)
+          }
+        }
+      }
+      return s
+    }, new MagicString(input))
+    .toString()
 }
 
 export function hasDefaultExport(input: string): boolean {

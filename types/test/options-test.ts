@@ -175,11 +175,11 @@ Vue.component('component', {
     },
     e: [
       'handle1',
-      function handle2 (val, oldVal) {},
+      function handle2(val, oldVal) {},
       {
-        handler: function handle3 (val, oldVal) {},
+        handler: function handle3(val, oldVal) {}
       }
-    ],
+    ]
   },
   el: '#app',
   template: '<div>{{ message }}</div>',

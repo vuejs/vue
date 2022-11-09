@@ -126,7 +126,7 @@ export function genElement(el: ASTElement, state: CodegenState): string {
 function checkBindingType(bindings: BindingMetadata, key: string) {
   const camelName = camelize(key)
   const PascalName = capitalize(camelName)
-  const checkType = (type) => {
+  const checkType = type => {
     if (bindings[key] === type) {
       return key
     }
