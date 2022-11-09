@@ -477,13 +477,13 @@ function hash(str) {
 }
 
 function containsSlotChild(el: ASTNode): boolean {
-  if (el.type === 1) {
-    if (el.tag === 'slot') {
-      return true
-    }
-    return el.children.some(containsSlotChild)
+  if (el.type !== 1) {
+    return false
   }
-  return false
+  if (el.tag === 'slot') {
+    return true
+  }
+  return el.children.some(containsSlotChild)
 }
 
 function genScopedSlot(el: ASTElement, state: CodegenState): string {
