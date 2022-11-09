@@ -42,7 +42,7 @@ export const bindRE = /^:|^\.|^v-bind:/
 const propBindRE = /^\./
 const modifierRE = /\.[^.\]]+(?=[^\]]*$)/g
 
-const slotRE = /^v-slot(:|$)|^#/
+export const slotRE = /^v-slot(:|$)|^#/
 
 const lineBreakRE = /[\r\n]/
 const whitespaceRE = /[ \f\t\r\n]+/g
