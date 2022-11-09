@@ -712,4 +712,12 @@ describe('Options provide/inject', () => {
     await nextTick()
     expect(spy).toHaveBeenCalledWith(2)
   })
+
+  // #12854
+  test('should not mutate original provide options', () => {
+    const hairMixin = { provide: { hair: 'red' } }
+    const eyesMixin = { provide: { eyes: 'brown' } }
+    new Vue({ mixins: [hairMixin, eyesMixin], render() {} }).$mount()
+    expect(eyesMixin.provide).toStrictEqual({ eyes: 'brown' })
+  })
 })
