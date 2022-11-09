@@ -1571,7 +1571,7 @@ describe('SFC analyze <script> bindings', () => {
       </script>
       <template>
         <div @click="$emit('update:a');"></div>
-      </tempalte>
+      </template>
       `)
     })
   })
