@@ -42,7 +42,7 @@ class Test extends Vue {
     this.$delete({}, 'key')
     this.$watch('a', (val: number, oldVal: number) => {}, {
       immediate: true,
-      deep: false,
+      deep: false
     })()
     this.$watch(
       () => this.a,
@@ -85,9 +85,9 @@ class Test extends Vue {
     this.extend({
       data() {
         return {
-          msg: '',
+          msg: ''
         }
-      },
+      }
     })
     this.nextTick(() => {})
     this.nextTick(
@@ -110,7 +110,7 @@ class Test extends Vue {
       functional: true,
       render(h) {
         return h('div', 'hello!')
-      },
+      }
     })
     this.use
     this.mixin(Test)
@@ -126,24 +126,24 @@ const HelloWorldComponent = Vue.extend({
   props: ['name'],
   data() {
     return {
-      message: 'Hello ' + this.name,
+      message: 'Hello ' + this.name
     }
   },
   computed: {
     shouted(): string {
       return this.message.toUpperCase()
-    },
+    }
   },
   methods: {
     getMoreExcited() {
       this.message += '!'
-    },
+    }
   },
   watch: {
     message(a: string) {
       console.log(`Message ${this.message} was changed!`)
-    },
-  },
+    }
+  }
 })
 
 const FunctionalHelloWorldComponent = Vue.extend({
@@ -151,7 +151,7 @@ const FunctionalHelloWorldComponent = Vue.extend({
   props: ['name'],
   render(createElement, ctxt) {
     return createElement('div', 'Hello ' + ctxt.props.name)
-  },
+  }
 })
 
 const FunctionalScopedSlotsComponent = Vue.extend({
@@ -161,29 +161,29 @@ const FunctionalScopedSlotsComponent = Vue.extend({
       (ctx.scopedSlots.default && ctx.scopedSlots.default({})) ||
       h('div', 'functional scoped slots')
     )
-  },
+  }
 })
 
 const Parent = Vue.extend({
   data() {
     return { greeting: 'Hello' }
-  },
+  }
 })
 
 const Child = Parent.extend({
   methods: {
     foo() {
       console.log(this.greeting.toLowerCase())
-    },
-  },
+    }
+  }
 })
 
 const GrandChild = Child.extend({
   computed: {
     lower(): string {
       return this.greeting.toLowerCase()
-    },
-  },
+    }
+  }
 })
 
 new GrandChild().lower.toUpperCase()
@@ -198,11 +198,11 @@ new Vue(options)
 Vue.extend({
   props: {
     bar: {
-      type: String,
-    },
+      type: String
+    }
   },
   methods: {
-    foo() {},
+    foo() {}
   },
   mounted() {
     this.foo()
@@ -211,7 +211,7 @@ Vue.extend({
   render(h): VNode {
     const a = this.bar
     return h('canvas', {}, [a])
-  },
+  }
 })
 
 declare function decorate<VC extends typeof Vue>(v: VC): VC
@@ -228,23 +228,23 @@ obj.a++
 const ComponentWithStyleInVNodeData = Vue.extend({
   render(h) {
     const elementWithStyleAsString = h('div', {
-      style: '--theme-color: black;',
+      style: '--theme-color: black;'
     })
 
     const elementWithStyleCSSProperties = h('div', {
-      style: { ['--theme-color' as any]: 'black' },
+      style: { ['--theme-color' as any]: 'black' }
     })
 
     const elementWithStyleAsArrayOfStyleValues = h('div', {
-      style: [{ ['--theme-color' as any]: 'black' }],
+      style: [{ ['--theme-color' as any]: 'black' }]
     })
 
     return h('div', undefined, [
       elementWithStyleAsString,
       elementWithStyleCSSProperties,
-      elementWithStyleAsArrayOfStyleValues,
+      elementWithStyleAsArrayOfStyleValues
     ])
-  },
+  }
 })
 
 // infer mixin type with new Vue() #12730
@@ -255,25 +255,25 @@ new Vue({
         p1: String,
         p2: {
           type: Number,
-          default: 0,
-        },
+          default: 0
+        }
       },
       data() {
         return {
-          foo: 123,
+          foo: 123
         }
       },
       computed: {
         bar() {
           return 123
-        },
-      },
+        }
+      }
     }),
     {
       methods: {
-        hello(n: number) {},
-      },
-    },
+        hello(n: number) {}
+      }
+    }
   ],
   created() {
     this.hello(this.foo)
@@ -281,5 +281,5 @@ new Vue({
     // @ts-expect-error
     this.hello(this.p1)
     this.hello(this.p2)
-  },
+  }
 })
