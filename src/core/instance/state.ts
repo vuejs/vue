@@ -14,7 +14,6 @@ import {
 
 import {
   warn,
-  bind,
   noop,
   hasOwn,
   isArray,
@@ -300,13 +299,10 @@ function initMethods(vm: Component, methods: Object) {
       }
     }
     function changethis() {
-        return () => {
-            methods[key].call(this)
-        }
+      return () => methods[key].call(this)
     }
 
     vm[key] = typeof methods[key] !== 'function' ? noop : changethis.call(vm);
-    // vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
   }
 }
 
