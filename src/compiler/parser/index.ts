@@ -936,12 +936,15 @@ function checkInFor(el: ASTElement): boolean {
 
 function parseModifiers(name: string): Object | void {
   const match = name.match(modifierRE)
-  return match
-  ? match.reduce((ret,m) => {
-      ret[m.slice(1)] = true
-      return ret
-    },{})
-  : undefined
+  if(!match){
+    return
+  }
+
+  return match.reduce((ret,m) => {
+    ret[m.slice(1)] = true
+    return ret
+  },{})
+
 }
 
 function makeAttrsMap(attrs: Array<Record<string, any>>): Record<string, any> {
