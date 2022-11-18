@@ -530,7 +530,7 @@ export function genChildren(
     child.tag !== 'slot'
   ) {
     const normalizationType = checkSkip
-      ? state.maybeComponent(el)
+      ? state.maybeComponent(child)
         ? `,1`
         : `,0`
       : ``
