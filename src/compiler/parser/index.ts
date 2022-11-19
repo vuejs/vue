@@ -936,7 +936,7 @@ function checkInFor(el: ASTElement): boolean {
 
 function parseModifiers(name: string): Object | void {
   const match = name.match(modifierRE)
-  if(!match){
+  if(!match) {
     return
   }
 
@@ -944,7 +944,6 @@ function parseModifiers(name: string): Object | void {
     ret[m.slice(1)] = true
     return ret
   },{})
-
 }
 
 function makeAttrsMap(attrs: Array<Record<string, any>>): Record<string, any> {
