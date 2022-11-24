@@ -10,13 +10,13 @@ jobs:
   unit-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
+        uses: pnpm/action-setup@v2
 
       - name: Set node version to 16
-        uses: actions/setup-node@v3.5.1
+        uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: 'pnpm'
@@ -29,13 +29,13 @@ jobs:
   ssr-sfc-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
+        uses: pnpm/action-setup@v2
 
       - name: Set node version to 16
-        uses: actions/setup-node@v3.5.1
+        uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: 'pnpm'
@@ -51,13 +51,13 @@ jobs:
   e2e-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
+        uses: pnpm/action-setup@v2
 
       - name: Set node version to 16
-        uses: actions/setup-node@v3.5.1
+        uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: 'pnpm'
@@ -73,13 +73,13 @@ jobs:
   type-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3
 
       - name: Install pnpm
-        uses: pnpm/action-setup@v2.2.4
+        uses: pnpm/action-setup@v2
 
       - name: Set node version to 16
-        uses: actions/setup-node@v3.5.1
+        uses: actions/setup-node@v3
         with:
           node-version: 16
           cache: 'pnpm'
