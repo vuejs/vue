@@ -1,0 +1,38 @@
+<!--
+ * @Author: ngz
+ * @Date: 2022-11-28 13:55:49
+ * @LastEditors: ngz
+ * @LastEditTime: 2022-11-28 15:06:58
+ * @Description: input Description
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue初始化</title>
+</head>
+<body>
+
+  <div id="app">
+    <h1>hello Vue</h1>
+    {{msg}}
+  </div>
+
+  <script src="../../dist/vue.js"></script>
+  <script>
+
+    const vm = new Vue({
+      el: "#app",
+      data() {
+        return {
+          msg: 'hello Vue'
+        }
+      }
+    })
+
+  </script>
+  
+</body>
+</html>

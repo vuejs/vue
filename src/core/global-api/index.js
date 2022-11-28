@@ -1,3 +1,10 @@
+/*
+ * @Author: ngz
+ * @Date: 2022-11-27 23:16:11
+ * @LastEditors: ngz
+ * @LastEditTime: 2022-11-28 15:02:49
+ * @Description: input Description
+ */
 /* @flow */
 
 import config from '../config'
@@ -29,6 +36,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
       )
     }
   }
+  // 初始化Vue.config对象
   Object.defineProperty(Vue, 'config', configDef)
 
   // exposed util methods.
@@ -41,16 +49,19 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     defineReactive
   }
 
+  // 静态方法set/del/nextTick
   Vue.set = set
   Vue.delete = del
   Vue.nextTick = nextTick
 
   // 2.6 explicit observable API
+  // 让一个对象实现响应性
   Vue.observable = <T>(obj: T): T => {
     observe(obj)
     return obj
   }
 
+  // 初始化 Vue.options 对象，并将其扩展
   Vue.options = Object.create(null)
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
@@ -60,10 +71,14 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   // components with in Weex's multi-instance scenarios.
   Vue.options._base = Vue
 
+  // 设置 keep-alive 组件
   extend(Vue.options.components, builtInComponents)
-
+  // 注册 Vue.use() 用来注册插件
   initUse(Vue)
+  // 注册 Vue.mixin() 用来实现混入
   initMixin(Vue)
+  // 注册 Vue.extend() 基于传入的 options 返回一个组件的构造函数
   initExtend(Vue)
+  // 注册 Vue.directive()、Vue.component()、Vue.filter()
   initAssetRegisters(Vue)
 }
