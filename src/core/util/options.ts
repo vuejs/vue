@@ -51,7 +51,8 @@ if (__DEV__) {
  */
 function mergeData(
   to: Record<string | symbol, any>,
-  from: Record<string | symbol, any> | null
+  from: Record<string | symbol, any> | null,
+  recursive = true
 ): Record<PropertyKey, any> {
   if (!from) return to
   let key, toVal, fromVal
@@ -66,7 +67,7 @@ function mergeData(
     if (key === '__ob__') continue
     toVal = to[key]
     fromVal = from[key]
-    if (!hasOwn(to, key)) {
+    if (!recursive || !hasOwn(to, key)) {
       set(to, key, fromVal)
     } else if (
       toVal !== fromVal &&
@@ -262,7 +263,22 @@ strats.props =
       if (childVal) extend(ret, childVal)
       return ret
     }
-strats.provide = mergeDataOrFn
+
+strats.provide = function (parentVal: Object | null, childVal: Object | null) {
+  if (!parentVal) return childVal
+  return function () {
+    const ret = Object.create(null)
+    mergeData(ret, isFunction(parentVal) ? parentVal.call(this) : parentVal)
+    if (childVal) {
+      mergeData(
+        ret,
+        isFunction(childVal) ? childVal.call(this) : childVal,
+        false // non-recursive
+      )
+    }
+    return ret
+  }
+}
 
 /**
  * Default strategy.

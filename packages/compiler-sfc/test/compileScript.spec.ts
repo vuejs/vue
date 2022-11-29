@@ -1571,7 +1571,23 @@ describe('SFC analyze <script> bindings', () => {
       </script>
       <template>
         <div @click="$emit('update:a');"></div>
-      </tempalte>
+      </template>
+      `)
+    })
+
+    // #12841
+    test('should not error when performing ts expression check for v-slot destructured default value', () => {
+      compile(`
+      <script setup lang="ts">
+        import FooComp from './Foo.vue'
+      </script>
+      <template>
+        <FooComp>
+          <template #bar="{ bar = { baz: '' } }">
+            {{ bar.baz }}
+          </template>
+        </FooComp>
+      </template>
       `)
     })
   })

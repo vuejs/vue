@@ -228,21 +228,21 @@ obj.a++
 const ComponentWithStyleInVNodeData = Vue.extend({
   render(h) {
     const elementWithStyleAsString = h('div', {
-      style: 'background-color: red;'
+      style: '--theme-color: black;'
     })
 
-    const elementWithStyleAsObject = h('div', {
-      style: { backgroundColor: 'green' }
+    const elementWithStyleCSSProperties = h('div', {
+      style: { ['--theme-color' as any]: 'black' }
     })
 
-    const elementWithStyleAsArrayOfObjects = h('div', {
-      style: [{ backgroundColor: 'blue' }]
+    const elementWithStyleAsArrayOfStyleValues = h('div', {
+      style: [{ ['--theme-color' as any]: 'black' }]
     })
 
     return h('div', undefined, [
       elementWithStyleAsString,
-      elementWithStyleAsObject,
-      elementWithStyleAsArrayOfObjects
+      elementWithStyleCSSProperties,
+      elementWithStyleAsArrayOfStyleValues
     ])
   }
 })

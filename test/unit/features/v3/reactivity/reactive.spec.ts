@@ -259,7 +259,7 @@ describe('reactivity/reactive', () => {
   })
 
   test('markRaw on non-extensible objects', () => {
-    const foo = Object.freeze({})
+    const foo = Object.seal({})
     markRaw(foo)
     expect(isReactive(reactive(foo))).toBe(false)
   })
