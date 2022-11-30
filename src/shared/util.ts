@@ -1,3 +1,5 @@
+import { isRef, unref } from 'v3'
+
 export const emptyObject: Record<string, any> = Object.freeze({})
 
 export const isArray = Array.isArray
@@ -90,7 +92,7 @@ export function toString(val: any): string {
   return val == null
     ? ''
     : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
-    ? JSON.stringify(val, null, 2)
+    ? JSON.stringify(isRef(val) ? unref(val) : val, null, 2)
     : String(val)
 }
 
