@@ -1,3 +1,5 @@
+const _toString = Object.prototype.toString
+
 export const emptyObject: Record<string, any> = Object.freeze({})
 
 export const isArray = Array.isArray
@@ -25,16 +27,16 @@ export function isFalse(v: any): boolean {
  */
 export function isPrimitive(value: any): boolean {
   return (
-    typeof value === 'string' ||
-    typeof value === 'number' ||
+    _toString.call(value) === '[object String]' ||
+    _toString.call(value) === '[object Number]' ||
     // $flow-disable-line
-    typeof value === 'symbol' ||
-    typeof value === 'boolean'
+    _toString.call(value) === '[object Boolean]' ||
+    typeof value === 'symbol'
   )
 }
 
 export function isFunction(value: any): value is (...args: any[]) => any {
-  return typeof value === 'function'
+  return _toString.call(value) === '[object Function]'
 }
 
 /**
@@ -43,14 +45,12 @@ export function isFunction(value: any): value is (...args: any[]) => any {
  * is a JSON-compliant type.
  */
 export function isObject(obj: any): boolean {
-  return obj !== null && typeof obj === 'object'
+  return obj !== null && _toString.call(obj) === '[object Object]'
 }
 
 /**
  * Get the raw type string of a value, e.g., [object Object].
  */
-const _toString = Object.prototype.toString
-
 export function toRawType(value: any): string {
   return _toString.call(value).slice(8, -1)
 }
@@ -78,8 +78,8 @@ export function isValidArrayIndex(val: any): boolean {
 export function isPromise(val: any): val is Promise<any> {
   return (
     isDef(val) &&
-    typeof val.then === 'function' &&
-    typeof val.catch === 'function'
+    _toString.call(val.then) === '[object Function]' &&
+    _toString.call(val.catch)=== '[object Function]'
   )
 }
 
