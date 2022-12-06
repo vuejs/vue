@@ -19,7 +19,7 @@ import { isReadonly, isRef, TrackOpTypes, TriggerOpTypes } from '../../v3'
 
 const arrayKeys = Object.getOwnPropertyNames(arrayMethods)
 
-const NO_INIITIAL_VALUE = {}
+const NO_INITIAL_VALUE = {}
 
 /**
  * In some cases we may want to disable observation inside a component's
@@ -79,7 +79,7 @@ export class Observer {
       const keys = Object.keys(value)
       for (let i = 0; i < keys.length; i++) {
         const key = keys[i]
-        defineReactive(value, key, NO_INIITIAL_VALUE, undefined, shallow, mock)
+        defineReactive(value, key, NO_INITIAL_VALUE, undefined, shallow, mock)
       }
     }
   }
@@ -145,7 +145,7 @@ export function defineReactive(
   const setter = property && property.set
   if (
     (!getter || setter) &&
-    (val === NO_INIITIAL_VALUE || arguments.length === 2)
+    (val === NO_INITIAL_VALUE || arguments.length === 2)
   ) {
     val = obj[key]
   }
