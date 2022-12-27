@@ -62,7 +62,7 @@ export function isUnknownElement(tag: string): boolean {
   }
   const el = document.createElement(tag)
   if (tag.indexOf('-') > -1) {
-    // http://stackoverflow.com/a/28210364/1070244
+    // https://stackoverflow.com/a/28210364/1070244
     return (unknownElementCache[tag] =
       el.constructor === window.HTMLUnknownElement ||
       el.constructor === window.HTMLElement)
