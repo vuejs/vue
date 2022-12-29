@@ -4,7 +4,7 @@ importers:
 
   .:
     specifiers:
-      '@babel/parser': ^7.18.4
+      '@babel/parser': ^7.20.5
       '@microsoft/api-extractor': ^7.25.0
       '@rollup/plugin-alias': ^3.1.9
       '@rollup/plugin-commonjs': ^22.0.0
@@ -51,7 +51,7 @@ importers:
       '@vue/compiler-sfc': link:packages/compiler-sfc
       csstype: 3.1.1
     devDependencies:
-      '@babel/parser': 7.19.4
+      '@babel/parser': 7.20.5
       '@microsoft/api-extractor': 7.32.1
       '@rollup/plugin-alias': 3.1.9_rollup@2.79.1
       '@rollup/plugin-commonjs': 22.0.2_rollup@2.79.1
@@ -95,8 +95,8 @@ importers:
 
   packages/compiler-sfc:
     specifiers:
-      '@babel/parser': ^7.18.4
-      '@babel/types': ^7.19.4
+      '@babel/parser': ^7.20.5
+      '@babel/types': ^7.20.5
       '@types/estree': ^0.0.48
       '@types/hash-sum': ^1.0.0
       '@types/lru-cache': ^5.1.1
@@ -116,11 +116,11 @@ importers:
       source-map: ^0.6.1
       stylus: ^0.58.1
     dependencies:
-      '@babel/parser': 7.19.4
+      '@babel/parser': 7.20.5
       postcss: 8.4.17
       source-map: 0.6.1
     devDependencies:
-      '@babel/types': 7.19.4
+      '@babel/types': 7.20.5
       '@types/estree': 0.0.48
       '@types/hash-sum': 1.0.0
       '@types/lru-cache': 5.1.1
@@ -206,15 +206,15 @@ packages:
       js-tokens: 4.0.0
     dev: true
 
-  /@babel/parser/7.19.4:
-    resolution: {integrity: sha512-qpVT7gtuOLjWeDTKLkJ6sryqLliBaFpAtGeqw5cs5giLldvh+Ch0plqnUMKoVAUS6ZEueQQiZV+p5pxtPitEsA==}
+  /@babel/parser/7.20.5:
+    resolution: {integrity: sha512-r27t/cy/m9uKLXQNWWebeCUHgnAZq0CpG1OwKRxzJMP1vpSU4bSIK2hq+/cp0bQxetkXx38n09rNu8jVkcK/zA==}
     engines: {node: '>=6.0.0'}
     hasBin: true
     dependencies:
-      '@babel/types': 7.19.4
+      '@babel/types': 7.20.5
 
-  /@babel/types/7.19.4:
-    resolution: {integrity: sha512-M5LK7nAeS6+9j7hAq+b3fQs+pNfUtTGq+yFFfHnauFA8zQtLRfmuipmsKDKKLuyG+wC8ABW43A153YNawNTEtw==}
+  /@babel/types/7.20.5:
+    resolution: {integrity: sha512-c9fst/h2/dcF7H+MJKZ2T0KjEQ8hY/BNnDk/H3XY8C4Aw/eWQXWn/lWntHF9ooUBnGmEvbfGrTgLWc+um0YDUg==}
     engines: {node: '>=6.9.0'}
     dependencies:
       '@babel/helper-string-parser': 7.19.4
@@ -971,7 +971,7 @@ packages:
     resolution: {integrity: sha512-GAwkz0AihzY5bkwIY5QDR+LvsRQgB/B+1foMPvi0FZPMl5fjD7ICiznUiBdLYMH1QYe6vqu4gWYytZOccLouFw==}
     engines: {node: '>= 10.0.0'}
     dependencies:
-      '@babel/types': 7.19.4
+      '@babel/types': 7.20.5
     dev: true
 
   /balanced-match/1.0.2:
@@ -1017,6 +1017,7 @@ packages:
 
   /bindings/1.5.0:
     resolution: {integrity: sha512-p2q/t/mhvuOj/UeLlV6566GD/guowlr0hHxClI0W9m7MWYkL1F0hLo+0Aexs9HSPCtR1SXQ0TD3MMKrXZajbiQ==}
+    requiresBuild: true
     dependencies:
       file-uri-to-path: 1.0.0
     dev: true
@@ -1496,8 +1497,8 @@ packages:
   /constantinople/4.0.1:
     resolution: {integrity: sha512-vCrqcSIq4//Gx74TXXCGnHpulY1dskqLTFGDmhrGxzeXL8lF8kvXv6mpNWlJj1uD4DW23D4ljAqbY4RRaaUZIw==}
     dependencies:
-      '@babel/parser': 7.19.4
-      '@babel/types': 7.19.4
+      '@babel/parser': 7.20.5
+      '@babel/types': 7.20.5
     dev: true
 
   /constants-browserify/1.0.0:
@@ -1659,8 +1660,8 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
     dependencies:
-      JSONStream: 1.3.5
       is-text-path: 1.0.1
+      JSONStream: 1.3.5
       lodash: 4.17.21
       meow: 8.1.2
       split2: 3.2.2
@@ -2577,6 +2578,7 @@ packages:
 
   /file-uri-to-path/1.0.0:
     resolution: {integrity: sha512-0Zt+s3L7Vf1biwWZ29aARiVYLx7iMGnEUl9x33fbB/j3jR81u/O2LbqK+Bm1CDSNDKVtJ/YjwY7TUd5SkeLQLw==}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -4115,6 +4117,7 @@ packages:
 
   /nan/2.17.0:
     resolution: {integrity: sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ==}
+    requiresBuild: true
     dev: true
     optional: true
 
@@ -6345,8 +6348,8 @@ packages:
     resolution: {integrity: sha512-RNGKj82nUPg3g5ygxkQl0R937xLyho1J24ItRCBTr/m1YnZkzJy1hUiHUJrc/VlsDQzsCnInEGSg3bci0Lmd4w==}
     engines: {node: '>= 10.0.0'}
     dependencies:
-      '@babel/parser': 7.19.4
-      '@babel/types': 7.19.4
+      '@babel/parser': 7.20.5
+      '@babel/types': 7.20.5
       assert-never: 1.2.1
       babel-walk: 3.0.0-canary-5
     dev: true
@@ -6523,7 +6526,7 @@ packages:
   'file:':
     resolution: {directory: '', type: directory}
     name: vue
-    version: 2.7.10
+    version: 2.7.14
     dependencies:
       '@vue/compiler-sfc': link:packages/compiler-sfc
       csstype: 3.1.1
