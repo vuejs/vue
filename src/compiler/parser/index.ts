@@ -970,15 +970,10 @@ const ieNSPrefix = /^NS\d+:/
 
 /* istanbul ignore next */
 function guardIESVGBug(attrs) {
-  const res: any[] = []
-  for (let i = 0; i < attrs.length; i++) {
-    const attr = attrs[i]
-    if (!ieNSBug.test(attr.name)) {
-      attr.name = attr.name.replace(ieNSPrefix, '')
-      res.push(attr)
-    }
-  }
-  return res
+  return attrs.filter(attr => !ieNSBug.test(attr.name)).map(attr => {
+    attr.name = attr.name.replace(ieNSPrefix, '')
+    return attr
+  })
 }
 
 function checkForAliasModel(el, value) {
