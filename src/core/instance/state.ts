@@ -119,6 +119,7 @@ function initProps(vm: Component, propsOptions: Object) {
   toggleObserving(true)
 }
 
+// 给 vm.data 添加响应式机制
 function initData(vm: Component) {
   let data: any = vm.$options.data
   data = vm._data = isFunction(data) ? getData(data, vm) : data || {}
@@ -222,7 +223,9 @@ export function defineComputed(
   key: string,
   userDef: Record<string, any> | (() => any)
 ) {
+  // 是否缓存， 服务端渲染不缓存
   const shouldCache = !isServerRendering()
+
   if (isFunction(userDef)) {
     sharedPropertyDefinition.get = shouldCache
       ? createComputedGetter(key)
@@ -244,6 +247,8 @@ export function defineComputed(
       )
     }
   }
+
+  // 将 computed 中属性转成响应式
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 

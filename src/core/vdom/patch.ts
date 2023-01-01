@@ -613,6 +613,7 @@ export function createPatchFunction(backend) {
     // note we only do this if the vnode is cloned -
     // if the new node is not cloned it means the render functions have been
     // reset by the hot-reload-api and we need to do a proper re-render.
+    // 静态节点或只渲染一次的节点，实行节点复用模式
     if (
       isTrue(vnode.isStatic) &&
       isTrue(oldVnode.isStatic) &&
@@ -635,11 +636,15 @@ export function createPatchFunction(backend) {
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode)
       if (isDef((i = data.hook)) && isDef((i = i.update))) i(oldVnode, vnode)
     }
+
+    // 非文本节点
     if (isUndef(vnode.text)) {
+      // 如果新旧节点都有，则比较新旧节点，如果新旧节点不相等，则将旧节点替换成新节点
       if (isDef(oldCh) && isDef(ch)) {
         if (oldCh !== ch)
           updateChildren(elm, oldCh, ch, insertedVnodeQueue, removeOnly)
       } else if (isDef(ch)) {
+        // 如果不存在旧节点，则将新节点加入到父元素中
         if (__DEV__) {
           checkDuplicateKeys(ch)
         }
@@ -798,7 +803,9 @@ export function createPatchFunction(backend) {
     }
   }
 
+  // 打补丁
   return function patch(oldVnode, vnode, hydrating, removeOnly) {
+    // vnode 是否未定义
     if (isUndef(vnode)) {
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
       return
@@ -807,16 +814,19 @@ export function createPatchFunction(backend) {
     let isInitialPatch = false
     const insertedVnodeQueue: any[] = []
 
+    // 只有新节点
     if (isUndef(oldVnode)) {
       // empty mount (likely as component), create new root element
       isInitialPatch = true
       createElm(vnode, insertedVnodeQueue)
     } else {
+      // 新旧节点都有
       const isRealElement = isDef(oldVnode.nodeType)
       if (!isRealElement && sameVnode(oldVnode, vnode)) {
         // patch existing root node
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
       } else {
+        // 新旧节点不同，需要进行替换
         if (isRealElement) {
           // mounting to a real element
           // check if this is server-rendered content and if we can perform

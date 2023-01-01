@@ -11,7 +11,7 @@ import type { Component } from 'types/component'
 import type { InternalComponentOptions } from 'types/options'
 import { EffectScope } from 'v3/reactivity/effectScope'
 
-let uid = 0 
+let uid = 0
 
 export function initMixin(Vue: typeof Component) {
   Vue.prototype._init = function (options?: Record<string, any>) {
@@ -55,10 +55,14 @@ export function initMixin(Vue: typeof Component) {
     }
     // expose real self
     vm._self = vm
+
+    // 初始化 vue 实例中部分属性
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
     callHook(vm, 'beforeCreate')
+
+    // 初始化 data、computed、watch、methods、provide、inject
     initInjections(vm) // resolve injections before data/props
     initState(vm)
     initProvide(vm) // resolve provide after data/props

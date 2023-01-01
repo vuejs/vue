@@ -141,7 +141,10 @@ export function mountComponent(
   el: Element | null | undefined,
   hydrating?: boolean
 ): Component {
+  // 这里的 el 已经是一个 dom 对象了
   vm.$el = el
+
+  // 没有 render 函数，也就是说，这里时模板（template）渲染
   if (!vm.$options.render) {
     // @ts-expect-error invalid type
     vm.$options.render = createEmptyVNode
@@ -189,6 +192,7 @@ export function mountComponent(
     }
   } else {
     updateComponent = () => {
+      // 更新视图
       vm._update(vm._render(), hydrating)
     }
   }
@@ -209,6 +213,8 @@ export function mountComponent(
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+
+  //  这里的 updateComponent 在数据变更时回被调用
   new Watcher(
     vm,
     updateComponent,

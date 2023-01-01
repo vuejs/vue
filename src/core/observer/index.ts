@@ -49,9 +49,8 @@ export class Observer {
     // 在对象上标记 __ob__, 表示该对象已经做过响应式处理
     def(value, '__ob__', this)
 
-
+    // 如果对象为数组
     if (isArray(value)) {
-      // 如果对象为数组
       if (hasProto) {
         protoAugment(value, arrayMethods)
       } else {
@@ -70,7 +69,7 @@ export class Observer {
    * Walk through all properties and convert them into
    * getter/setters. This method should only be called when
    * value type is Object.
-   * 
+   *
    * 遍历所有属性并且在 getter、setter 中转化它们
    * 仅当值类型为 Object 时才应调用此方法。
    */
@@ -167,7 +166,7 @@ export function defineReactive(
   if (
     (!getter || setter) &&
     (val === NO_INIITIAL_VALUE || arguments.length === 2)
-  ) { 
+  ) {
     val = obj[key]
   }
 
