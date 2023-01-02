@@ -68,6 +68,14 @@ export type ASTModifiers = { [key: string]: boolean }
 export type ASTIfCondition = { exp: string | null; block: ASTElement }
 export type ASTIfConditions = Array<ASTIfCondition>
 
+export type ASTTempNode = {
+  tag: string
+  lowerCasedTag: string
+  attrs: ASTAttr[]
+  start: number
+  end: number
+}
+
 export type ASTAttr = {
   name: string
   value: any
