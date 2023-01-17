@@ -1,9 +1,9 @@
-var ENV = ENV || (function() {
+let ENV = ENV || (function() {
 
-  var first = true;
-  var counter = 0;
-  var data;
-  var _base;
+  let first = true;
+  let counter = 0;
+  let data;
+  let _base;
   (_base = String.prototype).lpad || (_base.lpad = function(padding, toLength) {
     return padding.repeat((toLength - this.length) / padding.length).concat(this);
   });
