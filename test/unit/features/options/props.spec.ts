@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import { hasSymbol } from 'core/util/env'
 import testObjectOption from '../../../helpers/test-object-option'
+import { ref, h } from 'v3'
 
 describe('Options props', () => {
   testObjectOption('props')
@@ -591,6 +592,38 @@ describe('Options props', () => {
     }).$mount()
     expect(
       'Invalid prop type: "String" is not a constructor'
+    ).toHaveBeenWarned()
+  })
+
+  // #12930
+  it('should work with ref unwrap', function () {
+    function makeInstance(value, type) {
+      const Comp = {
+        props: {
+          msg: {
+            type
+          }
+        },
+        setup() {
+          return () => h('div')
+        }
+      }
+      const App = {
+        setup() {
+          const msg = ref(value)
+          return () => h(Comp, { props: { msg } })
+        }
+      }
+      return new Vue(App).$mount()
+    }
+
+    makeInstance('123', String)
+    expect((console.error as any).mock.calls.length).toBe(0)
+    makeInstance('123', Object)
+    expect('Expected Object, got String with value "123"').toHaveBeenWarned()
+    makeInstance('123', Number)
+    expect(
+      'Expected Number with value 123, got String with value "123"'
     ).toHaveBeenWarned()
   })
 })

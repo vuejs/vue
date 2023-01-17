@@ -1,5 +1,6 @@
 import { warn } from './debug'
 import { observe, toggleObserving, shouldObserve } from '../observer/index'
+import { isRef } from '../../v3'
 import {
   hasOwn,
   isArray,
@@ -109,6 +110,7 @@ function assertProp(
   vm?: Component,
   absent?: boolean
 ) {
+  value = isRef(value) ? value.value : value
   if (prop.required && absent) {
     warn('Missing required prop: "' + name + '"', vm)
     return
