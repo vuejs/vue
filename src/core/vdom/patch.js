@@ -40,7 +40,8 @@ function sameVnode (a, b) {
         a.tag === b.tag &&
         a.isComment === b.isComment &&
         isDef(a.data) === isDef(b.data) &&
-        sameInputType(a, b)
+        sameInputType(a, b) &&
+        findScopeId(a) === findScopeId(b)
       ) || (
         isTrue(a.isAsyncPlaceholder) &&
         isUndef(b.asyncFactory.error)
@@ -65,6 +66,20 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
     if (isDef(key)) map[key] = i
   }
   return map
+}
+
+function findScopeId (node) {
+  if (isDef(node.fnScopeId)) {
+    return node.fnScopeId
+  }
+
+  let ancestor = node
+  while (ancestor) {
+    if (isDef(ancestor.context) && isDef(ancestor.context.$options._scopeId)) {
+      return ancestor.context.$options._scopeId
+    }
+    ancestor = ancestor.parent
+  }
 }
 
 export function createPatchFunction (backend) {
