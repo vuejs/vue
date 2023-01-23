@@ -65,6 +65,7 @@ export const {
   // v3 compat
   h,
   getCurrentInstance,
+  setCurrentInstance,
   useSlots,
   useAttrs,
   mergeDefaults,

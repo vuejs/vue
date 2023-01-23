@@ -3,6 +3,8 @@ import { CreateElement, Vue } from './vue'
 
 export function getCurrentInstance(): { proxy: Vue } | null
 
+export function setCurrentInstance(vm?: Vue | null): void
+
 export const h: CreateElement
 
 export function useSlots(): SetupContext['slots']
