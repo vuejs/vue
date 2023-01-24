@@ -8,6 +8,14 @@ describe('Directive v-show', () => {
     }).$mount()
     expect(vm.$el.firstChild.style.display).toBe('')
   })
+  
+  it('should check not show value is truthy with display none important', () => {
+    const vm = new Vue({
+      template: '<div><span v-show.important="foo">hello</span></div>',
+      data: { foo: false }
+    }).$mount()
+    expect(vm.$el.firstChild.style.display).toBe('none !important')
+  })
 
   it('should check show value is falsy', () => {
     const vm = new Vue({
