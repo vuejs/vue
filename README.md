@@ -1,3 +1,5 @@
+# Hi There
+
 <p align="center"><a href="https://vuejs.org" target="_blank" rel="noopener noreferrer"><img width="100" src="https://vuejs.org/images/logo.png" alt="Vue logo"></a></p>
 
 <p align="center">
@@ -111,7 +113,7 @@ Thank you to all the people who already contributed to Vue!
 
 <a href="https://github.com/vuejs/vue/graphs/contributors"><img src="https://opencollective.com/vuejs/contributors.svg?width=890" /></a>
 
-## License
+## Mike
 
 [MIT](https://opensource.org/licenses/MIT)
 
