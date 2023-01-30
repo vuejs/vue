@@ -29,7 +29,7 @@ describe('vdom style module', () => {
   })
 
   it('border related style should update correctly', () => {
-    const vnode1 = new VNode('p', { style: { border: 'border: 10px solid red', 'border-bottom': '10px solid blue' } })
+    const vnode1 = new VNode('p', { style: { border: '10px solid red', 'border-bottom': '10px solid blue' } })
     const vnode2 = new VNode('p', { style: { 'border-right': '10px solid red', 'border-bottom': '10px solid blue' } })
     patch(null, vnode1)
     const elm = patch(vnode1, vnode2)
