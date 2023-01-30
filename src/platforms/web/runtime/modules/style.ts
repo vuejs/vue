@@ -91,7 +91,7 @@ function updateStyle(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   }
   for (name in newStyle) {
     cur = newStyle[name]
-    if (cur !== oldStyle[name]) {
+    if (cur !== oldStyle[name] || !el.style[name]) {
       // ie9 setting to null has no effect, must use empty string
       setProp(el, name, cur == null ? '' : cur)
     }
