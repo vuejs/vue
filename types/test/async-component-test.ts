@@ -41,4 +41,4 @@ const e: AsyncComponent = () => ({
 })
 
 // Test that Vue.component accepts any AsyncComponent
-Vue.component('async-compponent1', a)
+Vue.component('async-component1', a)

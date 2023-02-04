@@ -767,7 +767,7 @@ describe('parser', () => {
     expect(ast.directives[0].arg).toBe('field1')
   })
 
-  it('attribute with modifiered directive', () => {
+  it('attribute with modified directive', () => {
     const ast = parse(
       '<input type="text" name="field1" :value="msg" v-validate.on.off>',
       baseOptions
