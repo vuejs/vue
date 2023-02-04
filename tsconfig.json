@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "baseUrl": ".",
-    "outDir": "dist",
+    "outDir": "Vusal",
     "sourceMap": true,
     "target": "esnext",
     "module": "ESNext",
