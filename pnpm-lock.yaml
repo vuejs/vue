@@ -36,7 +36,7 @@ importers:
       prettier: ^2.6.2
       puppeteer: ^14.3.0
       rimraf: ^3.0.2
-      rollup: '3'
+      rollup: ^3.14.0
       rollup-plugin-typescript2: ^0.32.0
       semver: ^7.3.7
       shelljs: ^0.8.5
