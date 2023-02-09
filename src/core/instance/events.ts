@@ -68,7 +68,10 @@ export function eventsMixin(Vue: typeof Component) {
         vm.$on(event[i], fn)
       }
     } else {
-      ;(vm._events[event] || (vm._events[event] = [])).push(fn)
+      const _events = (vm._events[event] || (vm._events[event] = []))
+      // @ts-ignore
+      const hasFn = _events.some((cb) => cb === fn|| cb === fn.fn)
+      !hasFn && _events.push(fn)
       // optimize hook:event cost by using a boolean flag marked at registration
       // instead of a hash lookup
       if (hookRE.test(event)) {

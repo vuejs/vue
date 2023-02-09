@@ -93,4 +93,14 @@ describe('Instance methods events', () => {
     expect(spy2.mock.calls.length).toBe(1)
     expect(spy2).toHaveBeenCalledWith(1, 2, 3)
   })
+
+  it('$on event + fn (multiple)', () => {
+      vm.$on('test', spy)
+      vm.$on('test', spy)
+      vm.$once('test', spy)
+      vm.$once('test', spy)
+      vm.$emit('test', 1, 2, 3)
+      expect(spy).toBeCalledTimes(1)
+      expect(spy).toHaveBeenCalledWith(1, 2, 3)
+  })
 })
