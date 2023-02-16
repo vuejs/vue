@@ -10,8 +10,9 @@ import {
   ComponentOptionsWithArrayProps,
   ComponentOptionsWithProps,
   ComponentOptionsMixin,
-  ComponentOptionsBase
+  ComponentOptionsBase,
 } from './v3-component-options'
+import { InjectOptions } from './options';
 import {
   ComponentPublicInstanceConstructor,
   CreateComponentPublicInstance
@@ -30,12 +31,14 @@ export type DefineComponent<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = {},
   EE extends string = string,
+  inject extends InjectOptions = {},
+  InjectNames extends string = string,
   Props = Readonly<
     PropsOrPropOptions extends ComponentPropsOptions
       ? ExtractPropTypes<PropsOrPropOptions>
       : PropsOrPropOptions
   >,
-  Defaults = ExtractDefaultPropTypes<PropsOrPropOptions>
+  Defaults = ExtractDefaultPropTypes<PropsOrPropOptions>,
 > = ComponentPublicInstanceConstructor<
   CreateComponentPublicInstance<
     Props,
@@ -62,7 +65,9 @@ export type DefineComponent<
     Extends,
     E,
     EE,
-    Defaults
+    Defaults,
+    inject,
+    InjectNames
   > & {
     props: PropsOrPropOptions
   }
@@ -78,7 +83,9 @@ export function defineComponent<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
-  EmitsNames extends string = string
+  EmitsNames extends string = string,
+  Inject extends InjectOptions = {},
+  InjectNames extends string = string
 >(
   options: { functional?: never } & ComponentOptionsWithoutProps<
     {},
@@ -89,9 +96,11 @@ export function defineComponent<
     Mixin,
     Extends,
     Emits,
-    EmitsNames
+    EmitsNames,
+    Inject,
+    InjectNames
   >
-): DefineComponent<{}, RawBindings, D, C, M, Mixin, Extends, Emits>
+): DefineComponent<{}, RawBindings, D, C, M, Mixin, Extends, Emits, string, Inject, InjectNames>
 
 /**
  * overload 2: object format with array props declaration
@@ -109,7 +118,9 @@ export function defineComponent<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
-  PropsOptions extends ComponentPropsOptions = ComponentPropsOptions
+  PropsOptions extends ComponentPropsOptions = ComponentPropsOptions,
+  Inject extends InjectOptions = {},
+  InjectNames extends string = string
 >(
   options: { functional?: never } & ComponentOptionsWithArrayProps<
     PropNames,
@@ -120,7 +131,9 @@ export function defineComponent<
     Mixin,
     Extends,
     Emits,
-    EmitsNames
+    EmitsNames,
+    Inject,
+    InjectNames
   >
 ): DefineComponent<
   Readonly<{ [key in PropNames]?: any }>,
@@ -130,7 +143,10 @@ export function defineComponent<
   M,
   Mixin,
   Extends,
-  Emits
+  Emits,
+  string,
+  Inject,
+  InjectNames
 >
 
 /**
@@ -148,7 +164,9 @@ export function defineComponent<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
-  PropsOptions extends ComponentPropsOptions = ComponentPropsOptions
+  PropsOptions extends ComponentPropsOptions = ComponentPropsOptions,
+  Inject extends InjectOptions = {},
+  InjectNames extends string = string
 >(
   options: HasDefined<Props> extends true
     ? { functional?: never } & ComponentOptionsWithProps<
@@ -161,6 +179,8 @@ export function defineComponent<
         Extends,
         Emits,
         EmitsNames,
+        Inject,
+        InjectNames,
         Props
       >
     : { functional?: never } & ComponentOptionsWithProps<
@@ -172,9 +192,11 @@ export function defineComponent<
         Mixin,
         Extends,
         Emits,
-        EmitsNames
+        EmitsNames,
+        Inject,
+        InjectNames
       >
-): DefineComponent<PropsOptions, RawBindings, D, C, M, Mixin, Extends, Emits>
+): DefineComponent<PropsOptions, RawBindings, D, C, M, Mixin, Extends, Emits, string, Inject, InjectNames>
 
 /**
  * overload 4.1: functional component with array props

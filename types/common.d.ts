@@ -5,7 +5,7 @@ export type UnionToIntersection<U> = (
 ) extends (k: infer I) => void
   ? I
   : never
-
+  
 // Conditional returns can enforce identical types.
 // See here: https://github.com/Microsoft/TypeScript/issues/27024#issuecomment-421529650
 // prettier-ignore
