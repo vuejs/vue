@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Create new issue
+    url: https://new-issue.vuejs.org/
+    about: Please use the following link to create a new issue.
+  - name: Patreon
+    url: https://www.patreon.com/evanyou
+    about: Love Vue.js? Please consider supporting us via Patreon.
+  - name: Open Collective
+    url: https://opencollective.com/vuejs/donate
+    about: Love Vue.js? Please consider supporting us via Open Collective.
