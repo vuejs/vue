@@ -1,0 +1,925 @@
+// Vitest Snapshot v1
+
+exports[`SFC analyze <script> bindings > auto name inference > basic 1`] = `
+"export default {
+  __name: 'FooBar',
+  setup(__props) {
+const a = 1
+return { a }
+}
+
+}"
+`;
+
+exports[`SFC analyze <script> bindings > auto name inference > do not overwrite manual name (call) 1`] = `
+"import { defineComponent } from 'vue'
+        const __default__ = defineComponent({
+          name: 'Baz'
+        })
+        
+export default /*#__PURE__*/Object.assign(__default__, {
+  setup(__props) {
+const a = 1
+return { a }
+}
+
+})"
+`;
+
+exports[`SFC analyze <script> bindings > auto name inference > do not overwrite manual name (object) 1`] = `
+"const __default__ = {
+          name: 'Baz'
+        }
+        
+export default /*#__PURE__*/Object.assign(__default__, {
+  setup(__props) {
+const a = 1
+return { a }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > <script> after <script setup> the script content not end with \`\\n\` 1`] = `
+"const n = 1
+import { x } from './x'
+    
+export default {
+  setup(__props) {
+
+    
+return { n, x }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > <script> and <script setup> co-usage > script first 1`] = `
+"import { x } from './x'
+      
+      export const n = 1
+
+      const __default__ = {}
+      
+export default /*#__PURE__*/Object.assign(__default__, {
+  setup(__props) {
+
+      x()
+      
+return { n, x }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > <script> and <script setup> co-usage > script setup first 1`] = `
+"export const n = 1
+      const __default__ = {}
+      
+import { x } from './x'
+      
+export default /*#__PURE__*/Object.assign(__default__, {
+  setup(__props) {
+
+      x()
+      
+return { n, x }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > <script> and <script setup> co-usage > script setup first, lang="ts", script block content export default 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+
+      const __default__ = {
+        name: \\"test\\"
+      }
+      
+import { x } from './x'
+      
+export default /*#__PURE__*/_defineComponent({
+  ...__default__,
+  setup(__props) {
+
+      x()
+      
+return { x }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > <script> and <script setup> co-usage > script setup first, named default export 1`] = `
+"export const n = 1
+      const def = {}
+      
+      
+const __default__ = def
+
+import { x } from './x'
+      
+export default /*#__PURE__*/Object.assign(__default__, {
+  setup(__props) {
+
+      x()
+      
+return { n, def, x }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > <script> and <script setup> co-usage > spaces in ExportDefaultDeclaration node > with many spaces and newline 1`] = `
+"import { x } from './x'
+        
+        export const n = 1
+        const __default__ = {
+          some:'option'
+        }
+        
+export default /*#__PURE__*/Object.assign(__default__, {
+  setup(__props) {
+
+        x()
+        
+return { n, x }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > <script> and <script setup> co-usage > spaces in ExportDefaultDeclaration node > with minimal spaces 1`] = `
+"import { x } from './x'
+        
+        export const n = 1
+        const __default__ = {
+          some:'option'
+        }
+        
+export default /*#__PURE__*/Object.assign(__default__, {
+  setup(__props) {
+
+        x()
+        
+return { n, x }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > binding analysis for destructure 1`] = `
+"export default {
+  setup(__props) {
+
+      const { foo, b: bar, ['x' + 'y']: baz, x: { y, zz: { z }}} = {}
+      
+return { foo, bar, baz, y, z }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > defineEmits() 1`] = `
+"export default {
+  emits: ['foo', 'bar'],
+  setup(__props, { emit: myEmit }) {
+
+
+
+return { myEmit }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > defineExpose() 1`] = `
+"export default {
+  setup(__props, { expose }) {
+
+expose({ foo: 123 })
+
+return {  }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > defineProps w/ external definition 1`] = `
+"import { propsModel } from './props'
+    
+export default {
+  props: propsModel,
+  setup(__props) {
+
+const props = __props
+
+    
+    
+return { props, propsModel }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > defineProps w/ leading code 1`] = `
+"import { x } from './x'
+    
+export default {
+  props: {},
+  setup(__props) {
+
+const props = __props
+
+    
+return { props, x }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > defineProps() 1`] = `
+"export default {
+  props: {
+  foo: String
+},
+  setup(__props) {
+
+const props = __props
+
+
+const bar = 1
+
+return { props, bar }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > defineProps/defineEmits in multi-variable declaration (full removal) 1`] = `
+"export default {
+  props: ['item'],
+  emits: ['a'],
+  setup(__props, { emit }) {
+
+const props = __props
+
+    
+    
+return { props, emit }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > defineProps/defineEmits in multi-variable declaration 1`] = `
+"export default {
+  props: ['item'],
+  emits: ['a'],
+  setup(__props, { emit }) {
+
+const props = __props
+
+    const a = 1;
+    
+return { props, a, emit }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > dev mode import usage check > TS annotations 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+import { Foo, Baz, Qux, Fred } from './x'
+        
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        const a = 1
+        function b() {}
+        
+return { a, b, Baz }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > dev mode import usage check > attribute expressions 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+import { bar, baz } from './x'
+        
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        const cond = true
+        
+return { cond, bar, baz }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > dev mode import usage check > components 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+import { FooBar, FooBaz, FooQux, foo } from './x'
+        
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        const fooBar: FooBar = 1
+        
+return { fooBar, FooBaz, FooQux, foo }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > dev mode import usage check > directive 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+import { vMyDir } from './x'
+        
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        
+return { vMyDir }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > dev mode import usage check > js template string interpolations 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+import { VAR, VAR2, VAR3 } from './x'
+        
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        
+return { VAR, VAR3 }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > dev mode import usage check > last tag 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+import { FooBaz, Last } from './x'
+        
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        
+return { FooBaz, Last }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > dev mode import usage check > vue interpolations 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+import { x, y, z, x$y } from './x'
+      
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+      
+return { x, z, x$y }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > errors > should allow defineProps/Emit() referencing imported binding 1`] = `
+"import { bar } from './bar'
+        
+export default {
+  props: {
+          foo: {
+            default: () => bar
+          }
+        },
+  emits: {
+          foo: () => bar > 1
+        },
+  setup(__props) {
+
+        
+        
+        
+return { bar }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > errors > should allow defineProps/Emit() referencing scope var 1`] = `
+"export default {
+  props: {
+            foo: {
+              default: bar => bar + 1
+            }
+          },
+  emits: {
+            foo: bar => bar > 1
+          },
+  setup(__props) {
+
+          const bar = 1
+          
+          
+        
+return { bar }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > imports > import dedupe between <script> and <script setup> 1`] = `
+"import { x } from './x'
+        
+export default {
+  setup(__props) {
+
+        x()
+        
+return { x }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > imports > should allow defineProps/Emit at the start of imports 1`] = `
+"import { ref } from 'vue'
+      
+export default {
+  props: ['foo'],
+  emits: ['bar'],
+  setup(__props) {
+
+      
+      
+      const r = ref(0)
+      
+return { r, ref }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > imports > should extract comment for import or type declarations 1`] = `
+"import a from 'a' // comment
+        import b from 'b'
+        
+export default {
+  setup(__props) {
+
+        
+return { a, b }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > imports > should hoist and expose imports 1`] = `
+"import { ref } from 'vue'
+          import 'foo/css'
+        
+export default {
+  setup(__props) {
+
+          
+return { ref }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > should expose top level declarations 1`] = `
+"import { xx } from './x'
+      let aa = 1
+      const bb = 2
+      function cc() {}
+      class dd {}
+      
+import { x } from './x'
+      
+export default {
+  setup(__props) {
+
+      let a = 1
+      const b = 2
+      function c() {}
+      class d {}
+      
+return { aa, bb, cc, dd, a, b, c, d, xx, x }
+}
+
+}"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > const Enum 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+const enum Foo { A = 123 }
+        
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        
+return { Foo }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (exported interface) 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+export interface Emits { (e: 'foo' | 'bar'): void }
+      
+export default /*#__PURE__*/_defineComponent({
+  emits: [\\"foo\\", \\"bar\\"],
+  setup(__props, { emit }: { emit: ({ (e: 'foo' | 'bar'): void }), expose: any, slots: any, attrs: any }) {
+
+      
+      
+return { emit }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (exported type alias) 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+export type Emits = { (e: 'foo' | 'bar'): void }
+      
+export default /*#__PURE__*/_defineComponent({
+  emits: [\\"foo\\", \\"bar\\"],
+  setup(__props, { emit }: { emit: ({ (e: 'foo' | 'bar'): void }), expose: any, slots: any, attrs: any }) {
+
+      
+      
+return { emit }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (interface) 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+interface Emits { (e: 'foo' | 'bar'): void }
+      
+export default /*#__PURE__*/_defineComponent({
+  emits: [\\"foo\\", \\"bar\\"],
+  setup(__props, { emit }: { emit: ({ (e: 'foo' | 'bar'): void }), expose: any, slots: any, attrs: any }) {
+
+      
+      
+return { emit }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (referenced exported function type) 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+export type Emits = (e: 'foo' | 'bar') => void
+      
+export default /*#__PURE__*/_defineComponent({
+  emits: [\\"foo\\", \\"bar\\"],
+  setup(__props, { emit }: { emit: ((e: 'foo' | 'bar') => void), expose: any, slots: any, attrs: any }) {
+
+      
+      
+return { emit }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (referenced function type) 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+type Emits = (e: 'foo' | 'bar') => void
+      
+export default /*#__PURE__*/_defineComponent({
+  emits: [\\"foo\\", \\"bar\\"],
+  setup(__props, { emit }: { emit: ((e: 'foo' | 'bar') => void), expose: any, slots: any, attrs: any }) {
+
+      
+      
+return { emit }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (type alias) 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+type Emits = { (e: 'foo' | 'bar'): void }
+      
+export default /*#__PURE__*/_defineComponent({
+  emits: [\\"foo\\", \\"bar\\"],
+  setup(__props, { emit }: { emit: ({ (e: 'foo' | 'bar'): void }), expose: any, slots: any, attrs: any }) {
+
+      
+      
+return { emit }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (type literal w/ call signatures) 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+
+export default /*#__PURE__*/_defineComponent({
+  emits: [\\"foo\\", \\"bar\\", \\"baz\\"],
+  setup(__props, { emit }: { emit: ({(e: 'foo' | 'bar'): void; (e: 'baz', id: number): void;}), expose: any, slots: any, attrs: any }) {
+
+      
+      
+return { emit }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+
+export default /*#__PURE__*/_defineComponent({
+  emits: [\\"foo\\", \\"bar\\"],
+  setup(__props, { emit }: { emit: ((e: 'foo' | 'bar') => void), expose: any, slots: any, attrs: any }) {
+
+      
+      
+return { emit }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineProps w/ exported interface 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+export interface Props { x?: number }
+      
+export default /*#__PURE__*/_defineComponent({
+  props: {
+    x: { type: Number, required: false }
+  },
+  setup(__props: any) {
+
+      
+      
+return {  }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineProps w/ exported interface in normal script 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+
+        export interface Props { x?: number }
+      
+export default /*#__PURE__*/_defineComponent({
+  props: {
+    x: { type: Number, required: false }
+  },
+  setup(__props: any) {
+
+        
+      
+return {  }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineProps w/ exported type alias 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+export type Props = { x?: number }
+      
+export default /*#__PURE__*/_defineComponent({
+  props: {
+    x: { type: Number, required: false }
+  },
+  setup(__props: any) {
+
+      
+      
+return {  }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineProps w/ interface 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+interface Props { x?: number }
+      
+export default /*#__PURE__*/_defineComponent({
+  props: {
+    x: { type: Number, required: false }
+  },
+  setup(__props: any) {
+
+      
+      
+return {  }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineProps w/ type 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+interface Test {}
+
+      type Alias = number[]
+
+      
+export default /*#__PURE__*/_defineComponent({
+  props: {
+    string: { type: String, required: true },
+    number: { type: Number, required: true },
+    boolean: { type: Boolean, required: true },
+    object: { type: Object, required: true },
+    objectLiteral: { type: Object, required: true },
+    fn: { type: Function, required: true },
+    functionRef: { type: Function, required: true },
+    objectRef: { type: Object, required: true },
+    dateTime: { type: Date, required: true },
+    array: { type: Array, required: true },
+    arrayRef: { type: Array, required: true },
+    tuple: { type: Array, required: true },
+    set: { type: Set, required: true },
+    literal: { type: String, required: true },
+    optional: { type: null, required: false },
+    recordRef: { type: Object, required: true },
+    interface: { type: Object, required: true },
+    alias: { type: Array, required: true },
+    method: { type: Function, required: true },
+    symbol: { type: Symbol, required: true },
+    union: { type: [String, Number], required: true },
+    literalUnion: { type: String, required: true },
+    literalUnionNumber: { type: Number, required: true },
+    literalUnionMixed: { type: [String, Number, Boolean], required: true },
+    intersection: { type: Object, required: true },
+    foo: { type: [Function, null], required: true }
+  },
+  setup(__props: any) {
+
+      
+      
+return {  }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineProps w/ type alias 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+type Props = { x?: number }
+      
+export default /*#__PURE__*/_defineComponent({
+  props: {
+    x: { type: Number, required: false }
+  },
+  setup(__props: any) {
+
+      
+      
+return {  }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > defineProps/Emit w/ runtime options 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+
+export default /*#__PURE__*/_defineComponent({
+  props: { foo: String },
+  emits: ['a', 'b'],
+  setup(__props, { emit }) {
+
+const props = __props
+
+
+
+
+return { props, emit }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > hoist type declarations 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+export interface Foo {}
+        type Bar = {}
+      
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        
+return {  }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > import type 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+import type { Foo } from './main.ts'
+        import { type Bar, Baz } from './main.ts'
+        
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        
+return { Baz }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > runtime Enum 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+enum Foo { A = 123 }
+        
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        
+return { Foo }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > runtime Enum in normal script 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+enum Foo { A = 123 }
+        
+          export enum D { D = \\"D\\" }
+          const enum C { C = \\"C\\" }
+          enum B { B = \\"B\\" }
+        
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        
+return { D, C, B, Foo }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > withDefaults (dynamic) 1`] = `
+"import { mergeDefaults as _mergeDefaults, defineComponent as _defineComponent } from 'vue'
+import { defaults } from './foo'
+      
+export default /*#__PURE__*/_defineComponent({
+  props: _mergeDefaults({
+    foo: { type: String, required: false },
+    bar: { type: Number, required: false },
+    baz: { type: Boolean, required: true }
+  }, { ...defaults }),
+  setup(__props: any) {
+
+const props = __props as {
+        foo?: string
+        bar?: number
+        baz: boolean
+      }
+
+      
+      
+return { props, defaults }
+}
+
+})"
+`;
+
+exports[`SFC compile <script setup> > with TypeScript > withDefaults (static) 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+
+export default /*#__PURE__*/_defineComponent({
+  props: {
+    foo: { type: String, required: false, default: 'hi' },
+    bar: { type: Number, required: false },
+    baz: { type: Boolean, required: true },
+    qux: { type: Function, required: false, default() { return 1 } }
+  },
+  setup(__props: any) {
+
+const props = __props as { foo: string, bar?: number, baz: boolean, qux(): number }
+
+      
+      
+return { props }
+}
+
+})"
+`;
