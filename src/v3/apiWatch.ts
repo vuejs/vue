@@ -218,8 +218,17 @@ function doWatch(
       })
   } else if (isFunction(source)) {
     if (cb) {
-      // getter with cb
-      getter = () => call(source, WATCHER_GETTER)
+      const ob = call(source, WATCHER_GETTER)
+      if (isReactive(ob)){
+        getter = () => {
+          ;(ob as any).__ob__.dep.depend()
+          return ob
+        }
+        deep = true
+      } else {
+        // getter with cb
+        getter = () => ob
+      }
     } else {
       // no cb -> simple effect
       getter = () => {

@@ -1200,4 +1200,15 @@ describe('api: watch', () => {
     expect(parentSpy).toHaveBeenCalledTimes(1)
     expect(childSpy).toHaveBeenCalledTimes(1)
   })
+
+  // #12967
+  test('trigger when adding new property with Vue.set', async () => {
+    const spy = vi.fn()
+    const r = reactive({ exist: 5 })
+    watch(() => r, spy, { deep: true })
+    set(r, 'add', 1)
+
+    await nextTick()
+    expect(spy).toHaveBeenCalledTimes(1)
+  })
 })
