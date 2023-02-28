@@ -227,7 +227,7 @@ function doWatch(
         deep = true
       } else {
         // getter with cb
-        getter = () => ob
+        getter = () => call(source, WATCHER_GETTER)
       }
     } else {
       // no cb -> simple effect
