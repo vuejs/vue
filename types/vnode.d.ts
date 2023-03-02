@@ -39,6 +39,7 @@ export type VNodeChildren =
   | boolean
   | null
   | undefined
+  | number
 export interface VNodeChildrenArrayContents
   extends Array<VNodeChildren | VNode> {}
 
