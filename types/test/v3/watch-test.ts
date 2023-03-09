@@ -1,4 +1,4 @@
-import { ref, computed, watch } from '../../index'
+import { ref, computed, watch, shallowRef } from '../../index'
 import { expectType } from '../utils'
 
 const source = ref('foo')
@@ -76,3 +76,17 @@ watch([someRef, otherRef], values => {
   // no type error
   console.log(value2.a)
 })
+
+{
+  //#12978
+  type Steps = { step: '1' } | { step: '2' }
+  const shallowUnionGenParam = shallowRef<Steps>({ step: '1' })
+  const shallowUnionAsCast = shallowRef({ step: '1' } as Steps)
+
+  watch(shallowUnionGenParam, value => {
+    expectType<Steps>(value)
+  })
+  watch(shallowUnionAsCast, value => {
+    expectType<Steps>(value)
+  })
+}

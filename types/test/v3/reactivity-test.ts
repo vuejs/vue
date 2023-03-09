@@ -15,7 +15,7 @@ import {
   set,
   del
 } from '../../index'
-import { describe, expectType } from '../utils'
+import { IsUnion, describe, expectType } from '../utils'
 
 function plainType(arg: number | Ref<number>) {
   // ref coercing
@@ -385,3 +385,14 @@ describe('set/del', () => {
   // @ts-expect-error
   del([], 'fse', 123)
 })
+
+
+{
+  //#12978
+  type Steps = { step: '1' } | { step: '2' }
+  const shallowUnionGenParam = shallowRef<Steps>({ step: '1' })
+  const shallowUnionAsCast = shallowRef({ step: '1' } as Steps)
+
+  expectType<IsUnion<typeof shallowUnionGenParam>>(false)
+  expectType<IsUnion<typeof shallowUnionAsCast>>(false)
+}
