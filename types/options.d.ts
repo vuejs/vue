@@ -214,7 +214,7 @@ export interface ComponentOptions<
   renderTracked?(e: DebuggerEvent): void
   renderTriggerd?(e: DebuggerEvent): void
 
-  directives?: { [key: string]: DirectiveFunction | DirectiveOptions }
+  directives?: { [key: string]: FunctionDirective | ObjectDirective | DirectiveFunction | DirectiveOptions }
   components?: {
     [key: string]:
       | {}
