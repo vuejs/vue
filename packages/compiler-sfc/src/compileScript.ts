@@ -1801,7 +1801,7 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor, isTS: boolean) {
       }
       for (let i = 0; i < attrs.length; i++) {
         const { name, value } = attrs[i]
-        if (dirRE.test(name)) {
+        if (dirRE.test(name) || name === 'ref') {
           const baseName = onRE.test(name)
             ? 'on'
             : slotRE.test(name)
