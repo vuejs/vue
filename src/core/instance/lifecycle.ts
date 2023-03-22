@@ -282,10 +282,7 @@ export function updateChildComponent(
   vm.$vnode = parentVnode // update vm's placeholder node without re-render
 
   // avoid change reference of keep-alive's vnode on prev _vnode
-  if (
-    vm._vnode &&
-    !(vm.$options._componentTag === 'keep-alive' && vm._vnode.tag)
-  ) {
+  if (vm._vnode && vm.$options._componentTag !== 'keep-alive') {
     // update child tree's parent
     vm._vnode.parent = parentVnode
   }
