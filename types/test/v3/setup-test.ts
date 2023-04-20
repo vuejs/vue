@@ -104,3 +104,20 @@ const vm = new Vue({
 })
 
 vm.$mount('#app')
+
+// props + method-based emits + setup
+defineComponent({
+  props: {
+    foo: Number
+  },
+  emits: {
+    'update:foo'(value: number) {}
+  },
+  setup(_, { emit }) {
+    emit('update:foo', 123)
+    // @ts-expect-error
+    emit('update:foo', '123')
+    // @ts-expect-error
+    emit('bar')
+  }
+})

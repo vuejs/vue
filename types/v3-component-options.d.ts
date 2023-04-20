@@ -147,10 +147,9 @@ export type ComponentOptionsWithProps<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
-  Props = ExtractPropTypes<PropsOptions>,
   Defaults = ExtractDefaultPropTypes<PropsOptions>
 > = ComponentOptionsBase<
-  Props,
+  ExtractPropTypes<PropsOptions>,
   RawBindings,
   D,
   C,
@@ -164,7 +163,7 @@ export type ComponentOptionsWithProps<
   props?: PropsOptions
 } & ThisType<
     CreateComponentPublicInstance<
-      Props,
+      ExtractPropTypes<PropsOptions>,
       RawBindings,
       D,
       C,
