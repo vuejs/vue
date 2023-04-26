@@ -16,13 +16,7 @@
   </head>
   <body>
     <div id="demo">
-      <h1>Vue.js Demo</h1>
-      <template>
-        <ul>
-          <li v-for="item in list">{{ item.name }}</li>
-        </ul>
-      </template>
-      <button @click="handleClick">click</button>
+      <ul><li v-for="item in list" :key="item.key">{{ item.name }}</li></ul><button @click="handleClick">click</button>
     </div>
     <script>
       let arr = [1]
@@ -31,22 +25,18 @@
         data: {
           arr,
           list: [
-            { name: 'jax' },
-            { name: 'bob' },
-            { name: 'tina' },
+            { key: 'id1', name: 'A' },
+            { key: 'id2', name: 'B' },
+            { key: 'id3', name: 'C' },
+            { key: 'id4', name: 'D' },
           ]
         },
         mounted() {
-          this.insert()
+
         },
         methods: {
-          insert() {
-            this.arr.push(2)
-            console.log('arr', this.arr)
-          },
           handleClick() {
-            this.list[1] = { name: 'test' }
-            console.log('list: ', this.list)
+            this.list.reverse().push({key: 'id5', name: 'E'})
           }
         }
       })
