@@ -719,7 +719,7 @@
   };
 
   Dep.prototype.addSub = function addSub (sub) {
-    this.subs.push(sub);
+    this.subs.push(sub); // dep收集watcher
   };
 
   Dep.prototype.removeSub = function removeSub (sub) {
@@ -728,14 +728,14 @@
 
   Dep.prototype.depend = function depend () {
     if (Dep.target) {
-      Dep.target.addDep(this);
+      Dep.target.addDep(this); // watcher收集dep
     }
   };
 
   Dep.prototype.notify = function notify () {
     // stabilize the subscriber list first
     var subs = this.subs.slice();
-    if (!config.async) {
+    if ( !config.async) {
       // subs aren't sorted in scheduler if not running async
       // we need to sort them now to make sure they fire in correct
       // order
@@ -1021,6 +1021,7 @@
     customSetter,
     shallow
   ) {
+    // defineReactive中的闭包dep，用于收集对象中每个常规属性的watcher
     var dep = new Dep();
 
     var property = Object.getOwnPropertyDescriptor(obj, key);
@@ -1086,15 +1087,18 @@
     ) {
       warn(("Cannot set reactive property on undefined, null, or primitive value: " + ((target))));
     }
+    // 把数组的某个索引处的值转换成响应式
     if (Array.isArray(target) && isValidArrayIndex(key)) {
       target.length = Math.max(target.length, key);
       target.splice(key, 1, val);
       return val
     }
+    // key已经存在target中，直接赋值
     if (key in target && !(key in Object.prototype)) {
       target[key] = val;
       return val
     }
+    // 不能是vue实例和根数据对象(this.$data)
     var ob = (target).__ob__;
     if (target._isVue || (ob && ob.vmCount)) {
       warn(
@@ -1103,6 +1107,7 @@
       );
       return val
     }
+    // target非响应式对象，直接赋值
     if (!ob) {
       target[key] = val;
       return val
@@ -1132,10 +1137,12 @@
       );
       return
     }
+    // key不在target中
     if (!hasOwn(target, key)) {
       return
     }
     delete target[key];
+    // 非响应式对象，不需要向依赖发送通知
     if (!ob) {
       return
     }

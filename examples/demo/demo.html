@@ -19,11 +19,9 @@
       <ul><li v-for="item in list" :key="item.key">{{ item.name }}</li></ul><button @click="handleClick">click</button>
     </div>
     <script>
-      let arr = [1]
       new Vue({
         el: '#demo',
         data: {
-          arr,
           list: [
             { key: 'id1', name: 'A' },
             { key: 'id2', name: 'B' },

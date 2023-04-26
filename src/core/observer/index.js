@@ -140,6 +140,7 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // defineReactive中的闭包dep，用于收集对象中每个常规属性的watcher
   const dep = new Dep()
 
   const property = Object.getOwnPropertyDescriptor(obj, key)
@@ -206,15 +207,18 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 把数组的某个索引处的值转换成响应式
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
     target.splice(key, 1, val)
     return val
   }
+  // key已经存在target中，直接赋值
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
   }
+  // 不能是vue实例和根数据对象(this.$data)
   const ob = (target: any).__ob__
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
@@ -223,10 +227,12 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     )
     return val
   }
+  // target非响应式对象，直接赋值
   if (!ob) {
     target[key] = val
     return val
   }
+  // 新增属性转换成响应式
   defineReactive(ob.value, key, val)
   ob.dep.notify()
   return val
@@ -253,10 +259,12 @@ export function del (target: Array<any> | Object, key: any) {
     )
     return
   }
+  // key不在target中
   if (!hasOwn(target, key)) {
     return
   }
   delete target[key]
+  // 非响应式对象，不需要向依赖发送通知
   if (!ob) {
     return
   }
