@@ -13,75 +13,68 @@ import { isTrue, isUndef } from 'shared/util'
 import { createWriteFunction } from './write'
 
 export default class RenderStream extends Readable {
-  buffer: string
-  render: (write: Function, done: Function) => void
-  expectedSize: number
-  write: Function
-  //@ts-expect-error
-  next: Function
-  end: Function
-  //@ts-expect-error
-  done: boolean
+  private buffer: string = '';
+  private readonly renderComponent: (write: Function, done: Function) => void;
+  private expectedSize: number = 0;
+  private nextFunction: Function | undefined;
+  private readonly endFunction: Function;
+  private isDone: boolean = false;
 
-  constructor(render: Function) {
-    super()
-    this.buffer = ''
-    //@ts-expect-error
-    this.render = render
-    this.expectedSize = 0
-
-    this.write = createWriteFunction(
-      (text, next) => {
-        const n = this.expectedSize
-        this.buffer += text
-        if (this.buffer.length >= n) {
-          this.next = next
-          this.pushBySize(n)
-          return true // we will decide when to call next
-        }
-        return false
-      },
-      err => {
-        this.emit('error', err)
-      }
-    )
-
-    this.end = () => {
-      this.emit('beforeEnd')
+  constructor(renderComponent: (write: Function, done: Function) => void) {
+    super({ highWaterMark: 16 }); // set highWaterMark to improve performance
+    this.renderComponent = renderComponent;
+    this.endFunction = () => {
+      this.emit('beforeEnd');
       // the rendering is finished; we should push out the last of the buffer.
-      this.done = true
-      this.push(this.buffer)
+      this.isDone = true;
+      this.push(this.buffer);
+    };
+  }
+
+  private pushBySize(n: number): void {
+    const bufferToPush = this.buffer.substring(0, n);
+    this.buffer = this.buffer.substring(n);
+    this.push(bufferToPush);
+  }
+
+  private writeFunction = createWriteFunction(
+    (text, next) => {
+      const n = this.expectedSize;
+      this.buffer += text;
+      if (this.buffer.length >= n) {
+        this.nextFunction = next;
+        this.pushBySize(n);
+        return true; // we will decide when to call next
+      }
+      return false;
+    },
+    (err: Error) => {
+      this.emit('error', err);
     }
-  }
+  );
 
-  pushBySize(n: number) {
-    const bufferToPush = this.buffer.substring(0, n)
-    this.buffer = this.buffer.substring(n)
-    this.push(bufferToPush)
-  }
-
-  tryRender() {
+  private tryRender(): void {
     try {
-      this.render(this.write, this.end)
+      this.renderComponent(this.writeFunction, this.endFunction);
     } catch (e) {
-      this.emit('error', e)
+      this.emit('error', e);
     }
   }
 
-  tryNext() {
+  private tryNext(): void {
     try {
-      this.next()
+      this.nextFunction!();
     } catch (e) {
-      this.emit('error', e)
+      this.emit('error', e);
     }
   }
 
-  _read(n: number) {
+  _read(n: number):void {
     this.expectedSize = n
     // it's possible that the last chunk added bumped the buffer up to > 2 * n,
     // which means we will need to go through multiple read calls to drain it
     // down to < n.
-    if (isTrue(this.done)) {
+    if (isTrue(this.isDone)) {
       this.push(null)
       return
     }
@@ -89,7 +82,7 @@ export default class RenderStream extends Readable {
       this.pushBySize(n)
       return
     }
-    if (isUndef(this.next)) {
+    if (isUndef(this.nextFunction)) {
       // start the rendering chain.
       this.tryRender()
     } else {
