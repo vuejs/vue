@@ -1,7 +1,7 @@
 const args = require('minimist')(process.argv.slice(2))
 const fs = require('fs')
 const path = require('path')
-const chalk = require('chalk')
+const pc = require('picocolors')
 const semver = require('semver')
 const currentVersion = require('../package.json').version
 const { prompt } = require('enquirer')
@@ -29,9 +29,9 @@ const inc = i => semver.inc(currentVersion, i, preId)
 const run = (bin, args, opts = {}) =>
   execa(bin, args, { stdio: 'inherit', ...opts })
 const dryRun = (bin, args, opts = {}) =>
-  console.log(chalk.blue(`[dryrun] ${bin} ${args.join(' ')}`), opts)
+  console.log(pc.blue(`[dryrun] ${bin} ${args.join(' ')}`), opts)
 const runIfNotDry = isDryRun ? dryRun : run
-const step = msg => console.log(chalk.cyan(msg))
+const step = msg => console.log(pc.cyan(msg))
 
 async function main() {
   let targetVersion = args._[0]
@@ -187,12 +187,10 @@ async function publishPackage(pkgName, version, runIfNotDry) {
         stdio: 'pipe'
       }
     )
-    console.log(
-      chalk.green(`Successfully published ${publishedName}@${version}`)
-    )
+    console.log(pc.green(`Successfully published ${publishedName}@${version}`))
   } catch (e) {
     if (e.stderr.match(/previously published/)) {
-      console.log(chalk.red(`Skipping already published: ${publishedName}`))
+      console.log(pc.red(`Skipping already published: ${publishedName}`))
     } else {
       throw e
     }
