@@ -24,13 +24,8 @@ export function isFalse(v: any): boolean {
  * Check if value is primitive.
  */
 export function isPrimitive(value: any): boolean {
-  return (
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    // $flow-disable-line
-    typeof value === 'symbol' ||
-    typeof value === 'boolean'
-  )
+  const primitiveTypes = ['string', 'number', 'symbol', 'boolean'];
+  return primitiveTypes.includes(typeof value);
 }
 
 export function isFunction(value: any): value is (...args: any[]) => any {
