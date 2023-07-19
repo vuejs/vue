@@ -30,5 +30,8 @@
     "pug": "^3.0.2",
     "sass": "^1.52.3",
     "stylus": "^0.58.1"
+  },
+  "optionalDependencies": {
+    "prettier": "^1.18.2 || ^2.0.0"
   }
 }
