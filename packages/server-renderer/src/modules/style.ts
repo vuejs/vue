@@ -21,9 +21,9 @@ export function genStyle(style: Object): string {
 
 function normalizeValue(key: string, value: any): string {
   if (
+    value === 0 ||
     typeof value === 'string' ||
-    (typeof value === 'number' && noUnitNumericStyleProps[key]) ||
-    value === 0
+    (typeof value === 'number' && noUnitNumericStyleProps[key])
   ) {
     return `${key}:${value};`
   } else {
