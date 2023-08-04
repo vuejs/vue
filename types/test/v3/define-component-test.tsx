@@ -8,7 +8,7 @@ import {
   ComponentPublicInstance
 } from '../../index'
 import { describe, test, expectType, expectError, IsUnion } from '../utils'
-import MyTestComponent from './MyTestComponent.vue'
+import MyTestComponent from './MyTestComponent'
 
 describe('compat with v2 APIs', () => {
   const comp = defineComponent({})

@@ -1,4 +1,3 @@
-<script>
 // @ts-check
 import { expectTypeNotAny } from '../utils'
 
@@ -22,5 +21,3 @@ export default defineComponent({
   methods: {
   },
 })
-
-</script>
