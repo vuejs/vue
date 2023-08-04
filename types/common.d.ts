@@ -14,6 +14,16 @@ type Equal<Left, Right> =
 
 export type HasDefined<T> = Equal<T, unknown> extends true ? false : true
 
+type IsAny<T> = Equal<T, any> extends true ? true : false
+
+export type HasDefinedAndNotAny<T> = 
+  IsAny<T> extends true 
+    ? false 
+    : Equal<T, unknown> extends true 
+      ? false 
+      : true
+
+
 // If the type T accepts type "any", output type Y, otherwise output type N.
 // https://stackoverflow.com/questions/49927523/disallow-call-with-any/49928360#49928360
 export type IfAny<T, Y, N> = 0 extends 1 & T ? Y : N

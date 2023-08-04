@@ -49,7 +49,7 @@
     "test:sfc": "vitest run compiler-sfc",
     "test:e2e": "npm run build -- full-prod,server-renderer-basic && vitest run test/e2e",
     "test:transition": "karma start test/transition/karma.conf.js",
-    "test:types": "npm run build:types && tsc -p ./types/tsconfig.json",
+    "test:types": "npm run build:types && vue-tsc -p ./types/tsconfig.json",
     "format": "prettier --write --parser typescript \"(src|test|packages|types)/**/*.ts\"",
     "ts-check": "tsc -p tsconfig.json --noEmit",
     "ts-check:test": "tsc -p test/tsconfig.json --noEmit",
@@ -127,6 +127,7 @@
     "tslib": "^2.4.0",
     "typescript": "^4.8.4",
     "vitest": "^0.12.10",
+    "vue-tsc": "^1.8.0",
     "yorkie": "^2.0.0"
   }
 }
