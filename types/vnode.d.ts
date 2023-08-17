@@ -37,6 +37,7 @@ export type VNodeChildren =
   | [ScopedSlot]
   | string
   | boolean
+  | number
   | null
   | undefined
 export interface VNodeChildrenArrayContents
@@ -86,7 +87,7 @@ export interface VNodeData {
   staticClass?: string
   class?: any
   staticStyle?: { [key: string]: any }
-  style?: StyleValue
+  style?: StyleValue | number;
   props?: { [key: string]: any }
   attrs?: { [key: string]: any }
   domProps?: { [key: string]: any }
