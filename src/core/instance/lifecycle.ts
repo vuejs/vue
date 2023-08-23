@@ -6,6 +6,7 @@ import { updateComponentListeners } from './events'
 import { resolveSlots } from './render-helpers/resolve-slots'
 import { toggleObserving } from '../observer/index'
 import { pushTarget, popTarget } from '../observer/dep'
+import { getCurrentScope } from '../../v3/reactivity/effectScope'
 import type { Component } from 'types/component'
 import type { MountedComponentVNode } from 'types/vnode'
 
@@ -398,7 +399,8 @@ export function callHook(
 ) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
-  const prev = currentInstance
+  const prevInst = currentInstance
+  const prevScope = getCurrentScope()
   setContext && setCurrentInstance(vm)
   const handlers = vm.$options[hook]
   const info = `${hook} hook`
@@ -410,6 +412,10 @@ export function callHook(
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }
-  setContext && setCurrentInstance(prev)
+  if (setContext) {
+    setCurrentInstance(prevInst)
+    prevScope?.on()
+  }
+
   popTarget()
 }
