@@ -1,13 +1,14 @@
-import Vue, { VueConstructor } from '../../index'
+import Vue, { AttrsType, ExtractPropTypes, VueConstructor } from '../../index'
 import {
   Component,
   defineComponent,
   PropType,
-  ref,
-  reactive,
   ComponentPublicInstance
 } from '../../index'
+import { reactive } from '../../../src/v3/reactivity/reactive'
+import { ref } from '../../../src/v3/reactivity/ref'
 import { describe, test, expectType, expectError, IsUnion } from '../utils'
+import { ImgHTMLAttributes, StyleValue } from '../../jsx'
 
 describe('compat with v2 APIs', () => {
   const comp = defineComponent({})
@@ -1079,7 +1080,9 @@ export default {
     }
   })
 }
-
+const Foo = defineComponent((props: { msg: string }) => {
+  return () => <div>{props.msg}</div>
+})
 describe('functional w/ array props', () => {
   const Foo = defineComponent({
     functional: true,
@@ -1224,4 +1227,193 @@ describe('should report non-existent properties in instance', () => {
   const instance2 = new Foo2()
   // @ts-expect-error
   instance2.foo
+})
+const MyComp = defineComponent({
+  props: {
+    foo: String
+  },
+
+  created() {
+    console.log(this)
+  }
+})
+describe('define attrs', () => {
+  test('define attrs w/ object props', () => {
+    const MyComp = defineComponent({
+      props: {
+        foo: String
+      },
+      attrs: Object as AttrsType<{
+        bar?: number
+      }>,
+      created() {
+        expectType<number | undefined>(this.$attrs.bar)
+      }
+    })
+    expectType<JSX.Element>(<MyComp foo="1" bar={1} />)
+  })
+
+  test('define attrs w/ array props', () => {
+    const MyComp = defineComponent({
+      props: ['foo'],
+      attrs: Object as AttrsType<{
+        bar?: number
+      }>,
+      created() {
+        expectType<number | undefined>(this.$attrs.bar)
+      }
+    })
+    expectType<JSX.Element>(<MyComp foo="1" bar={1} />)
+  })
+
+  test('define attrs w/ no props', () => {
+    const MyComp = defineComponent({
+      attrs: Object as AttrsType<{
+        bar?: number
+      }>,
+      created() {
+        expectType<number | undefined>(this.$attrs.bar)
+      }
+    })
+    expectType<JSX.Element>(<MyComp bar={1} />)
+  })
+
+  test('define attrs w/ composition api', () => {
+    const MyComp = defineComponent({
+      props: {
+        foo: {
+          type: String,
+          required: true
+        }
+      },
+      attrs: Object as AttrsType<{
+        bar?: number
+      }>,
+      setup(props, { attrs }) {
+        expectType<string>(props.foo)
+        expectType<number | undefined>(attrs.bar)
+      }
+    })
+    expectType<JSX.Element>(<MyComp foo="1" bar={1} />)
+  })
+
+  test('functional w/ array props', () => {
+    const Comp = defineComponent({
+      functional: true,
+      props: ['foo'],
+      attrs: Object as AttrsType<{
+        bar?: number
+      }>,
+      render(h, ctx) {
+        expectType<any>(ctx.props.foo)
+        expectType<number | undefined>(ctx.attrs.bar)
+      }
+    });
+
+    <Comp foo="hi" bar={1}/>
+  })
+
+  test('functional w/ object props', () => {
+    const Comp = defineComponent({
+      functional: true,
+      props: {
+        foo: String
+      },
+      attrs: Object as AttrsType<{
+        bar?: number
+      }>,
+      render(h, ctx) {
+        expectType<any>(ctx.props.foo)
+        expectType<number | undefined>(ctx.attrs.bar)
+      }
+    });
+    <Comp foo="hi" bar={1}/>
+  })
+
+  test('define attrs as low priority', () => {
+    const MyComp = defineComponent({
+      props: {
+        foo: String
+      },
+      attrs: Object as AttrsType<{
+        foo?: number
+      }>,
+      created() {
+        // @ts-expect-error
+        this.$attrs.foo
+
+        expectType<string | undefined>(this.foo)
+      }
+    })
+    expectType<JSX.Element>(<MyComp foo="1" />)
+  })
+
+  test('define required attrs', () => {
+    const MyComp = defineComponent({
+      attrs: Object as AttrsType<{
+        bar: number
+      }>,
+      created() {
+        expectType<number | undefined>(this.$attrs.bar)
+      }
+    })
+    expectType<JSX.Element>(<MyComp bar={1} />)
+    // @ts-expect-error
+    expectType<JSX.Element>(<MyComp />)
+  })
+
+  test('define no attrs w/ object props', () => {
+    const MyComp = defineComponent({
+      props: {
+        foo: String
+      },
+      created() {
+        expectType<unknown>(this.$attrs.bar)
+      }
+    })
+    // @ts-expect-error
+    expectType<JSX.Element>(<MyComp foo="1" bar={1} />)
+  })
+
+  test('wrap elements, such as img element', () => {
+    const MyImg = defineComponent({
+      props: {
+        foo: String
+      },
+      attrs: Object as AttrsType<ImgHTMLAttributes>,
+      created() {
+        expectType<any>(this.$attrs.class)
+        expectType<StyleValue | undefined>(this.$attrs.style)
+      },
+      render() {
+        return <img {...this.$attrs} />
+      }
+    })
+    expectType<JSX.Element>(<MyImg class={'str'} style={'str'} src={'str'} />)
+  })
+
+  test('secondary packaging of components', () => {
+    const childProps = {
+      foo: String
+    }
+    type ChildProps = ExtractPropTypes<typeof childProps>
+    const Child = defineComponent({
+      props: childProps,
+      render() {
+        return <div>{this.foo}</div>
+      }
+    })
+    const Comp = defineComponent({
+      props: {
+        bar: Number
+      },
+      attrs: Object as AttrsType<ChildProps>,
+      render() {
+        return <Child {...this.$attrs} />
+      }
+    })
+    expectType<JSX.Element>(
+      <Comp class={'str'} style={'str'} bar={1} foo={'str'} />
+    )
+  })
 })

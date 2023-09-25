@@ -3,8 +3,9 @@ import { VNode, VNodeData, VNodeDirective, NormalizedScopedSlot } from './vnode'
 import { SetupContext } from './v3-setup-context'
 import { DebuggerEvent } from './v3-generated'
 import { DefineComponent } from './v3-define-component'
-import { ComponentOptionsMixin } from './v3-component-options'
+import { AttrsType, ComponentOptionsMixin, noAttrsDefine, UnwrapAttrsType } from './v3-component-options'
 import { ObjectDirective, FunctionDirective } from './v3-directive'
+import { Data } from './common'
 
 type Constructor = {
   new (...args: any[]): any
@@ -263,7 +264,7 @@ export interface FunctionalComponentOptions<
   ): VNode | VNode[]
 }
 
-export interface RenderContext<Props = DefaultProps> {
+export interface RenderContext<Props = DefaultProps, Attrs extends AttrsType = Record<string, unknown>> {
   props: Props
   children: VNode[]
   slots(): any
@@ -272,6 +273,9 @@ export interface RenderContext<Props = DefaultProps> {
   listeners: { [key: string]: Function | Function[] }
   scopedSlots: { [key: string]: NormalizedScopedSlot }
   injections: any
+  attrs: noAttrsDefine<Attrs> extends true
+  ? Data
+  : UnwrapAttrsType<NonNullable<Attrs>>
 }
 
 export type Prop<T> =

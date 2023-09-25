@@ -1,4 +1,5 @@
 import * as V from './index'
+import { AttrsType } from './index'
 import {
   DefaultData,
   DefaultProps,
@@ -38,7 +39,7 @@ declare namespace Vue {
     Props = DefaultProps,
     PropDefs = PropsDefinition<Props>
   > = V.FunctionalComponentOptions<Props, PropDefs>
-  export type RenderContext<Props = DefaultProps> = V.RenderContext<Props>
+  export type RenderContext<Props = DefaultProps, Attrs extends AttrsType = Record<string, unknown>> = V.RenderContext<Props, Attrs>
   export type PropType<T> = V.PropType<T>
   export type PropOptions<T = any> = V.PropOptions<T>
   export type ComputedOptions<T> = V.ComputedOptions<T>

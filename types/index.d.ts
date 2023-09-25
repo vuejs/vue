@@ -49,7 +49,8 @@ export {
   ComputedOptions as ComponentComputedOptions,
   MethodOptions as ComponentMethodOptions,
   ComponentPropsOptions,
-  ComponentCustomOptions
+  ComponentCustomOptions,
+  AttrsType
 } from './v3-component-options'
 export {
   ComponentInstance,

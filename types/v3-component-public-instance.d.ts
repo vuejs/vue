@@ -1,8 +1,12 @@
 import {
-  DebuggerEvent,
   ShallowUnwrapRef,
+} from '../src/v3/reactivity/ref'
+import {
   UnwrapNestedRefs
-} from './v3-generated'
+} from '../src/v3/reactivity/reactive'
+import {
+  DebuggerEvent
+} from '../src/v3/debug'
 import { UnionToIntersection } from './common'
 
 import { Vue, VueConstructor } from './vue'
@@ -11,7 +15,8 @@ import {
   MethodOptions,
   ExtractComputedReturns,
   ComponentOptionsMixin,
-  ComponentOptionsBase
+  ComponentOptionsBase,
+  AttrsType
 } from './v3-component-options'
 import { EmitFn, EmitsOptions } from './v3-setup-context'
 
@@ -99,6 +104,7 @@ export type CreateComponentPublicInstance<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = {},
+  Attrs extends AttrsType = Record<string, unknown>,
   PublicProps = P,
   Defaults = {},
   MakeDefaultsOptional extends boolean = false,
@@ -121,7 +127,8 @@ export type CreateComponentPublicInstance<
   E,
   PublicProps,
   PublicDefaults,
-  MakeDefaultsOptional
+  MakeDefaultsOptional,
+  Attrs
 >
 
 // public properties exposed on the proxy, which is used as the render context
@@ -136,6 +143,7 @@ export type ComponentPublicInstance<
   PublicProps = P,
   Defaults = {},
   MakeDefaultsOptional extends boolean = false,
+  Attrs extends AttrsType = Record<string, unknown>,
   Options = ComponentOptionsBase<
     any,
     any,
@@ -155,7 +163,8 @@ export type ComponentPublicInstance<
   E,
   Defaults,
   MakeDefaultsOptional,
-  Options
+  Options,
+  Attrs
 > &
   Readonly<P> &
   ShallowUnwrapRef<B> &
@@ -171,7 +180,8 @@ interface Vue3Instance<
   E,
   Defaults,
   MakeDefaultsOptional,
-  Options
+  Options,
+  Attrs extends AttrsType
 > extends Vue<
     D,
     Readonly<
@@ -181,7 +191,8 @@ interface Vue3Instance<
     >,
     ComponentPublicInstance,
     Options & MergedComponentOptionsOverride,
-    EmitFn<E>
+    EmitFn<E>,
+    Attrs
   > {}
 
 type MergedHook<T = () => void> = T | T[]
