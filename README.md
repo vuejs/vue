@@ -1,3 +1,4 @@
+hi
 <p align="center"><a href="https://vuejs.org" target="_blank" rel="noopener noreferrer"><img width="100" src="https://vuejs.org/images/logo.png" alt="Vue logo"></a></p>
 
 <p align="center">
@@ -59,7 +60,9 @@ Vue.js supports all browsers that are [ES5-compliant](https://kangax.github.io/c
 [vue-router]: https://github.com/vuejs/vue-router
 [vuex]: https://github.com/vuejs/vuex
 [vue-cli]: https://github.com/vuejs/vue-cli
-[vue-loader]: https://github.com/vuejs/vue-loader
+[vue-loader]: https://github.com/vuejs/vue-loaderatively, use esc then tab to move to the next interactive element on the page.
+No file chosen
+Attach files by dragging & dropping, selecting or pasting them.
 [vue-server-renderer]: https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer
 [vue-class-component]: https://github.com/vuejs/vue-class-component
 [vue-rx]: https://github.com/vuejs/vue-rx
