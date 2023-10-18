@@ -75,12 +75,14 @@ export function lifecycleMixin(Vue: typeof Component) {
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
     restoreActiveInstance()
-    // update __vue__ reference
-    if (prevEl) {
-      prevEl.__vue__ = null
-    }
-    if (vm.$el) {
-      vm.$el.__vue__ = vm
+    if (__DEV__) {
+      // update __vue__ reference
+      if (prevEl) {
+        prevEl.__vue__ = null
+      }
+      if (vm.$el) {
+        vm.$el.__vue__ = vm
+      }
     }
     // if parent is an HOC, update its $el as well
     let wrapper: Component | undefined = vm
@@ -132,9 +134,11 @@ export function lifecycleMixin(Vue: typeof Component) {
     callHook(vm, 'destroyed')
     // turn off all instance listeners.
     vm.$off()
-    // remove __vue__ reference
-    if (vm.$el) {
-      vm.$el.__vue__ = null
+    if (__DEV__) {
+      // remove __vue__ reference
+      if (vm.$el) {
+        vm.$el.__vue__ = null
+      }
     }
     // release circular reference (#6759)
     if (vm.$vnode) {
