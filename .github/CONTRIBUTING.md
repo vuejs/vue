@@ -36,7 +36,7 @@ Hi! I'm really excited that you are interested in contributing to Vue.js. Before
 
 ## Development Setup
 
-You will need [Node.js](https://nodejs.org) **version 12+** and [pnpm](https://pnpm.io/).
+You will need [Node.js](https://nodejs.org) **version 18+** and [pnpm](https://pnpm.io/) **version 8+**.
 
 After cloning the repo, run:
 

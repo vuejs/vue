@@ -18,7 +18,7 @@ jobs:
       - name: Set node version to 16
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 18
           cache: 'pnpm'
 
       - run: pnpm install
@@ -37,7 +37,7 @@ jobs:
       - name: Set node version to 16
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 18
           cache: 'pnpm'
 
       - run: pnpm install
@@ -59,7 +59,7 @@ jobs:
       - name: Set node version to 16
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 18
           cache: 'pnpm'
 
       - run: pnpm install
@@ -81,7 +81,7 @@ jobs:
       - name: Set node version to 16
         uses: actions/setup-node@v2
         with:
-          node-version: 16
+          node-version: 18
           cache: 'pnpm'
 
       - run: pnpm install
