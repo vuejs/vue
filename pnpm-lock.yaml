@@ -95,7 +95,7 @@ importers:
         version: 1.2.7
       postcss:
         specifier: ^8.4.14
-        version: 8.4.17
+        version: 8.4.31
       prettier:
         specifier: ^2.6.2
         version: 2.7.1
