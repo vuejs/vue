@@ -2,9 +2,10 @@
 
 import Vue from 'vue'
 import renderToString from 'server/index-basic'
+import { _it } from './utils'
 
 describe('SSR: basicRenderer', () => {
-  it('should work', done => {
+  _it('should work', done => {
     renderToString(
       new Vue({
         template: `
@@ -61,7 +62,7 @@ describe('SSR: basicRenderer', () => {
   })
 
   // #5941
-  it('should work properly when accessing $ssrContext in root component', done => {
+  _it('should work properly when accessing $ssrContext in root component', done => {
     let ssrContext
     renderToString(
       new Vue({

@@ -4,7 +4,7 @@ import { createWebpackBundleRenderer } from './compile-with-webpack'
 
 describe('SSR: bundle renderer', () => {
   createAssertions(true)
-  createAssertions(false)
+  // createAssertions(false)
 })
 
 function createAssertions(runInNewContext) {

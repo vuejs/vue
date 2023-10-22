@@ -2,10 +2,12 @@
 
 import Vue from 'vue'
 import { createRenderer } from 'server/index'
+import { _it } from './utils'
+
 const { renderToStream } = createRenderer()
 
 describe('SSR: renderToStream', () => {
-  it('should render to a stream', done => {
+  _it('should render to a stream', done => {
     const stream = renderToStream(
       new Vue({
         template: `
@@ -74,7 +76,7 @@ describe('SSR: renderToStream', () => {
     })
   })
 
-  it('should catch error', done => {
+  _it('should catch error', done => {
     const stream = renderToStream(
       new Vue({
         render() {
@@ -90,7 +92,7 @@ describe('SSR: renderToStream', () => {
     stream.on('data', _ => _)
   })
 
-  it('should not mingle two components', done => {
+  _it('should not mingle two components', done => {
     const padding = new Array(20000).join('x')
     const component1 = new Vue({
       template: `<div>${padding}<div></div></div>`,
@@ -114,7 +116,7 @@ describe('SSR: renderToStream', () => {
     stream2.read(1)
   })
 
-  it('should call context.rendered', done => {
+  _it('should call context.rendered', done => {
     let a = 0
     const stream = renderToStream(
       new Vue({

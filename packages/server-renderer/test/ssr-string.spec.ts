@@ -3,10 +3,12 @@
 import Vue from 'vue'
 import VM from 'vm'
 import { createRenderer } from 'server/index'
+import { _it } from './utils'
+
 const { renderToString } = createRenderer()
 
 describe('SSR: renderToString', () => {
-  it('static attributes', done => {
+  _it('static attributes', done => {
     renderVmWithOptions(
       {
         template: '<div id="foo" bar="123"></div>'
@@ -20,7 +22,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('unary tags', done => {
+  _it('unary tags', done => {
     renderVmWithOptions(
       {
         template: '<input value="123">'
@@ -34,7 +36,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('dynamic attributes', done => {
+  _it('dynamic attributes', done => {
     renderVmWithOptions(
       {
         template: '<div qux="quux" :id="foo" :bar="baz"></div>',
@@ -52,7 +54,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('static class', done => {
+  _it('static class', done => {
     renderVmWithOptions(
       {
         template: '<div class="foo bar"></div>'
@@ -66,7 +68,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('dynamic class', done => {
+  _it('dynamic class', done => {
     renderVmWithOptions(
       {
         template:
@@ -86,7 +88,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('custom component class', done => {
+  _it('custom component class', done => {
     renderVmWithOptions(
       {
         template: '<div><cmp class="cmp"></cmp></div>',
@@ -105,7 +107,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('nested component class', done => {
+  _it('nested component class', done => {
     renderVmWithOptions(
       {
         template: '<cmp class="outer" :class="cls"></cmp>',
@@ -135,7 +137,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('dynamic style', done => {
+  _it('dynamic style', done => {
     renderVmWithOptions(
       {
         template:
@@ -154,7 +156,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('dynamic string style', done => {
+  _it('dynamic string style', done => {
     renderVmWithOptions(
       {
         template: '<div :style="style"></div>',
@@ -171,7 +173,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('auto-prefixed style value as array', done => {
+  _it('auto-prefixed style value as array', done => {
     renderVmWithOptions(
       {
         template: '<div :style="style"></div>',
@@ -190,7 +192,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('custom component style', done => {
+  _it('custom component style', done => {
     renderVmWithOptions(
       {
         template: '<section><comp :style="style"></comp></section>',
@@ -212,7 +214,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('nested custom component style', done => {
+  _it('nested custom component style', done => {
     renderVmWithOptions(
       {
         template: '<comp style="color: blue" :style="style"></comp>',
@@ -240,7 +242,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('component style not passed to child', done => {
+  _it('component style not passed to child', done => {
     renderVmWithOptions(
       {
         template: '<comp :style="style"></comp>',
@@ -262,7 +264,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('component style not passed to slot', done => {
+  _it('component style not passed to slot', done => {
     renderVmWithOptions(
       {
         template:
@@ -285,7 +287,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('attrs merging on components', done => {
+  _it('attrs merging on components', done => {
     const Test = {
       render: h =>
         h('div', {
@@ -308,7 +310,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('domProps merging on components', done => {
+  _it('domProps merging on components', done => {
     const Test = {
       render: h =>
         h('div', {
@@ -331,7 +333,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-show directive render', done => {
+  _it('v-show directive render', done => {
     renderVmWithOptions(
       {
         template: '<div v-show="false"><span>inner</span></div>'
@@ -345,7 +347,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-show directive merge with style', done => {
+  _it('v-show directive merge with style', done => {
     renderVmWithOptions(
       {
         template:
@@ -360,7 +362,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-show directive not passed to child', done => {
+  _it('v-show directive not passed to child', done => {
     renderVmWithOptions(
       {
         template: '<foo v-show="false"></foo>',
@@ -379,7 +381,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-show directive not passed to slot', done => {
+  _it('v-show directive not passed to slot', done => {
     renderVmWithOptions(
       {
         template: '<foo v-show="false"><span>inner</span></foo>',
@@ -398,7 +400,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-show directive merging on components', done => {
+  _it('v-show directive merging on components', done => {
     renderVmWithOptions(
       {
         template: '<foo v-show="false"></foo>',
@@ -430,7 +432,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('text interpolation', done => {
+  _it('text interpolation', done => {
     renderVmWithOptions(
       {
         template: '<div>{{ foo }} side {{ bar }}</div>',
@@ -448,7 +450,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-html on root', done => {
+  _it('v-html on root', done => {
     renderVmWithOptions(
       {
         template: '<div v-html="text"></div>',
@@ -465,7 +467,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-text on root', done => {
+  _it('v-text on root', done => {
     renderVmWithOptions(
       {
         template: '<div v-text="text"></div>',
@@ -482,7 +484,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-html', done => {
+  _it('v-html', done => {
     renderVmWithOptions(
       {
         template: '<div><div v-html="text"></div></div>',
@@ -499,7 +501,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-html with null value', done => {
+  _it('v-html with null value', done => {
     renderVmWithOptions(
       {
         template: '<div><div v-html="text"></div></div>',
@@ -516,7 +518,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-text', done => {
+  _it('v-text', done => {
     renderVmWithOptions(
       {
         template: '<div><div v-text="text"></div></div>',
@@ -533,7 +535,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-text with null value', done => {
+  _it('v-text with null value', done => {
     renderVmWithOptions(
       {
         template: '<div><div v-text="text"></div></div>',
@@ -550,7 +552,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('child component (hoc)', done => {
+  _it('child component (hoc)', done => {
     renderVmWithOptions(
       {
         template: '<child class="foo" :msg="msg"></child>',
@@ -579,7 +581,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('has correct lifecycle during render', done => {
+  _it('has correct lifecycle during render', done => {
     let lifecycleCount = 1
     renderVmWithOptions(
       {
@@ -622,7 +624,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('computed properties', done => {
+  _it('computed properties', done => {
     renderVmWithOptions(
       {
         template: '<div>{{ b }}</div>',
@@ -648,7 +650,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('renders async component', done => {
+  _it('renders async component', done => {
     renderVmWithOptions(
       {
         template: `
@@ -683,7 +685,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('renders async component (Promise, nested)', done => {
+  _it('renders async component (Promise, nested)', done => {
     const Foo = () =>
       Promise.resolve({
         render: h => h('div', [h('span', 'foo'), h(Bar)])
@@ -706,7 +708,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('renders async component (ES module)', done => {
+  _it('renders async component (ES module)', done => {
     const Foo = () =>
       Promise.resolve({
         __esModule: true,
@@ -735,7 +737,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('renders async component (hoc)', done => {
+  _it('renders async component (hoc)', done => {
     renderVmWithOptions(
       {
         template: '<test-async></test-async>',
@@ -761,7 +763,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('renders async component (functional, single node)', done => {
+  _it('renders async component (functional, single node)', done => {
     renderVmWithOptions(
       {
         template: `
@@ -793,7 +795,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('renders async component (functional, multiple nodes)', done => {
+  _it('renders async component (functional, multiple nodes)', done => {
     renderVmWithOptions(
       {
         template: `
@@ -831,7 +833,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('renders nested async functional component', done => {
+  _it('renders nested async functional component', done => {
     renderVmWithOptions(
       {
         template: `
@@ -877,7 +879,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should catch async component error', done => {
+  _it('should catch async component error', done => {
     renderToString(
       new Vue({
         template: '<test-async></test-async>',
@@ -900,7 +902,7 @@ describe('SSR: renderToString', () => {
   })
 
   // #11963, #10391
-  it('renders async children passed in slots', done => {
+  _it('renders async children passed in slots', done => {
     const Parent = {
       template: `<div><slot name="child"/></div>`
     }
@@ -930,7 +932,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('everything together', done => {
+  _it('everything together', done => {
     renderVmWithOptions(
       {
         template: `
@@ -985,7 +987,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('normal attr', done => {
+  _it('normal attr', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1013,7 +1015,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('enumerated attr', done => {
+  _it('enumerated attr', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1043,7 +1045,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('boolean attr', done => {
+  _it('boolean attr', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1069,7 +1071,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-bind object', done => {
+  _it('v-bind object', done => {
     renderVmWithOptions(
       {
         data: {
@@ -1086,7 +1088,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('custom directives on raw element', done => {
+  _it('custom directives on raw element', done => {
     const renderer = createRenderer({
       directives: {
         'class-prefixer': (node, dir) => {
@@ -1129,7 +1131,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('custom directives on component', done => {
+  _it('custom directives on component', done => {
     const Test = {
       template: '<span>hello world</span>'
     }
@@ -1161,7 +1163,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('custom directives on element root of a component', done => {
+  _it('custom directives on element root of a component', done => {
     const Test = {
       template:
         '<span v-class-prefixer="\'my\'" class="class1" :class="\'class2\'">hello world</span>'
@@ -1193,7 +1195,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('custom directives on element with parent element', done => {
+  _it('custom directives on element with parent element', done => {
     const renderer = createRenderer({
       directives: {
         'class-prefixer': (node, dir) => {
@@ -1221,26 +1223,29 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should not warn for custom directives that do not have server-side implementation', done => {
-    renderToString(
-      new Vue({
-        directives: {
-          test: {
-            bind() {
-              // noop
+  _it(
+    'should not warn for custom directives that do not have server-side implementation',
+    done => {
+      renderToString(
+        new Vue({
+          directives: {
+            test: {
+              bind() {
+                // noop
+              }
             }
-          }
-        },
-        template: '<div v-test></div>'
-      }),
-      () => {
-        expect('Failed to resolve directive: test').not.toHaveBeenWarned()
-        done()
-      }
-    )
-  })
+          },
+          template: '<div v-test></div>'
+        }),
+        () => {
+          expect('Failed to resolve directive: test').not.toHaveBeenWarned()
+          done()
+        }
+      )
+    }
+  )
 
-  it('_scopeId', done => {
+  _it('_scopeId', done => {
     renderVmWithOptions(
       {
         _scopeId: '_v-parent',
@@ -1268,7 +1273,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('_scopeId on slot content', done => {
+  _it('_scopeId on slot content', done => {
     renderVmWithOptions(
       {
         _scopeId: '_v-parent',
@@ -1294,7 +1299,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('comment nodes', done => {
+  _it('comment nodes', done => {
     renderVmWithOptions(
       {
         template: '<div><transition><div v-if="false"></div></transition></div>'
@@ -1308,7 +1313,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should catch error', done => {
+  _it('should catch error', done => {
     renderToString(
       new Vue({
         render() {
@@ -1323,7 +1328,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('default value Foreign Function', () => {
+  _it('default value Foreign Function', () => {
     const FunctionConstructor = VM.runInNewContext('Function')
     const func = () => 123
     const vm = new Vue({
@@ -1340,7 +1345,7 @@ describe('SSR: renderToString', () => {
     expect(vm.a).toBe(func)
   })
 
-  it('should prevent xss in attributes', done => {
+  _it('should prevent xss in attributes', done => {
     renderVmWithOptions(
       {
         data: {
@@ -1359,7 +1364,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should prevent xss in attribute names', done => {
+  _it('should prevent xss in attribute names', done => {
     renderVmWithOptions(
       {
         data: {
@@ -1378,7 +1383,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should prevent xss in attribute names (optimized)', done => {
+  _it('should prevent xss in attribute names (optimized)', done => {
     renderVmWithOptions(
       {
         data: {
@@ -1399,22 +1404,25 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should prevent script xss with v-bind object syntax + array value', done => {
-    renderVmWithOptions(
-      {
-        data: {
-          test: ['"><script>alert(1)</script><!--"']
+  _it(
+    'should prevent script xss with v-bind object syntax + array value',
+    done => {
+      renderVmWithOptions(
+        {
+          data: {
+            test: ['"><script>alert(1)</script><!--"']
+          },
+          template: `<div v-bind="{ test }"></div>`
         },
-        template: `<div v-bind="{ test }"></div>`
-      },
-      res => {
-        expect(res).not.toContain(`<script>alert(1)</script>`)
-        done()
-      }
-    )
-  })
+        res => {
+          expect(res).not.toContain(`<script>alert(1)</script>`)
+          done()
+        }
+      )
+    }
+  )
 
-  it('v-if', done => {
+  _it('v-if', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1433,7 +1441,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('v-for', done => {
+  _it('v-for', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1452,7 +1460,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('template v-if', done => {
+  _it('template v-if', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1473,7 +1481,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('template v-for', done => {
+  _it('template v-for', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1494,7 +1502,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('with inheritAttrs: false + $attrs', done => {
+  _it('with inheritAttrs: false + $attrs', done => {
     renderVmWithOptions(
       {
         template: `<foo id="a"/>`,
@@ -1514,7 +1522,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should escape static strings', done => {
+  _it('should escape static strings', done => {
     renderVmWithOptions(
       {
         template: `<div>&lt;foo&gt;</div>`
@@ -1526,7 +1534,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should not cache computed properties', done => {
+  _it('should not cache computed properties', done => {
     renderVmWithOptions(
       {
         template: `<div>{{ foo }}</div>`,
@@ -1549,7 +1557,7 @@ describe('SSR: renderToString', () => {
   })
 
   // #8977
-  it('should call computed properties with vm as first argument', done => {
+  _it('should call computed properties with vm as first argument', done => {
     renderToString(
       new Vue({
         data: {
@@ -1571,7 +1579,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('return Promise', async () => {
+  _it('return Promise', async () => {
     await renderToString(
       new Vue({
         template: `<div>{{ foo }}</div>`,
@@ -1582,7 +1590,7 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('return Promise (error)', async () => {
+  _it('return Promise (error)', async () => {
     await renderToString(
       new Vue({
         render() {
@@ -1595,7 +1603,7 @@ describe('SSR: renderToString', () => {
     })
   })
 
-  it('should catch template compilation error', done => {
+  _it('should catch template compilation error', done => {
     renderToString(
       new Vue({
         template: `<div></div><div></div>`
@@ -1610,7 +1618,7 @@ describe('SSR: renderToString', () => {
   })
 
   // #6907
-  it('should not optimize root if conditions', done => {
+  _it('should not optimize root if conditions', done => {
     renderVmWithOptions(
       {
         data: { foo: 123 },
@@ -1625,7 +1633,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('render muted properly', done => {
+  _it('render muted properly', done => {
     renderVmWithOptions(
       {
         template: '<video muted></video>'
@@ -1639,7 +1647,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('render v-model with textarea', done => {
+  _it('render v-model with textarea', done => {
     renderVmWithOptions(
       {
         data: { foo: 'bar' },
@@ -1652,7 +1660,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('render v-model with textarea (non-optimized)', done => {
+  _it('render v-model with textarea (non-optimized)', done => {
     renderVmWithOptions(
       {
         render(h) {
@@ -1672,7 +1680,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('render v-model with <select> (value binding)', done => {
+  _it('render v-model with <select> (value binding)', done => {
     renderVmWithOptions(
       {
         data: {
@@ -1702,7 +1710,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('render v-model with <select> (static value)', done => {
+  _it('render v-model with <select> (static value)', done => {
     renderVmWithOptions(
       {
         data: {
@@ -1729,7 +1737,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('render v-model with <select> (text as value)', done => {
+  _it('render v-model with <select> (text as value)', done => {
     renderVmWithOptions(
       {
         data: {
@@ -1760,7 +1768,7 @@ describe('SSR: renderToString', () => {
   })
 
   // #7223
-  it('should not double escape attribute values', done => {
+  _it('should not double escape attribute values', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1777,7 +1785,7 @@ describe('SSR: renderToString', () => {
   })
 
   // #7859
-  it('should not double escape class values', done => {
+  _it('should not double escape class values', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1793,7 +1801,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should expose ssr helpers on functional context', done => {
+  _it('should expose ssr helpers on functional context', done => {
     let called = false
     renderVmWithOptions(
       {
@@ -1815,7 +1823,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should support serverPrefetch option', done => {
+  _it('should support serverPrefetch option', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1840,7 +1848,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should support serverPrefetch option (nested)', done => {
+  _it('should support serverPrefetch option (nested)', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1890,7 +1898,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should support serverPrefetch option (nested async)', done => {
+  _it('should support serverPrefetch option (nested async)', done => {
     renderVmWithOptions(
       {
         template: `
@@ -1942,7 +1950,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('should merge serverPrefetch option', done => {
+  _it('should merge serverPrefetch option', done => {
     const mixin = {
       data: {
         message: ''
@@ -1986,29 +1994,32 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it(`should skip serverPrefetch option that doesn't return a promise`, done => {
-    renderVmWithOptions(
-      {
-        template: `
+  _it(
+    `should skip serverPrefetch option that doesn't return a promise`,
+    done => {
+      renderVmWithOptions(
+        {
+          template: `
         <div>{{ count }}</div>
       `,
-        data: {
-          count: 0
+          data: {
+            count: 0
+          },
+          serverPrefetch() {
+            setTimeout(() => {
+              this.count = 42
+            }, 1)
+          }
         },
-        serverPrefetch() {
-          setTimeout(() => {
-            this.count = 42
-          }, 1)
+        result => {
+          expect(result).toContain('<div data-server-rendered="true">0</div>')
+          done()
         }
-      },
-      result => {
-        expect(result).toContain('<div data-server-rendered="true">0</div>')
-        done()
-      }
-    )
-  })
+      )
+    }
+  )
 
-  it('should call context.rendered', done => {
+  _it('should call context.rendered', done => {
     let a = 0
     renderToString(
       new Vue({
@@ -2028,7 +2039,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('invalid style value', done => {
+  _it('invalid style value', done => {
     renderVmWithOptions(
       {
         template: '<div :style="style"><p :style="style2"/></div>',
@@ -2054,7 +2065,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('numeric style value', done => {
+  _it('numeric style value', done => {
     renderVmWithOptions(
       {
         template: '<div :style="style"></div>',
@@ -2076,7 +2087,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('handling max stack size limit', done => {
+  _it('handling max stack size limit', done => {
     const vueInstance = new Vue({
       template: `<div class="root">
         <child v-for="(x, i) in items" :key="i"></child>
@@ -2094,7 +2105,7 @@ describe('SSR: renderToString', () => {
     renderToString(vueInstance, err => done(err))
   })
 
-  it('undefined v-model with textarea', done => {
+  _it('undefined v-model with textarea', done => {
     renderVmWithOptions(
       {
         render(h) {
@@ -2116,7 +2127,7 @@ describe('SSR: renderToString', () => {
     )
   })
 
-  it('Options inheritAttrs in parent component', done => {
+  _it('Options inheritAttrs in parent component', done => {
     const childComponent = {
       template: `<div>{{ someProp }}</div>`,
       props: {

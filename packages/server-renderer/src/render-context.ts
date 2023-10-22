@@ -34,8 +34,6 @@ export class RenderContext {
   renderStates: Array<RenderState>
   write: (text: string, next: Function) => void
   renderNode: (node: VNode, isRoot: boolean, context: RenderContext) => void
-  //@ts-expect-error
-  next: () => void
   done: (err?: Error) => void
 
   modules: Array<(node: VNode) => string | null>
@@ -67,11 +65,9 @@ export class RenderContext {
     this.get = cache && normalizeAsync(cache, 'get')
     this.has = cache && normalizeAsync(cache, 'has')
 
-    //@ts-expect-error
     this.next = this.next.bind(this)
   }
 
-  //@ts-expect-error
   next() {
     // eslint-disable-next-line
     while (true) {
