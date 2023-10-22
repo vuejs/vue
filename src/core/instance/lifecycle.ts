@@ -18,6 +18,7 @@ import {
   invokeWithErrorHandling
 } from '../util/index'
 import { currentInstance, setCurrentInstance } from 'v3/currentInstance'
+import { getCurrentScope } from 'v3/reactivity/effectScope'
 import { syncSetupProxy } from 'v3/apiSetup'
 
 export let activeInstance: any = null
@@ -398,7 +399,8 @@ export function callHook(
 ) {
   // #7573 disable dep collection when invoking lifecycle hooks
   pushTarget()
-  const prev = currentInstance
+  const prevInst = currentInstance
+  const prevScope = getCurrentScope()
   setContext && setCurrentInstance(vm)
   const handlers = vm.$options[hook]
   const info = `${hook} hook`
@@ -410,6 +412,10 @@ export function callHook(
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }
-  setContext && setCurrentInstance(prev)
+  if (setContext) {
+    setCurrentInstance(prevInst)
+    prevScope && prevScope.on()
+  }
+
   popTarget()
 }
