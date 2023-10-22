@@ -15,7 +15,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v2
 
-      - name: Set node version to 16
+      - name: Set node version to 18
         uses: actions/setup-node@v2
         with:
           node-version: 18
@@ -34,7 +34,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v2
 
-      - name: Set node version to 16
+      - name: Set node version to 18
         uses: actions/setup-node@v2
         with:
           node-version: 18
@@ -56,7 +56,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v2
 
-      - name: Set node version to 16
+      - name: Set node version to 18
         uses: actions/setup-node@v2
         with:
           node-version: 18
@@ -78,7 +78,7 @@ jobs:
       - name: Install pnpm
         uses: pnpm/action-setup@v2
 
-      - name: Set node version to 16
+      - name: Set node version to 18
         uses: actions/setup-node@v2
         with:
           node-version: 18
