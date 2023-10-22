@@ -292,7 +292,7 @@ describe('reactivity/effectScope', () => {
     })
   })
 
-  it('test scope should not break currentScope when component call hooks', () => {
+  it('scope should not break currentScope when component call hooks', () => {
     const scope = new EffectScope()
     const vm = new Vue({
       template: `

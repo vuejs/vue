@@ -6,7 +6,6 @@ import { updateComponentListeners } from './events'
 import { resolveSlots } from './render-helpers/resolve-slots'
 import { toggleObserving } from '../observer/index'
 import { pushTarget, popTarget } from '../observer/dep'
-import { getCurrentScope } from '../../v3/reactivity/effectScope'
 import type { Component } from 'types/component'
 import type { MountedComponentVNode } from 'types/vnode'
 
@@ -19,6 +18,7 @@ import {
   invokeWithErrorHandling
 } from '../util/index'
 import { currentInstance, setCurrentInstance } from 'v3/currentInstance'
+import { getCurrentScope } from 'v3/reactivity/effectScope'
 import { syncSetupProxy } from 'v3/apiSetup'
 
 export let activeInstance: any = null
@@ -414,7 +414,7 @@ export function callHook(
   }
   if (setContext) {
     setCurrentInstance(prevInst)
-    prevScope?.on()
+    prevScope && prevScope.on()
   }
 
   popTarget()
