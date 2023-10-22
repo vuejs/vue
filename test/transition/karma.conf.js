@@ -2,12 +2,12 @@ const featureFlags = require('../../scripts/feature-flags')
 process.env.CHROME_BIN = require('puppeteer').executablePath()
 
 const define = {
-  __DEV__: true,
-  'process.env.CI': !!process.env.CI
+  __DEV__: `true`,
+  'process.env.CI': String(!!process.env.CI)
 }
 
 for (const key in featureFlags) {
-  define[`process.env.${key}`] = featureFlags[key]
+  define[`process.env.${key}`] = String(featureFlags[key])
 }
 
 module.exports = function (config) {
