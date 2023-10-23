@@ -1,4 +1,4 @@
-// Vitest Snapshot v1
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`CSS vars injection > codegen > <script> w/ default export 1`] = `
 "const __default__ = { setup() {} }
