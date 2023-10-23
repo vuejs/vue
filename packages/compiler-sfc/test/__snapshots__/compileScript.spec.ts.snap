@@ -212,7 +212,7 @@ export default {
   props: propsModel,
   setup(__props) {
 
-const props = __props
+const props = __props;
 
     
     
@@ -229,7 +229,7 @@ export default {
   props: {},
   setup(__props) {
 
-const props = __props
+const props = __props;
 
     
 return { props, x }
@@ -245,7 +245,7 @@ exports[`SFC compile <script setup> > defineProps() 1`] = `
 },
   setup(__props) {
 
-const props = __props
+const props = __props;
 
 
 const bar = 1
@@ -262,7 +262,7 @@ exports[`SFC compile <script setup> > defineProps/defineEmits in multi-variable 
   emits: ['a'],
   setup(__props, { emit }) {
 
-const props = __props
+const props = __props;
 
     
     
@@ -278,7 +278,7 @@ exports[`SFC compile <script setup> > defineProps/defineEmits in multi-variable 
   emits: ['a'],
   setup(__props, { emit }) {
 
-const props = __props
+const props = __props;
 
     const a = 1;
     
@@ -835,7 +835,7 @@ export default /*#__PURE__*/_defineComponent({
   emits: ['a', 'b'],
   setup(__props, { emit }) {
 
-const props = __props
+const props = __props;
 
 
 
@@ -924,7 +924,7 @@ const props = __props as {
         foo?: string
         bar?: number
         baz: boolean
-      }
+      };
 
       
       
@@ -946,7 +946,7 @@ export default /*#__PURE__*/_defineComponent({
   },
   setup(__props: any) {
 
-const props = __props as { foo: string, bar?: number, baz: boolean, qux(): number }
+const props = __props as { foo: string, bar?: number, baz: boolean, qux(): number };
 
       
       

@@ -1125,7 +1125,7 @@ export function compileScript(
       startOffset,
       `\nconst ${propsIdentifier} = __props${
         propsTypeDecl ? ` as ${genSetupPropsType(propsTypeDecl)}` : ``
-      }\n`
+      };\n`
     )
   }
   if (propsDestructureRestId) {
@@ -1133,7 +1133,7 @@ export function compileScript(
       startOffset,
       `\nconst ${propsDestructureRestId} = ${helper(
         `createPropsRestProxy`
-      )}(__props, ${JSON.stringify(Object.keys(propsDestructuredBindings))})\n`
+      )}(__props, ${JSON.stringify(Object.keys(propsDestructuredBindings))});\n`
     )
   }
 
