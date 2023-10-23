@@ -1,3 +1,19 @@
+## [2.7.15](https://github.com/vuejs/vue/compare/v2.7.14...v2.7.15) (2023-10-23)
+
+
+### Bug Fixes
+
+* **compiler-sfc:** add semicolon after `defineProps` statement ([#12879](https://github.com/vuejs/vue/issues/12879)) ([51fef2c](https://github.com/vuejs/vue/commit/51fef2ca69459c1175e105991f60511f1996e0c8))
+* **compiler-sfc:** fix macro usage in multi-variable declaration ([#12873](https://github.com/vuejs/vue/issues/12873)) ([d27c128](https://github.com/vuejs/vue/commit/d27c128b7cb1640f3aa185a5ecdea4ff35763794))
+* **compiler-sfc:** Optimize the value of emitIdentifier ([#12851](https://github.com/vuejs/vue/issues/12851)) ([bb59751](https://github.com/vuejs/vue/commit/bb59751dd4e45afcaafd607f22505a724b1ef841))
+* **compiler-sfc:** Resolve object expression parsing errors in `v-on` ([#12862](https://github.com/vuejs/vue/issues/12862)) ([b8c8b3f](https://github.com/vuejs/vue/commit/b8c8b3fc7a211744fdabd237a1a986a1f80b7c43))
+* **lifecycle:** scope might changed when call hook ([#13070](https://github.com/vuejs/vue/issues/13070)) ([74ca5a1](https://github.com/vuejs/vue/commit/74ca5a13ba12a31580f1567e7c6d789e96730e46))
+* **patch:** clone insert hooks to avoid being mutated during iteration ([#12905](https://github.com/vuejs/vue/issues/12905)) ([c223634](https://github.com/vuejs/vue/commit/c22363425ae246ccbb8418342e94edfa270d93e5))
+* **types/sfc:** improve the type inference using `withDefaults` ([#12872](https://github.com/vuejs/vue/issues/12872)) ([099401e](https://github.com/vuejs/vue/commit/099401e227fd5ed496ff615528d1a9b3b64d4fbf))
+* **types:** correct serverPrefetch this type ([#13068](https://github.com/vuejs/vue/issues/13068)) ([67c1d26](https://github.com/vuejs/vue/commit/67c1d26cb0af3eb2db0a11fc7768a8299e7f7d58)), closes [#12488](https://github.com/vuejs/vue/issues/12488)
+
+
+
 ## [2.7.14](https://github.com/vuejs/vue/compare/v2.7.13...v2.7.14) (2022-11-09)
 
 
