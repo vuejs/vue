@@ -467,4 +467,42 @@ describe('vdom patch: edge cases', () => {
     vm.visible = false
     vm.$nextTick(done)
   })
+
+  it('should call directive\'s inserted hook correctly when template root is changed', done => {
+    let insertCalled = false
+    const vm = new Vue({
+      data: {
+        isOn: false
+      },
+      components: {
+        'v-switch': {
+          props: {
+            on: Boolean
+          },
+          template: `
+            <div v-if="on" key="on">On</div>
+            <div v-else key="off">Off</div>`
+        }
+      },
+      directives: {
+        foo: {
+          inserted() {
+            insertCalled = true
+          }
+        }
+      },
+      template: `
+        <transition-group>
+          <v-switch key="swicth" v-foo :on="isOn"/>
+        </transition-group>
+      `
+    }).$mount()
+
+    vm.isOn = true
+    insertCalled = false
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toMatch('On')
+      expect(insertCalled).toBe(true)
+    }).then(done)
+  })
 })
