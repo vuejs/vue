@@ -1,7 +1,7 @@
 import { Vue } from './vue'
 import { VNode } from './vnode'
 import { ComponentOptions as Vue2ComponentOptions } from './options'
-import { EmitsOptions, SetupContext } from './v3-setup-context'
+import { EmitsOptions, EmitsToProps, SetupContext } from './v3-setup-context'
 import { Data, LooseRequired, UnionToIntersection } from './common'
 import {
   ComponentPropsOptions,
@@ -137,6 +137,13 @@ export type ExtractComputedReturns<T extends any> = {
     : never
 }
 
+export type ResolveProps<PropsOrPropOptions, E extends EmitsOptions> = Readonly<
+  PropsOrPropOptions extends ComponentPropsOptions
+    ? ExtractPropTypes<PropsOrPropOptions>
+    : PropsOrPropOptions
+> &
+  ({} extends E ? {} : EmitsToProps<E>)
+
 export type ComponentOptionsWithProps<
   PropsOptions = ComponentPropsOptions,
   RawBindings = Data,
@@ -147,7 +154,7 @@ export type ComponentOptionsWithProps<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
-  Props = ExtractPropTypes<PropsOptions>,
+  Props = ResolveProps<PropsOptions, Emits>,
   Defaults = ExtractDefaultPropTypes<PropsOptions>
 > = ComponentOptionsBase<
   Props,
@@ -185,7 +192,7 @@ export type ComponentOptionsWithArrayProps<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
-  Props = Readonly<{ [key in PropNames]?: any }>
+  Props = Readonly<{ [key in PropNames]?: any }> & EmitsToProps<Emits>
 > = ComponentOptionsBase<
   Props,
   RawBindings,
@@ -221,9 +228,10 @@ export type ComponentOptionsWithoutProps<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
-  EmitsNames extends string = string
+  EmitsNames extends string = string,
+  PropsWithEmits = Props & EmitsToProps<Emits>
 > = ComponentOptionsBase<
-  Props,
+  PropsWithEmits,
   RawBindings,
   D,
   C,

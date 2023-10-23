@@ -10,7 +10,8 @@ import {
   ComponentOptionsWithArrayProps,
   ComponentOptionsWithProps,
   ComponentOptionsMixin,
-  ComponentOptionsBase
+  ComponentOptionsBase,
+  ResolveProps
 } from './v3-component-options'
 import {
   ComponentPublicInstanceConstructor,
@@ -161,7 +162,7 @@ export function defineComponent<
         Extends,
         Emits,
         EmitsNames,
-        Props
+        ResolveProps<PropsOptions, Emits>
       >
     : { functional?: never } & ComponentOptionsWithProps<
         PropsOptions,
