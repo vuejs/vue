@@ -910,11 +910,11 @@ export function compileScript(
             } else {
               let start = decl.start! + startOffset
               let end = decl.end! + startOffset
-              if (i < total - 1) {
-                // not the last one, locate the start of the next
+              if (i === 0) {
+                // first one, locate the start of the next
                 end = node.declarations[i + 1].start! + startOffset
               } else {
-                // last one, locate the end of the prev
+                // not first one, locate the end of the prev
                 start = node.declarations[i - 1].end! + startOffset
               }
               s.remove(start, end)

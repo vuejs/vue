@@ -288,6 +288,22 @@ return { props, a, emit }
 }"
 `;
 
+exports[`SFC compile <script setup> > defineProps/defineEmits in multi-variable declaration fix #6757  1`] = `
+"export default {
+  props: ['item'],
+  emits: ['a'],
+  setup(__props, { emit }) {
+
+const props = __props
+
+    const a = 1;
+    
+return { a, props, emit }
+}
+
+}"
+`;
+
 exports[`SFC compile <script setup> > dev mode import usage check > TS annotations 1`] = `
 "import { defineComponent as _defineComponent } from 'vue'
 import { Foo, Baz, Qux, Fred } from './x'
