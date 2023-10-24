@@ -26,6 +26,7 @@
       "types": "./types/index.d.ts"
     },
     "./compiler-sfc": {
+      "types": "./compiler-sfc/index.d.ts",
       "import": "./compiler-sfc/index.mjs",
       "require": "./compiler-sfc/index.js"
     },
