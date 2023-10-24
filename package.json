@@ -30,7 +30,7 @@
       "require": "./compiler-sfc/index.js"
     },
     "./dist/*": "./dist/*",
-    "./types/*": "./types/*",
+    "./types/*": ["./types/*.d.ts", "./types/*"],
     "./package.json": "./package.json"
   },
   "sideEffects": false,
