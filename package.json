@@ -18,12 +18,12 @@
   ],
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
       "import": {
         "node": "./dist/vue.runtime.mjs",
         "default": "./dist/vue.runtime.esm.js"
       },
-      "require": "./dist/vue.runtime.common.js",
-      "types": "./types/index.d.ts"
+      "require": "./dist/vue.runtime.common.js"
     },
     "./compiler-sfc": {
       "types": "./compiler-sfc/index.d.ts",
