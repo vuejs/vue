@@ -139,7 +139,7 @@ export function defineComponent<
  * see `ExtractPropTypes` in './componentProps.ts'
  */
 export function defineComponent<
-  Props,
+  Props = unknown,
   RawBindings = {},
   D = {},
   C extends ComputedOptions = {},
