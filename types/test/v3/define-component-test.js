@@ -1,6 +1,6 @@
 // @ts-check
 import { defineComponent } from '../../index'
-import { expectError, expectType, describe } from '../utils'
+import { expectError, describe } from '../utils'
 const props = {
   a: Number
 }
@@ -9,13 +9,10 @@ describe('defineComponents works in js', () => {
     props,
     computed: {
       test() {
-        /** @type import('../utils').IsAny<typeof this.a> */
-        let test
+        // @ts-expect-error Invalid typecast if `this.a` is not any
+        ;/** @type import('../utils').IsAny<typeof this.a> */ (this.a)
 
-        // @ts-expect-error
-        expectType(/** @type {number | undefined} */ (test))
-
-        // @ts-expect-error
+        // @ts-expect-error Unknown property
         expectError(this.b)
       }
     }
