@@ -4,7 +4,7 @@ import { expectError, describe } from '../utils'
 const props = {
   a: Number
 }
-describe('defineComponents works in js', () => {
+describe('defineComponent prop types work in js', () => {
   defineComponent({
     props,
     computed: {
