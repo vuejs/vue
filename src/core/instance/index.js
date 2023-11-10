@@ -12,7 +12,7 @@ function Vue (options) {
     warn('Vue is a constructor and should be called with the `new` keyword')
   }
   this._init(options)
-}
+}    
 
 initMixin(Vue)
 stateMixin(Vue)
