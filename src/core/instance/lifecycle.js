@@ -140,29 +140,13 @@ export function lifecycleMixin (Vue: Class<Component>) {
 
 export function mountComponent (
   vm: Component,
-  el: ?Element,
+  el: ?Element, // 可能是一个 div
   hydrating?: boolean
 ): Component {
   vm.$el = el
-  if (!vm.$options.render) {
-    vm.$options.render = createEmptyVNode
-    if (process.env.NODE_ENV !== 'production') {
-      /* istanbul ignore if */
-      if ((vm.$options.template && vm.$options.template.charAt(0) !== '#') ||
-        vm.$options.el || el) {
-        warn(
-          'You are using the runtime-only build of Vue where the template ' +
-          'compiler is not available. Either pre-compile the templates into ' +
-          'render functions, or use the compiler-included build.',
-          vm
-        )
-      } else {
-        warn(
-          'Failed to mount component: template or render function not defined.',
-          vm
-        )
-      }
-    }
+  // 如果没有 render 函数则表示需要进行模板解析
+  if (!vm.$options.render) { // $option = option
+    vm.$options.render = createEmptyVNode // 创建一个空的 node 节点
   }
   callHook(vm, 'beforeMount')
 
@@ -196,6 +180,7 @@ export function mountComponent (
   // component's mounted hook), which relies on vm._watcher being already defined
   new Watcher(vm, updateComponent, noop, {
     before () {
+      // 如果组件被实例化过
       if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate')
       }

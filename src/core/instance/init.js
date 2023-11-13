@@ -12,47 +12,46 @@ import { extend, mergeOptions, formatComponentName } from '../util/index'
 
 let uid = 0
 
+/**
+ * Vue 初始化过程
+ * 1. 合并配置项
+ * 2. 生命周期初始化
+ */
 export function initMixin (Vue: Class<Component>) {
+  // 在原型上挂在 init 方法
   Vue.prototype._init = function (options?: Object) {
     const vm: Component = this
-    // a uid
-    vm._uid = uid++
+
+    // 组件标识自增长的 id
+    vm._uid = uid++ 
 
     let startTag, endTag
-    /* istanbul ignore if */
-    if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
-      startTag = `vue-perf-start:${vm._uid}`
-      endTag = `vue-perf-end:${vm._uid}`
-      mark(startTag)
-    }
 
-    // a flag to avoid this being observed
+    // 存在_isVue 标识 表示这是 Vue 创建出来的实例
     vm._isVue = true
-    // merge options
+
+
+
+    // 如果配置项存在并且是一个组件
     if (options && options._isComponent) {
       // optimize internal component instantiation
       // since dynamic options merging is pretty slow, and none of the
       // internal component options needs special treatment.
-      initInternalComponent(vm, options)
-    } else {
+      initInternalComponent(vm, options) // 初始化内部组件
+    } else { // 如果不是组件则将配置项全部融入到 vue 实例上
       vm.$options = mergeOptions(
         resolveConstructorOptions(vm.constructor),
         options || {},
         vm
       )
     }
-    /* istanbul ignore else */
-    if (process.env.NODE_ENV !== 'production') {
-      initProxy(vm)
-    } else {
-      vm._renderProxy = vm
-    }
+
     // expose real self
     vm._self = vm
     initLifecycle(vm)
     initEvents(vm)
     initRender(vm)
-    callHook(vm, 'beforeCreate')
+    callHook(vm, 'beforeCreate') // 挂载生命周期钩子
     initInjections(vm) // resolve injections before data/props
     initState(vm)
     initProvide(vm) // resolve provide after data/props
@@ -66,6 +65,7 @@ export function initMixin (Vue: Class<Component>) {
     }
 
     if (vm.$options.el) {
+      // 真实 DOM 与实例关联
       vm.$mount(vm.$options.el)
     }
   }

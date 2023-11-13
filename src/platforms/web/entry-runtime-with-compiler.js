@@ -21,47 +21,24 @@ Vue.prototype.$mount = function (
 ): Component {
   el = el && query(el)
 
-  /* istanbul ignore if */
-  if (el === document.body || el === document.documentElement) {
-    process.env.NODE_ENV !== 'production' && warn(
-      `Do not mount Vue to <html> or <body> - mount to normal elements instead.`
-    )
-    return this
-  }
-
   const options = this.$options
-  // resolve template/el and convert to render function
+  // 如果没有 render 函数则尝试从 template 选项中获取
   if (!options.render) {
     let template = options.template
+
+    // 模板解析过程
     if (template) {
-      if (typeof template === 'string') {
+      if (typeof template === 'string') { // template 选项是字符串
         if (template.charAt(0) === '#') {
           template = idToTemplate(template)
-          /* istanbul ignore if */
-          if (process.env.NODE_ENV !== 'production' && !template) {
-            warn(
-              `Template element not found or is empty: ${options.template}`,
-              this
-            )
-          }
         }
-      } else if (template.nodeType) {
+      } else if (template.nodeType) { // template 选项是 DOM 元素
         template = template.innerHTML
-      } else {
-        if (process.env.NODE_ENV !== 'production') {
-          warn('invalid template option:' + template, this)
-        }
-        return this
-      }
-    } else if (el) {
-      template = getOuterHTML(el)
+      } 
+    } else if (el) { // template 选项不存在，则尝试从 el 元素中获取
+      template = getOuterHTML(el) // 
     }
     if (template) {
-      /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
-        mark('compile')
-      }
-
       const { render, staticRenderFns } = compileToFunctions(template, {
         outputSourceRange: process.env.NODE_ENV !== 'production',
         shouldDecodeNewlines,
@@ -71,12 +48,6 @@ Vue.prototype.$mount = function (
       }, this)
       options.render = render
       options.staticRenderFns = staticRenderFns
-
-      /* istanbul ignore if */
-      if (process.env.NODE_ENV !== 'production' && config.performance && mark) {
-        mark('compile end')
-        measure(`vue ${this._name} compile`, 'compile', 'compile end')
-      }
     }
   }
   return mount.call(this, el, hydrating)
@@ -87,6 +58,8 @@ Vue.prototype.$mount = function (
  * of SVG elements in IE as well.
  */
 function getOuterHTML (el: Element): string {
+  // outerHTML 可以获取一个 html 元素的完整的 html 代码
+  // 包括标签属性，子元素，文本节点，注释等
   if (el.outerHTML) {
     return el.outerHTML
   } else {
