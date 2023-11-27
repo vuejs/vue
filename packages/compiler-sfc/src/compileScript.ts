@@ -299,6 +299,9 @@ export function compileScript(
   }
 
   function processDefineProps(node: Node, declId?: LVal): boolean {
+    if (isSequenceOf(node, DEFINE_PROPS)) {
+      return processDefineProps(getSequenceResult(node) as Node, declId)
+    }
     if (!isCallOf(node, DEFINE_PROPS)) {
       return false
     }
@@ -381,6 +384,9 @@ export function compileScript(
   }
 
   function processDefineEmits(node: Node, declId?: LVal): boolean {
+    if (isSequenceOf(node, DEFINE_EMITS)) {
+      return processDefineEmits(getSequenceResult(node) as Node, declId)
+    }
     if (!isCallOf(node, DEFINE_EMITS)) {
       return false
     }
@@ -904,9 +910,28 @@ export function compileScript(
             processDefineProps(decl.init, decl.id) ||
             processWithDefaults(decl.init, decl.id)
           const isDefineEmits = processDefineEmits(decl.init, decl.id)
+
+          const isSequenceDefineProps = isSequenceOf(decl.init, DEFINE_PROPS)
+          const isSequenceDefineEmits = isSequenceOf(decl.init, DEFINE_EMITS)
+
           if (isDefineProps || isDefineEmits) {
             if (left === 1) {
-              s.remove(node.start! + startOffset, node.end! + startOffset)
+              if (isSequenceDefineProps || isSequenceDefineEmits) {
+                const sequenceLast = getSequenceResult(decl.init) as Node
+                const sequenceContentLeft = s
+                  .slice(
+                    decl.init.start! + startOffset,
+                    sequenceLast.start! + startOffset
+                  )
+                  .replace(/,\s+$/, '')
+                s.overwrite(
+                  node.start! + startOffset,
+                  node.end! + startOffset,
+                  sequenceContentLeft
+                )
+              } else {
+                s.remove(node.start! + startOffset, node.end! + startOffset)
+              }
             } else {
               let start = decl.start! + startOffset
               let end = decl.end! + startOffset
@@ -917,7 +942,24 @@ export function compileScript(
                 // not first one, locate the end of the prev
                 start = node.declarations[i - 1].end! + startOffset
               }
-              s.remove(start, end)
+              if (isSequenceDefineProps || isSequenceDefineEmits) {
+                const sequenceLast = getSequenceResult(decl.init) as Node
+                const sequenceContentLeft = s
+                  .slice(
+                    decl.init.start! + startOffset,
+                    sequenceLast.start! + startOffset
+                  )
+                  .replace(/,\s+$/, '')
+                if (i < total - 1) {
+                  // not last one
+                  s.overwrite(start, end, `_ = (${sequenceContentLeft}),`)
+                } else {
+                  // last one
+                  s.overwrite(start, end, `, _ = (${sequenceContentLeft})`)
+                }
+              } else {
+                s.remove(start, end)
+              }
               left--
             }
           }
@@ -1625,6 +1667,36 @@ function isCallOf(
       ? node.callee.name === test
       : test(node.callee.name))
   )
+}
+
+function isSequenceOf(
+  node: Node | null | undefined,
+  test: string | ((id: string) => boolean)
+): boolean {
+  if (
+    node &&
+    node.type === 'SequenceExpression' &&
+    node.expressions &&
+    node.expressions.length
+  ) {
+    const lastExpression = node.expressions[node.expressions.length - 1]
+    return isCallOf(lastExpression, test)
+  }
+  return false
+}
+
+function getSequenceResult(
+  node: Node | null | undefined
+): Node | null | undefined {
+  if (
+    node &&
+    node.type === 'SequenceExpression' &&
+    node.expressions &&
+    node.expressions.length
+  ) {
+    return node.expressions[node.expressions.length - 1]
+  }
+  return undefined
 }
 
 function canNeverBeRef(node: Node, userReactiveImport: string): boolean {
