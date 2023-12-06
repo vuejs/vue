@@ -185,8 +185,11 @@ function doWatch(
   }
 
   const instance = currentInstance
-  const call = (fn: Function, type: string, args: any[] | null = null) =>
-    invokeWithErrorHandling(fn, null, args, instance, type)
+  const call = (fn: Function, type: string, args: any[] | null = null) => {
+    const res = invokeWithErrorHandling(fn, null, args, instance, type)
+    if (deep && res && res.__ob__) res.__ob__.dep.depend()
+    return res
+  }
 
   let getter: () => any
   let forceTrigger = false
@@ -209,6 +212,7 @@ function doWatch(
         if (isRef(s)) {
           return s.value
         } else if (isReactive(s)) {
+          s.__ob__.dep.depend()
           return traverse(s)
         } else if (isFunction(s)) {
           return call(s, WATCHER_GETTER)
