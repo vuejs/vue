@@ -42,8 +42,14 @@ export function rewriteDefault(
   }).program.body
   ast.forEach(node => {
     if (node.type === 'ExportDefaultDeclaration') {
-      if (node.declaration.type === 'ClassDeclaration') {
-        s.overwrite(node.start!, node.declaration.id.start!, `class `)
+      if (node.declaration.type === 'ClassDeclaration' && node.declaration.id) {
+        let start: number =
+          node.declaration.decorators && node.declaration.decorators.length > 0
+            ? node.declaration.decorators[
+                node.declaration.decorators.length - 1
+              ].end!
+            : node.start!
+        s.overwrite(start, node.declaration.id.start!, ` class `)
         s.append(`\nconst ${as} = ${node.declaration.id.name}`)
       } else {
         s.overwrite(node.start!, node.declaration.start!, `const ${as} = `)

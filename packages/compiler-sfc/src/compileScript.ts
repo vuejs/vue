@@ -1575,7 +1575,7 @@ function extractRuntimeEmits(
 }
 
 function extractEventNames(
-  eventName: Identifier | RestElement,
+  eventName: ArrayPattern | Identifier | ObjectPattern | RestElement,
   emits: Set<string>
 ) {
   if (

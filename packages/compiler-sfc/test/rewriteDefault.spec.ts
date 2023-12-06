@@ -190,7 +190,7 @@ describe('compiler sfc: rewriteDefault', () => {
     ).toMatchInlineSnapshot(`
       "/*
       export default class Foo {}*/
-      class Bar {}
+       class Bar {}
       const script = Bar"
     `)
   })
@@ -206,7 +206,10 @@ describe('compiler sfc: rewriteDefault', () => {
 
   test('@Component\nexport default class w/ comments', async () => {
     expect(
-      rewriteDefault(`// export default\n@Component\nexport default class Foo {}`, 'script')
+      rewriteDefault(
+        `// export default\n@Component\nexport default class Foo {}`,
+        'script'
+      )
     ).toMatchInlineSnapshot(`
       "// export default
       @Component
@@ -231,15 +234,78 @@ describe('compiler sfc: rewriteDefault', () => {
   test('@Component\nexport default class w/ comments 3', async () => {
     expect(
       rewriteDefault(
-        `/*\n@Component\nexport default class Foo {}*/\n` + `export default class Bar {}`,
+        `/*\n@Component\nexport default class Foo {}*/\n` +
+          `export default class Bar {}`,
         'script'
       )
     ).toMatchInlineSnapshot(`
       "/*
       @Component
       export default class Foo {}*/
-      class Bar {}
+       class Bar {}
       const script = Bar"
+    `)
+  })
+
+  // #13060
+  test('@Component\nexport default class w/ comments 4', async () => {
+    expect(
+      rewriteDefault(
+        `@Component
+        export default class App extends Vue {
+          /* default <- This word means my component is not built correctly */
+          @Prop({ type: String, required: true })
+          protected someString: string;
+        }`,
+        'script'
+      )
+    ).toMatchInlineSnapshot(`
+      "@Component
+              class App extends Vue {
+                /* default <- This word means my component is not built correctly */
+                @Prop({ type: String, required: true })
+                protected someString: string;
+              }
+      const script = App"
+    `)
+  })
+
+  // #12892
+  test('@Component\nexport default class w/ comments 5', async () => {
+    expect(
+      rewriteDefault(
+        `@Component({})
+        export default class HelloWorld extends Vue {
+          test = "";
+          mounted() {
+            console.log("mounted!");
+            this.test = "Hallo Welt!";
+          }
+          exportieren(): void {
+            // do nothing
+          }
+          defaultWert(): void {
+            // do nothing
+          }
+        }`,
+        'script',
+        ['typescript', 'decorators-legacy']
+      )
+    ).toMatchInlineSnapshot(`
+      "@Component({}) class HelloWorld extends Vue {
+                test = "";
+                mounted() {
+                  console.log("mounted!");
+                  this.test = "Hallo Welt!";
+                }
+                exportieren(): void {
+                  // do nothing
+                }
+                defaultWert(): void {
+                  // do nothing
+                }
+              }
+      const script = HelloWorld"
     `)
   })
 })
