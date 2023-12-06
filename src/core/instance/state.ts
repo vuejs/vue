@@ -110,10 +110,10 @@ function initProps(vm: Component, propsOptions: Object) {
             )
           }
         },
-        true
+        true /* shallow */
       )
     } else {
-      defineReactive(props, key, value, undefined, true)
+      defineReactive(props, key, value, undefined, true /* shallow */)
     }
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
