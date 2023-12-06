@@ -40,9 +40,7 @@ export function isRef(r: any): r is Ref {
   return !!(r && (r as Ref).__v_isRef === true)
 }
 
-export function ref<T extends object>(
-  value: T
-): [T] extends [Ref] ? T : Ref<UnwrapRef<T>>
+export function ref<T extends Ref>(value: T): T
 export function ref<T>(value: T): Ref<UnwrapRef<T>>
 export function ref<T = any>(): Ref<T | undefined>
 export function ref(value?: unknown) {
@@ -53,9 +51,8 @@ declare const ShallowRefMarker: unique symbol
 
 export type ShallowRef<T = any> = Ref<T> & { [ShallowRefMarker]?: true }
 
-export function shallowRef<T extends object>(
-  value: T
-): T extends Ref ? T : ShallowRef<T>
+export function shallowRef<T>(value: T | Ref<T>): Ref<T> | ShallowRef<T>
+export function shallowRef<T extends Ref>(value: T): T
 export function shallowRef<T>(value: T): ShallowRef<T>
 export function shallowRef<T = any>(): ShallowRef<T | undefined>
 export function shallowRef(value?: unknown) {
