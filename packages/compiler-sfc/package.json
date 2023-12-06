@@ -8,12 +8,12 @@
     "dist"
   ],
   "dependencies": {
-    "@babel/parser": "^7.18.4",
+    "@babel/parser": "^7.23.5",
     "postcss": "^8.4.14",
     "source-map": "^0.6.1"
   },
   "devDependencies": {
-    "@babel/types": "^7.19.4",
+    "@babel/types": "^7.23.5",
     "@types/estree": "^0.0.48",
     "@types/hash-sum": "^1.0.0",
     "@types/lru-cache": "^5.1.1",

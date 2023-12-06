@@ -88,14 +88,14 @@
     "csstype": "^3.1.0"
   },
   "devDependencies": {
-    "@babel/parser": "^7.18.4",
+    "@babel/parser": "^7.23.5",
     "@microsoft/api-extractor": "^7.25.0",
     "@rollup/plugin-alias": "^3.1.9",
     "@rollup/plugin-commonjs": "^22.0.0",
     "@rollup/plugin-node-resolve": "^13.3.0",
     "@rollup/plugin-replace": "^4.0.0",
     "@types/he": "^1.1.2",
-    "@types/node": "^17.0.41",
+    "@types/node": "^20.10.3",
     "chalk": "^4.1.2",
     "conventional-changelog-cli": "^2.2.2",
     "cross-spawn": "^7.0.3",
