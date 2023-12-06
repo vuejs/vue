@@ -36,4 +36,19 @@ describe('vdom style module', () => {
     expect(elm.style.fontSize).toBe('')
     expect(elm.style.display).toBe('block')
   })
+
+  it('border related style should update correctly', () => {
+    const vnode1 = new VNode('p', {
+      style: { border: '10px solid red', 'border-bottom': '10px solid blue' }
+    })
+    const vnode2 = new VNode('p', {
+      style: {
+        'border-right': '10px solid red',
+        'border-bottom': '10px solid blue'
+      }
+    })
+    patch(null, vnode1)
+    const elm = patch(vnode1, vnode2)
+    expect(elm.style.borderBottom).toBe('10px solid blue')
+  })
 })
