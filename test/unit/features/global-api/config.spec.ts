@@ -116,7 +116,7 @@ describe('Global config', () => {
       expect(vm.computed).toBe('1,2,3')
       expect(vm.data).toBe('1,2,3')
 
-      vm.prop.push(4, 5)
+      vm.prop = [...vm.prop, 4, 5]
       expect(vm.computed).toBe('1,2,3,4,5')
       expect(vm.data).toBe('1,2,3,4,5')
       Vue.config.async = true

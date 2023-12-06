@@ -31,21 +31,21 @@ it('should work', () => {
       var _vm = this,
         _c = _vm._self._c
       return _c(
-        \\"div\\",
-        { attrs: { id: \\"app\\" } },
+        "div",
+        { attrs: { id: "app" } },
         [
-          _c(\\"div\\", { style: { color: _vm.color } }, [_vm._v(_vm._s(_vm.foo))]),
-          _vm._v(\\" \\"),
+          _c("div", { style: { color: _vm.color } }, [_vm._v(_vm._s(_vm.foo))]),
+          _vm._v(" "),
           _vm._l(_vm.list, function (i) {
-            return _c(\\"p\\", [_vm._v(_vm._s(i))])
+            return _c("p", [_vm._v(_vm._s(i))])
           }),
-          _vm._v(\\" \\"),
-          _c(\\"foo\\", {
+          _vm._v(" "),
+          _c("foo", {
             inlineTemplate: {
               render: function () {
                 var _vm = this,
                   _c = _vm._self._c
-                return _c(\\"div\\", [_vm._v(_vm._s(_vm.bar))])
+                return _c("div", [_vm._v(_vm._s(_vm.bar))])
               },
               staticRenderFns: [],
             },
@@ -81,10 +81,10 @@ it('setup bindings', () => {
         _c = _vm._self._c,
         _setup = _vm._self._setupProxy
       return _c(
-        \\"div\\",
+        "div",
         {
           on: {
-            click: function (\$event) {
+            click: function ($event) {
               _setup.count++
             },
           },

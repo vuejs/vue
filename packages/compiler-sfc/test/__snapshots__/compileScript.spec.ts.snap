@@ -93,7 +93,7 @@ exports[`SFC compile <script setup> > <script> and <script setup> co-usage > scr
 "import { defineComponent as _defineComponent } from 'vue'
 
       const __default__ = {
-        name: \\"test\\"
+        name: "test"
       }
       
 import { x } from './x'
@@ -553,7 +553,7 @@ exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (exp
 export interface Emits { (e: 'foo' | 'bar'): void }
       
 export default /*#__PURE__*/_defineComponent({
-  emits: [\\"foo\\", \\"bar\\"],
+  emits: ["foo", "bar"],
   setup(__props, { emit }: { emit: ({ (e: 'foo' | 'bar'): void }), expose: any, slots: any, attrs: any }) {
 
       
@@ -569,7 +569,7 @@ exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (exp
 export type Emits = { (e: 'foo' | 'bar'): void }
       
 export default /*#__PURE__*/_defineComponent({
-  emits: [\\"foo\\", \\"bar\\"],
+  emits: ["foo", "bar"],
   setup(__props, { emit }: { emit: ({ (e: 'foo' | 'bar'): void }), expose: any, slots: any, attrs: any }) {
 
       
@@ -601,7 +601,7 @@ exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (int
 interface Emits { (e: 'foo' | 'bar'): void }
       
 export default /*#__PURE__*/_defineComponent({
-  emits: [\\"foo\\", \\"bar\\"],
+  emits: ["foo", "bar"],
   setup(__props, { emit }: { emit: ({ (e: 'foo' | 'bar'): void }), expose: any, slots: any, attrs: any }) {
 
       
@@ -617,7 +617,7 @@ exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (ref
 export type Emits = (e: 'foo' | 'bar') => void
       
 export default /*#__PURE__*/_defineComponent({
-  emits: [\\"foo\\", \\"bar\\"],
+  emits: ["foo", "bar"],
   setup(__props, { emit }: { emit: ((e: 'foo' | 'bar') => void), expose: any, slots: any, attrs: any }) {
 
       
@@ -633,7 +633,7 @@ exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (ref
 type Emits = (e: 'foo' | 'bar') => void
       
 export default /*#__PURE__*/_defineComponent({
-  emits: [\\"foo\\", \\"bar\\"],
+  emits: ["foo", "bar"],
   setup(__props, { emit }: { emit: ((e: 'foo' | 'bar') => void), expose: any, slots: any, attrs: any }) {
 
       
@@ -649,7 +649,7 @@ exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (typ
 type Emits = { (e: 'foo' | 'bar'): void }
       
 export default /*#__PURE__*/_defineComponent({
-  emits: [\\"foo\\", \\"bar\\"],
+  emits: ["foo", "bar"],
   setup(__props, { emit }: { emit: ({ (e: 'foo' | 'bar'): void }), expose: any, slots: any, attrs: any }) {
 
       
@@ -664,7 +664,7 @@ exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type (typ
 "import { defineComponent as _defineComponent } from 'vue'
 
 export default /*#__PURE__*/_defineComponent({
-  emits: [\\"foo\\", \\"bar\\", \\"baz\\"],
+  emits: ["foo", "bar", "baz"],
   setup(__props, { emit }: { emit: ({(e: 'foo' | 'bar'): void; (e: 'baz', id: number): void;}), expose: any, slots: any, attrs: any }) {
 
       
@@ -679,7 +679,7 @@ exports[`SFC compile <script setup> > with TypeScript > defineEmits w/ type 1`] 
 "import { defineComponent as _defineComponent } from 'vue'
 
 export default /*#__PURE__*/_defineComponent({
-  emits: [\\"foo\\", \\"bar\\"],
+  emits: ["foo", "bar"],
   setup(__props, { emit }: { emit: ((e: 'foo' | 'bar') => void), expose: any, slots: any, attrs: any }) {
 
       
@@ -894,9 +894,9 @@ exports[`SFC compile <script setup> > with TypeScript > runtime Enum in normal s
 "import { defineComponent as _defineComponent } from 'vue'
 enum Foo { A = 123 }
         
-          export enum D { D = \\"D\\" }
-          const enum C { C = \\"C\\" }
-          enum B { B = \\"B\\" }
+          export enum D { D = "D" }
+          const enum C { C = "C" }
+          enum B { B = "B" }
         
 export default /*#__PURE__*/_defineComponent({
   setup(__props) {
