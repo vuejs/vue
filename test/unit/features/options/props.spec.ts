@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import { hasSymbol } from 'core/util/env'
 import testObjectOption from '../../../helpers/test-object-option'
+import { ref } from 'v3'
 
 describe('Options props', () => {
   testObjectOption('props')
@@ -592,5 +593,22 @@ describe('Options props', () => {
     expect(
       'Invalid prop type: "String" is not a constructor'
     ).toHaveBeenWarned()
+  })
+
+  // #12930
+  it('should not unwrap prop values that are raw refs', () => {
+    let val
+    const Comp = {
+      props: ['msg'],
+      created() {
+        val = this.msg
+      },
+      render() {}
+    }
+    const r = ref()
+    new Vue({
+      render: h => h(Comp, { props: { msg: r }})
+    }).$mount()
+    expect(val).toBe(r)
   })
 })

@@ -95,19 +95,25 @@ function initProps(vm: Component, propsOptions: Object) {
           vm
         )
       }
-      defineReactive(props, key, value, () => {
-        if (!isRoot && !isUpdatingChildComponent) {
-          warn(
-            `Avoid mutating a prop directly since the value will be ` +
-              `overwritten whenever the parent component re-renders. ` +
-              `Instead, use a data or computed property based on the prop's ` +
-              `value. Prop being mutated: "${key}"`,
-            vm
-          )
-        }
-      })
+      defineReactive(
+        props,
+        key,
+        value,
+        () => {
+          if (!isRoot && !isUpdatingChildComponent) {
+            warn(
+              `Avoid mutating a prop directly since the value will be ` +
+                `overwritten whenever the parent component re-renders. ` +
+                `Instead, use a data or computed property based on the prop's ` +
+                `value. Prop being mutated: "${key}"`,
+              vm
+            )
+          }
+        },
+        true
+      )
     } else {
-      defineReactive(props, key, value)
+      defineReactive(props, key, value, undefined, true)
     }
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
