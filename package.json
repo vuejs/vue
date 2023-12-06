@@ -18,19 +18,20 @@
   ],
   "exports": {
     ".": {
+      "types": "./types/index.d.ts",
       "import": {
         "node": "./dist/vue.runtime.mjs",
         "default": "./dist/vue.runtime.esm.js"
       },
-      "require": "./dist/vue.runtime.common.js",
-      "types": "./types/index.d.ts"
+      "require": "./dist/vue.runtime.common.js"
     },
     "./compiler-sfc": {
+      "types": "./compiler-sfc/index.d.ts",
       "import": "./compiler-sfc/index.mjs",
       "require": "./compiler-sfc/index.js"
     },
     "./dist/*": "./dist/*",
-    "./types/*": "./types/*",
+    "./types/*": ["./types/*.d.ts", "./types/*"],
     "./package.json": "./package.json"
   },
   "sideEffects": false,
