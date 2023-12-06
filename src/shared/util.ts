@@ -90,8 +90,16 @@ export function toString(val: any): string {
   return val == null
     ? ''
     : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
-    ? JSON.stringify(val, null, 2)
+    ? JSON.stringify(val, replacer, 2)
     : String(val)
+}
+
+function replacer(_key: string, val: any): any {
+  // avoid circular deps from v3
+  if (val && val.__v_isRef) {
+    return val.value
+  }
+  return val
 }
 
 /**
