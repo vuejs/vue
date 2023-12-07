@@ -1801,7 +1801,7 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor, isTS: boolean) {
       }
       for (let i = 0; i < attrs.length; i++) {
         const { name, value } = attrs[i]
-        if (dirRE.test(name) || name === 'ref') {
+        if (dirRE.test(name)) {
           const baseName = onRE.test(name)
             ? 'on'
             : slotRE.test(name)
@@ -1815,6 +1815,8 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor, isTS: boolean) {
           if (value) {
             code += `,${processExp(value, isTS, baseName)}`
           }
+        } else if (name === 'ref') {
+          code += `,${value}`
         }
       }
     },
