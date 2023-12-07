@@ -1818,6 +1818,8 @@ function resolveTemplateUsageCheckString(sfc: SFCDescriptor, isTS: boolean) {
           if (value) {
             code += `,${processExp(value, isTS, baseName)}`
           }
+        } else if (name === 'ref') {
+          code += `,${value}`
         }
       }
     },

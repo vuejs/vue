@@ -398,6 +398,19 @@ defineExpose({ foo: 123 })
       assertCode(content)
     })
 
+    test('imported ref as template ref', () => {
+      const { content } = compile(`
+        <script setup lang="ts">
+        import { aref } from './x'
+        </script>
+        <template>
+          <div ref="aref"></div>
+        </template>
+        `)
+      expect(content).toMatch(`return { aref }`)
+      assertCode(content)
+    })
+
     test('vue interpolations', () => {
       const { content } = compile(`
       <script setup lang="ts">

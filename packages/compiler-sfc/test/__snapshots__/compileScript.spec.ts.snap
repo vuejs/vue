@@ -364,6 +364,20 @@ return { vMyDir }
 })"
 `;
 
+exports[`SFC compile <script setup> > dev mode import usage check > imported ref as template ref 1`] = `
+"import { defineComponent as _defineComponent } from 'vue'
+import { aref } from './x'
+        
+export default /*#__PURE__*/_defineComponent({
+  setup(__props) {
+
+        
+return { aref }
+}
+
+})"
+`;
+
 exports[`SFC compile <script setup> > dev mode import usage check > js template string interpolations 1`] = `
 "import { defineComponent as _defineComponent } from 'vue'
 import { VAR, VAR2, VAR3 } from './x'
