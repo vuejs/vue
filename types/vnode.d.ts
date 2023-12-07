@@ -22,6 +22,7 @@ type ScopedSlotReturnValue =
   | VNode
   | string
   | boolean
+  | number
   | null
   | undefined
   | ScopedSlotReturnArray
@@ -37,6 +38,7 @@ export type VNodeChildren =
   | [ScopedSlot]
   | string
   | boolean
+  | number
   | null
   | undefined
 export interface VNodeChildrenArrayContents
