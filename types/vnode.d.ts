@@ -22,6 +22,7 @@ type ScopedSlotReturnValue =
   | VNode
   | string
   | boolean
+  | number
   | null
   | undefined
   | ScopedSlotReturnArray
@@ -87,7 +88,7 @@ export interface VNodeData {
   staticClass?: string
   class?: any
   staticStyle?: { [key: string]: any }
-  style?: StyleValue | number;
+  style?: StyleValue;
   props?: { [key: string]: any }
   attrs?: { [key: string]: any }
   domProps?: { [key: string]: any }
