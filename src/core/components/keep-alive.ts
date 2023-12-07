@@ -33,10 +33,15 @@ function matches(
 }
 
 function pruneCache(
-  keepAliveInstance: { cache: CacheEntryMap; keys: string[]; _vnode: VNode },
+  keepAliveInstance: {
+    cache: CacheEntryMap
+    keys: string[]
+    _vnode: VNode
+    $vnode: VNode
+  },
   filter: Function
 ) {
-  const { cache, keys, _vnode } = keepAliveInstance
+  const { cache, keys, _vnode, $vnode } = keepAliveInstance
   for (const key in cache) {
     const entry = cache[key]
     if (entry) {
@@ -46,6 +51,7 @@ function pruneCache(
       }
     }
   }
+  $vnode.componentOptions!.children = undefined
 }
 
 function pruneCacheEntry(

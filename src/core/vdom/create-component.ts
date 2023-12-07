@@ -62,8 +62,6 @@ const componentVNodeHooks = {
       vnode, // new parent vnode
       options.children // new children
     )
-    // #12187 unset children reference after use to avoid memory leak
-    options.children = undefined
   },
 
   insert(vnode: MountedComponentVNode) {
