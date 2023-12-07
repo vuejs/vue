@@ -71,3 +71,5 @@ export {
   FunctionDirective,
   Directive
 } from './v3-directive'
+
+export * from './built-in-components'
