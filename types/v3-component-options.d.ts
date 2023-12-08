@@ -2,7 +2,7 @@ import { Vue } from './vue'
 import { VNode } from './vnode'
 import { ComponentOptions as Vue2ComponentOptions } from './options'
 import { EmitsOptions, SetupContext } from './v3-setup-context'
-import { Data, LooseRequired, UnionToIntersection } from './common'
+import { Data, Equal, LooseRequired, UnionToIntersection } from './common'
 import {
   ComponentPropsOptions,
   ExtractDefaultPropTypes,
@@ -37,6 +37,9 @@ export interface WritableComputedOptions<T> {
   set: ComputedSetter<T>
 }
 
+// Whether the attrs option is not defined
+export type noAttrsDefine<T> = Equal<keyof T, string>
+
 export type ComputedOptions = Record<
   string,
   ComputedGetter<any> | WritableComputedOptions<any>
@@ -49,11 +52,12 @@ export interface MethodOptions {
 export type SetupFunction<
   Props,
   RawBindings = {},
-  Emits extends EmitsOptions = {}
+  Emits extends EmitsOptions = {},
+  Attrs extends AttrsType = Record<string, unknown>
 > = (
   this: void,
   props: Readonly<Props>,
-  ctx: SetupContext<Emits>
+  ctx: SetupContext<Emits, Attrs>
 ) => RawBindings | (() => VNode | null) | void
 
 type ExtractOptionProp<T> = T extends ComponentOptionsBase<
@@ -82,7 +86,8 @@ export interface ComponentOptionsBase<
   Extends extends ComponentOptionsMixin,
   Emits extends EmitsOptions,
   EmitNames extends string = string,
-  Defaults = {}
+  Defaults = {},
+  Attrs extends AttrsType = Record<string, unknown>
 > extends Omit<
       Vue2ComponentOptions<Vue, D, M, C, Props>,
       'data' | 'computed' | 'methods' | 'setup' | 'props' | 'mixins' | 'extends'
@@ -101,6 +106,7 @@ export interface ComponentOptionsBase<
   mixins?: Mixin[]
   extends?: Extends
   emits?: (Emits | EmitNames[]) & ThisType<void>
+  attrs?: Attrs
   setup?: SetupFunction<
     Readonly<
       LooseRequired<
@@ -110,7 +116,8 @@ export interface ComponentOptionsBase<
       >
     >,
     RawBindings,
-    Emits
+    Emits,
+    Attrs
   >
 
   __defaults?: Defaults
@@ -147,6 +154,7 @@ export type ComponentOptionsWithProps<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
+  Attrs extends AttrsType = Record<string, unknown>,
   Props = ExtractPropTypes<PropsOptions>,
   Defaults = ExtractDefaultPropTypes<PropsOptions>
 > = ComponentOptionsBase<
@@ -159,7 +167,8 @@ export type ComponentOptionsWithProps<
   Extends,
   Emits,
   EmitsNames,
-  Defaults
+  Defaults,
+  Attrs
 > & {
   props?: PropsOptions
 } & ThisType<
@@ -171,7 +180,8 @@ export type ComponentOptionsWithProps<
       M,
       Mixin,
       Extends,
-      Emits
+      Emits,
+      Attrs
     >
   >
 
@@ -185,6 +195,7 @@ export type ComponentOptionsWithArrayProps<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
+  Attrs extends AttrsType = Record<string, unknown>,
   Props = Readonly<{ [key in PropNames]?: any }>
 > = ComponentOptionsBase<
   Props,
@@ -196,7 +207,8 @@ export type ComponentOptionsWithArrayProps<
   Extends,
   Emits,
   EmitsNames,
-  {}
+  {},
+  Attrs
 > & {
   props?: PropNames[]
 } & ThisType<
@@ -208,7 +220,8 @@ export type ComponentOptionsWithArrayProps<
       M,
       Mixin,
       Extends,
-      Emits
+      Emits,
+      Attrs
     >
   >
 
@@ -221,7 +234,8 @@ export type ComponentOptionsWithoutProps<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
-  EmitsNames extends string = string
+  EmitsNames extends string = string,
+  Attrs extends AttrsType = Record<string, unknown>
 > = ComponentOptionsBase<
   Props,
   RawBindings,
@@ -232,7 +246,8 @@ export type ComponentOptionsWithoutProps<
   Extends,
   Emits,
   EmitsNames,
-  {}
+  {},
+  Attrs
 > & {
   props?: undefined
 } & ThisType<
@@ -244,9 +259,25 @@ export type ComponentOptionsWithoutProps<
       M,
       Mixin,
       Extends,
-      Emits
+      Emits,
+      Attrs
     >
   >
 
 export type WithLegacyAPI<T, D, C, M, Props> = T &
   Omit<Vue2ComponentOptions<Vue, D, M, C, Props>, keyof T>
+
+
+declare const AttrSymbol: unique symbol
+export type AttrsType<T extends Record<string, any> = Record<string, any>> = {
+  [AttrSymbol]?: T
+}
+
+export type UnwrapAttrsType<
+  Attrs extends AttrsType,
+  T = NonNullable<Attrs[typeof AttrSymbol]>
+> = [keyof Attrs] extends [never]
+  ? Data
+  : Readonly<{
+      [K in keyof T]: T[K]
+    }>

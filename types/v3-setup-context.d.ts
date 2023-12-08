@@ -1,6 +1,7 @@
 import { VNode } from './vnode'
 import { Data, UnionToIntersection } from './common'
 import { Vue } from './vue'
+import { AttrsType, noAttrsDefine, UnwrapAttrsType } from './v3-component-options'
 
 export type Slot = (...args: any[]) => VNode[]
 
@@ -29,8 +30,10 @@ export type EmitFn<
       }[Event]
     >
 
-export interface SetupContext<E extends EmitsOptions = {}> {
-  attrs: Data
+export interface SetupContext<E extends EmitsOptions = {}, Attrs extends AttrsType = Record<string, unknown>> {
+  attrs:  noAttrsDefine<Attrs> extends true
+  ? Data
+  : UnwrapAttrsType<NonNullable<Attrs>>
   /**
    * Equivalent of `this.$listeners`, which is Vue 2 only.
    */

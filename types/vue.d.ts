@@ -20,7 +20,10 @@ import {
 } from './v3-component-public-instance'
 import {
   ExtractComputedReturns,
-  ComponentOptionsMixin
+  ComponentOptionsMixin,
+  UnwrapAttrsType,
+  AttrsType,
+  noAttrsDefine
 } from './v3-component-options'
 import { Directive, ObjectDirective } from './v3-directive'
 
@@ -51,11 +54,12 @@ export interface Vue<
   Props = Record<string, any>,
   Instance = never,
   Options = never,
-  Emit = (event: string, ...args: any[]) => Vue
+  Emit = (event: string, ...args: any[]) => Vue,
+  Attrs extends AttrsType = Record<string, unknown>
 > {
   // properties with different types in defineComponent()
   readonly $data: Data
-  readonly $props: Props
+  readonly $props: noAttrsDefine<Attrs> extends true ? Props :  Props & Omit<UnwrapAttrsType<Attrs>, keyof Props>
   readonly $parent: NeverFallback<Instance, Vue> | null
   readonly $root: NeverFallback<Instance, Vue>
   readonly $children: NeverFallback<Instance, Vue>[]
@@ -78,7 +82,9 @@ export interface Vue<
 
   readonly $ssrContext: any
   readonly $vnode: VNode
-  readonly $attrs: Record<string, string>
+  readonly $attrs: noAttrsDefine<Attrs> extends true
+  ? Record<string, unknown>
+  : Omit<UnwrapAttrsType<Attrs>, keyof Props>
   readonly $listeners: Record<string, Function | Function[]>
 
   $mount(elementOrSelector?: Element | string, hydrating?: boolean): this

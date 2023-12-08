@@ -10,7 +10,10 @@ import {
   ComponentOptionsWithArrayProps,
   ComponentOptionsWithProps,
   ComponentOptionsMixin,
-  ComponentOptionsBase
+  ComponentOptionsBase,
+  AttrsType,
+  noAttrsDefine,
+  UnwrapAttrsType
 } from './v3-component-options'
 import {
   ComponentPublicInstanceConstructor,
@@ -30,6 +33,7 @@ export type DefineComponent<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   E extends EmitsOptions = {},
   EE extends string = string,
+  Attrs extends AttrsType = Record<string, unknown>,
   Props = Readonly<
     PropsOrPropOptions extends ComponentPropsOptions
       ? ExtractPropTypes<PropsOrPropOptions>
@@ -46,6 +50,7 @@ export type DefineComponent<
     Mixin,
     Extends,
     E,
+    Attrs,
     Props,
     Defaults,
     true
@@ -62,7 +67,8 @@ export type DefineComponent<
     Extends,
     E,
     EE,
-    Defaults
+    Defaults,
+    Attrs
   > & {
     props: PropsOrPropOptions
   }
@@ -78,7 +84,8 @@ export function defineComponent<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
-  EmitsNames extends string = string
+  EmitsNames extends string = string,
+  Attrs extends AttrsType = Record<string, unknown>
 >(
   options: { functional?: never } & ComponentOptionsWithoutProps<
     {},
@@ -89,9 +96,10 @@ export function defineComponent<
     Mixin,
     Extends,
     Emits,
-    EmitsNames
+    EmitsNames,
+    Attrs
   >
-): DefineComponent<{}, RawBindings, D, C, M, Mixin, Extends, Emits>
+): DefineComponent<{}, RawBindings, D, C, M, Mixin, Extends, Emits, EmitsNames, Attrs>
 
 /**
  * overload 2: object format with array props declaration
@@ -109,7 +117,8 @@ export function defineComponent<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
-  PropsOptions extends ComponentPropsOptions = ComponentPropsOptions
+  PropsOptions extends ComponentPropsOptions = ComponentPropsOptions,
+  Attrs extends AttrsType = Record<string, unknown>
 >(
   options: { functional?: never } & ComponentOptionsWithArrayProps<
     PropNames,
@@ -120,7 +129,8 @@ export function defineComponent<
     Mixin,
     Extends,
     Emits,
-    EmitsNames
+    EmitsNames,
+    Attrs
   >
 ): DefineComponent<
   Readonly<{ [key in PropNames]?: any }>,
@@ -130,7 +140,9 @@ export function defineComponent<
   M,
   Mixin,
   Extends,
-  Emits
+  Emits,
+  EmitsNames,
+  Attrs
 >
 
 /**
@@ -148,7 +160,8 @@ export function defineComponent<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
-  PropsOptions extends ComponentPropsOptions = ComponentPropsOptions
+  PropsOptions extends ComponentPropsOptions = ComponentPropsOptions,
+  Attrs extends AttrsType = Record<string, unknown>
 >(
   options: HasDefined<Props> extends true
     ? { functional?: never } & ComponentOptionsWithProps<
@@ -161,6 +174,7 @@ export function defineComponent<
         Extends,
         Emits,
         EmitsNames,
+        Attrs,
         Props
       >
     : { functional?: never } & ComponentOptionsWithProps<
@@ -172,30 +186,43 @@ export function defineComponent<
         Mixin,
         Extends,
         Emits,
-        EmitsNames
+        EmitsNames,
+        Attrs
       >
-): DefineComponent<PropsOptions, RawBindings, D, C, M, Mixin, Extends, Emits>
+): DefineComponent<PropsOptions, RawBindings, D, C, M, Mixin, Extends, Emits, EmitsNames, Attrs>
 
 /**
  * overload 4.1: functional component with array props
  */
 export function defineComponent<
   PropNames extends string,
-  Props = Readonly<{ [key in PropNames]?: any }>
+  Props = Readonly<{ [key in PropNames]?: any }>,
+  Attrs extends AttrsType = Record<string, unknown>,
+  // AttrsProps type used for JSX validation of attrs
+  AttrsProps = noAttrsDefine<Attrs> extends true // if attrs is not defined
+  ? {} // no JSX validation of attrs
+  : Omit<UnwrapAttrsType<Attrs>, keyof Props> // exclude props from attrs, for JSX validation
 >(options: {
   functional: true
   props?: PropNames[]
-  render?: (h: CreateElement, context: RenderContext<Props>) => any
-}): DefineComponent<Props>
+  attrs?: Attrs,
+  render?: (h: CreateElement, context: RenderContext<Props, Attrs>) => any
+}): DefineComponent<Props & AttrsProps>
 
 /**
  * overload 4.2: functional component with object props
  */
 export function defineComponent<
   PropsOptions extends ComponentPropsOptions = ComponentPropsOptions,
-  Props = ExtractPropTypes<PropsOptions>
+  Props = ExtractPropTypes<PropsOptions>,
+  Attrs extends AttrsType = Record<string, unknown>,
+  // AttrsProps type used for JSX validation of attrs
+  AttrsProps = noAttrsDefine<Attrs> extends true // if attrs is not defined
+  ? {} // no JSX validation of attrs
+  : Omit<UnwrapAttrsType<Attrs>, keyof Props> // exclude props from attrs, for JSX validation
 >(options: {
   functional: true
   props?: PropsOptions
-  render?: (h: CreateElement, context: RenderContext<Props>) => any
-}): DefineComponent<PropsOptions>
+  attrs?: Attrs,
+  render?: (h: CreateElement, context: RenderContext<Props, Attrs>) => any
+}): DefineComponent<Props & AttrsProps>
