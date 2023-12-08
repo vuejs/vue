@@ -1,6 +1,6 @@
 {
   "name": "vue",
-  "version": "2.7.15",
+  "version": "2.7.16-beta.1",
   "packageManager": "pnpm@8.9.2",
   "description": "Reactive, component-oriented view layer for modern web interfaces.",
   "main": "dist/vue.runtime.common.js",
@@ -31,7 +31,10 @@
       "require": "./compiler-sfc/index.js"
     },
     "./dist/*": "./dist/*",
-    "./types/*": ["./types/*.d.ts", "./types/*"],
+    "./types/*": [
+      "./types/*.d.ts",
+      "./types/*"
+    ],
     "./package.json": "./package.json"
   },
   "sideEffects": false,

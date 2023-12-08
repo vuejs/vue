@@ -1,3 +1,24 @@
+## [2.7.16-beta.1](https://github.com/vuejs/vue/compare/v2.7.15...v2.7.16-beta.1) (2023-12-08)
+
+
+### Bug Fixes
+
+* **compiler-sfc:** check template `ref` usage,  ([#12985](https://github.com/vuejs/vue/issues/12985)) ([83d9535](https://github.com/vuejs/vue/commit/83d95351a9f809311d624fc3398e7f6829b72447)), closes [#12984](https://github.com/vuejs/vue/issues/12984)
+* **compiler-sfc:** fix rewriteDefault edge cases ([25f97a5](https://github.com/vuejs/vue/commit/25f97a5033187372e7b8c591c79336197ee5c833)), closes [#13060](https://github.com/vuejs/vue/issues/13060) [#12892](https://github.com/vuejs/vue/issues/12892) [#12906](https://github.com/vuejs/vue/issues/12906)
+* **keep-alive:** fix keep-alive memory leak ([2632249](https://github.com/vuejs/vue/commit/2632249925e632e56f6dfc8fdbcf682c82e4081b)), closes [#12827](https://github.com/vuejs/vue/issues/12827)
+* **keep-alive:** fix memory leak without breaking transition tests ([e0747f4](https://github.com/vuejs/vue/commit/e0747f40a879b4000a1959d21377b51d1f1ed988))
+* **props:** should not unwrap props that are raw refs ([08382f0](https://github.com/vuejs/vue/commit/08382f008016c3b3b93f84594266f2e191fee91d)), closes [#12930](https://github.com/vuejs/vue/issues/12930)
+* **shallowReactive:** should track value if already reactive when set in shallowReactive ([0ad8e8d](https://github.com/vuejs/vue/commit/0ad8e8d94f3a3bf4429f25850c85a6bbb2b81364))
+* **style:** always set new styles ([f5ef882](https://github.com/vuejs/vue/commit/f5ef882a781b8a62c9ca00e95006d07636567c8e)), closes [#12901](https://github.com/vuejs/vue/issues/12901) [#12946](https://github.com/vuejs/vue/issues/12946)
+* **types:** fix shallowRef's return type  ([#12979](https://github.com/vuejs/vue/issues/12979)) ([a174c29](https://github.com/vuejs/vue/commit/a174c29dab2cf655b06f7870e0ac5a78ef35ec8a)), closes [#12978](https://github.com/vuejs/vue/issues/12978)
+* **types:** fix type augmentation and compiler-sfc types w/moduleResolution: bundler ([#13107](https://github.com/vuejs/vue/issues/13107)) ([de0b97b](https://github.com/vuejs/vue/commit/de0b97b3eadae120eda505b45df2de2115dcb6f0)), closes [#13106](https://github.com/vuejs/vue/issues/13106)
+* **types:** provide types for built-in components ([3650c12](https://github.com/vuejs/vue/commit/3650c12f7d3a20f3155bc1fd2b068e84289e0d33)), closes [#13002](https://github.com/vuejs/vue/issues/13002)
+* **types:** type VNodeChildren should allow type number  ([#13067](https://github.com/vuejs/vue/issues/13067)) ([24fcf69](https://github.com/vuejs/vue/commit/24fcf69624a633d43dfc0aa5fa6b93d11de7fad5)), closes [#12973](https://github.com/vuejs/vue/issues/12973)
+* **utils:** unwrap refs when stringifying values in template ([ae3e4b1](https://github.com/vuejs/vue/commit/ae3e4b1c706b8d61a4a312ca5d23441df021b4b4)), closes [#12884](https://github.com/vuejs/vue/issues/12884) [#12888](https://github.com/vuejs/vue/issues/12888)
+* **watch:** new property addition should trigger deep watcher with getter ([6d857f5](https://github.com/vuejs/vue/commit/6d857f5bee275dc98106e3b2cbc7722f5ec0cfc0)), closes [#12967](https://github.com/vuejs/vue/issues/12967) [#12972](https://github.com/vuejs/vue/issues/12972)
+
+
+
 ## [2.7.15](https://github.com/vuejs/vue/compare/v2.7.14...v2.7.15) (2023-10-23)
 
 
