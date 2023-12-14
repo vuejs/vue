@@ -1,3 +1,13 @@
+## [2.7.16-beta.2](https://github.com/vuejs/vue/compare/v2.7.16-beta.1...v2.7.16-beta.2) (2023-12-14)
+
+
+### Bug Fixes
+
+* account for nested render calls ([db9c566](https://github.com/vuejs/vue/commit/db9c566032da0ec5cd758a3e8525e9733874c1e5)), closes [#13131](https://github.com/vuejs/vue/issues/13131)
+* **types:** export more types for v3 alignment (jsx / component options) ([895669f](https://github.com/vuejs/vue/commit/895669ffa01f8075a326308caa8ad6a5f69a1919)), closes [#13078](https://github.com/vuejs/vue/issues/13078) [#13128](https://github.com/vuejs/vue/issues/13128)
+
+
+
 ## [2.7.16-beta.1](https://github.com/vuejs/vue/compare/v2.7.15...v2.7.16-beta.1) (2023-12-08)
 
 
