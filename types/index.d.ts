@@ -1,6 +1,7 @@
 import { Vue } from './vue'
 import './umd'
 import './jsx'
+export * from './jsx'
 
 export default Vue
 
@@ -49,7 +50,12 @@ export {
   ComputedOptions as ComponentComputedOptions,
   MethodOptions as ComponentMethodOptions,
   ComponentPropsOptions,
-  ComponentCustomOptions
+  ComponentCustomOptions,
+  ComponentOptionsMixin,
+  ComponentOptionsWithoutProps,
+  ComponentOptionsWithArrayProps,
+  ComponentOptionsWithProps,
+  ComponentOptionsBase
 } from './v3-component-options'
 export {
   ComponentInstance,
