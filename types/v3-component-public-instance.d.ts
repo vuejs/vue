@@ -13,7 +13,7 @@ import {
   ComponentOptionsMixin,
   ComponentOptionsBase
 } from './v3-component-options'
-import { EmitFn, EmitsOptions } from './v3-setup-context'
+import { EmitFn, EmitsOptions, EmitsToProps } from './v3-setup-context'
 
 /**
  * Custom properties added to component instances in any way and can be accessed through `this`
@@ -150,7 +150,7 @@ export type ComponentPublicInstance<
   >
 > = Vue3Instance<
   D,
-  P,
+  P & EmitsToProps<E>,
   PublicProps,
   E,
   Defaults,

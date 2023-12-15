@@ -966,6 +966,19 @@ describe('emits', () => {
       }
     }
   })
+
+  // should have `onXXX` props for emits
+  defineComponent({
+    props: {
+      bar: String
+    },
+    emits: {
+      foo: (n: number) => n > 0
+    },
+    setup(props) {
+      expectType<((n: number) => boolean) | undefined>(props.onFoo)
+    }
+  })
 })
 
 // describe('componentOptions setup should be `SetupContext`', () => {
