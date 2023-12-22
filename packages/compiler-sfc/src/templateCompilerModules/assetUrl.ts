@@ -25,7 +25,11 @@ const defaultOptions: AssetURLOptions = {
   source: 'src',
   img: 'src',
   image: ['xlink:href', 'href'],
-  use: ['xlink:href', 'href']
+  use: ['xlink:href', 'href'],
+  object: ['data'],
+  embed: ['src'],
+  track: ['src'],
+  link: ['href'],
 }
 
 export default (
