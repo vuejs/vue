@@ -1,3 +1,12 @@
+## [2.7.16](https://github.com/vuejs/vue/compare/v2.7.16-beta.2...v2.7.16) (2023-12-24)
+
+
+### Bug Fixes
+
+* **lifecycle:** esnure component effect scopes are disconnected ([56ce7f8](https://github.com/vuejs/vue/commit/56ce7f8c573116ed6683149206cf35c987249d42)), closes [#13134](https://github.com/vuejs/vue/issues/13134)
+
+
+
 ## [2.7.16-beta.2](https://github.com/vuejs/vue/compare/v2.7.16-beta.1...v2.7.16-beta.2) (2023-12-14)
 
 
