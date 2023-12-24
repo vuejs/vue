@@ -34,6 +34,9 @@ export function initMixin(Vue: typeof Component) {
     vm.__v_skip = true
     // effect scope
     vm._scope = new EffectScope(true /* detached */)
+    // #13134 edge case where a child component is manually created during the
+    // render of a parent component
+    vm._scope.parent = undefined
     vm._scope._vm = true
     // merge options
     if (options && options._isComponent) {
