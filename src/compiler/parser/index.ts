@@ -183,15 +183,16 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
 
   function trimEndingWhitespace(el) {
     // remove trailing whitespace node
-    if (!inPre) {
-      let lastNode
-      while (
-        (lastNode = el.children[el.children.length - 1]) &&
-        lastNode.type === 3 &&
-        lastNode.text === ' '
-      ) {
-        el.children.pop()
-      }
+    if (inPre) {
+      return
+    }
+    let lastNode
+    while (
+      (lastNode = el.children[el.children.length - 1]) &&
+      lastNode.type === 3 &&
+      lastNode.text === ' '
+    ) {
+      el.children.pop()
     }
   }
 
@@ -368,54 +369,56 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
       } else {
         text = preserveWhitespace ? ' ' : ''
       }
-      if (text) {
-        if (!inPre && whitespaceOption === 'condense') {
-          // condense consecutive whitespaces into single space
-          text = text.replace(whitespaceRE, ' ')
+      if (!text) {
+        return
+      }
+      if (!inPre && whitespaceOption === 'condense') {
+        // condense consecutive whitespaces into single space
+        text = text.replace(whitespaceRE, ' ')
+      }
+      let res
+      let child: ASTNode | undefined
+      if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
+        child = {
+          type: 2,
+          expression: res.expression,
+          tokens: res.tokens,
+          text
         }
-        let res
-        let child: ASTNode | undefined
-        if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
-          child = {
-            type: 2,
-            expression: res.expression,
-            tokens: res.tokens,
-            text
-          }
-        } else if (
-          text !== ' ' ||
-          !children.length ||
-          children[children.length - 1].text !== ' '
-        ) {
-          child = {
-            type: 3,
-            text
-          }
+      } else if (
+        text !== ' ' ||
+        !children.length ||
+        children[children.length - 1].text !== ' '
+      ) {
+        child = {
+          type: 3,
+          text
         }
-        if (child) {
-          if (__DEV__ && options.outputSourceRange) {
-            child.start = start
-            child.end = end
-          }
-          children.push(child)
+      }
+      if (child) {
+        if (__DEV__ && options.outputSourceRange) {
+          child.start = start
+          child.end = end
         }
+        children.push(child)
       }
     },
     comment(text: string, start, end) {
       // adding anything as a sibling to the root node is forbidden
       // comments should still be allowed, but ignored
-      if (currentParent) {
-        const child: ASTText = {
-          type: 3,
-          text,
-          isComment: true
-        }
-        if (__DEV__ && options.outputSourceRange) {
-          child.start = start
-          child.end = end
-        }
-        currentParent.children.push(child)
+      if (!currentParent) {
+        return
       }
+      const child: ASTText = {
+        type: 3,
+        text,
+        isComment: true
+      }
+      if (__DEV__ && options.outputSourceRange) {
+        child.start = start
+        child.end = end
+      }
+      currentParent.children.push(child)
     }
   })
   return root
@@ -469,34 +472,35 @@ export function processElement(element: ASTElement, options: CompilerOptions) {
 
 function processKey(el) {
   const exp = getBindingAttr(el, 'key')
-  if (exp) {
-    if (__DEV__) {
-      if (el.tag === 'template') {
+  if (!exp) {
+    return
+  }
+  if (__DEV__) {
+    if (el.tag === 'template') {
+      warn(
+        `<template> cannot be keyed. Place the key on real elements instead.`,
+        getRawBindingAttr(el, 'key')
+      )
+    }
+    if (el.for) {
+      const iterator = el.iterator2 || el.iterator1
+      const parent = el.parent
+      if (
+        iterator &&
+        iterator === exp &&
+        parent &&
+        parent.tag === 'transition-group'
+      ) {
         warn(
-          `<template> cannot be keyed. Place the key on real elements instead.`,
-          getRawBindingAttr(el, 'key')
+          `Do not use v-for index as key on <transition-group> children, ` +
+            `this is the same as not using keys.`,
+          getRawBindingAttr(el, 'key'),
+          true /* tip */
         )
       }
-      if (el.for) {
-        const iterator = el.iterator2 || el.iterator1
-        const parent = el.parent
-        if (
-          iterator &&
-          iterator === exp &&
-          parent &&
-          parent.tag === 'transition-group'
-        ) {
-          warn(
-            `Do not use v-for index as key on <transition-group> children, ` +
-              `this is the same as not using keys.`,
-            getRawBindingAttr(el, 'key'),
-            true /* tip */
-          )
-        }
-      }
     }
-    el.key = exp
   }
+  el.key = exp
 }
 
 function processRef(el) {
@@ -508,14 +512,15 @@ function processRef(el) {
 }
 
 export function processFor(el: ASTElement) {
-  let exp
-  if ((exp = getAndRemoveAttr(el, 'v-for'))) {
-    const res = parseFor(exp)
-    if (res) {
-      extend(el, res)
-    } else if (__DEV__) {
-      warn(`Invalid v-for expression: ${exp}`, el.rawAttrsMap['v-for'])
-    }
+  const exp = getAndRemoveAttr(el, 'v-for')
+  if (!exp) {
+    return
+  }
+  const res = parseFor(exp)
+  if (res) {
+    extend(el, res)
+  } else if (__DEV__) {
+    warn(`Invalid v-for expression: ${exp}`, el.rawAttrsMap['v-for'])
   }
 }
 
@@ -585,16 +590,14 @@ function findPrevElement(children: Array<any>): ASTElement | void {
   while (i--) {
     if (children[i].type === 1) {
       return children[i]
-    } else {
-      if (__DEV__ && children[i].text !== ' ') {
+    } else if (__DEV__ && children[i].text !== ' ') {
         warn(
           `text "${children[i].text.trim()}" between v-if and v-else(-if) ` +
             `will be ignored.`,
           children[i]
         )
-      }
-      children.pop()
     }
+    children.pop()
   }
 }
 
@@ -747,22 +750,23 @@ function getSlotName(binding) {
 
 // handle <slot/> outlets
 function processSlotOutlet(el) {
-  if (el.tag === 'slot') {
-    el.slotName = getBindingAttr(el, 'name')
-    if (__DEV__ && el.key) {
-      warn(
-        `\`key\` does not work on <slot> because slots are abstract outlets ` +
-          `and can possibly expand into multiple elements. ` +
-          `Use the key on a wrapping element instead.`,
-        getRawBindingAttr(el, 'key')
-      )
-    }
+  if (el.tag !== 'slot') {
+    return
+  }
+  el.slotName = getBindingAttr(el, 'name')
+  if (__DEV__ && el.key) {
+    warn(
+      `\`key\` does not work on <slot> because slots are abstract outlets ` +
+        `and can possibly expand into multiple elements. ` +
+        `Use the key on a wrapping element instead.`,
+      getRawBindingAttr(el, 'key')
+    )
   }
 }
 
 function processComponent(el) {
-  let binding
-  if ((binding = getBindingAttr(el, 'is'))) {
+  const binding = getBindingAttr(el, 'is')
+  if (binding) {
     el.component = binding
   }
   if (getAndRemoveAttr(el, 'inline-template') != null) {
@@ -932,13 +936,14 @@ function checkInFor(el: ASTElement): boolean {
 
 function parseModifiers(name: string): Object | void {
   const match = name.match(modifierRE)
-  if (match) {
-    const ret = {}
-    match.forEach(m => {
-      ret[m.slice(1)] = true
-    })
-    return ret
+  if(!match) {
+    return
   }
+
+  return match.reduce((ret,m) => {
+    ret[m.slice(1)] = true
+    return ret
+  },{})
 }
 
 function makeAttrsMap(attrs: Array<Record<string, any>>): Record<string, any> {

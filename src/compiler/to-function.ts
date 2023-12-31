@@ -100,8 +100,7 @@ export function createCompileToFunctionFn(compile: Function): Function {
     // this should only happen if there is a bug in the compiler itself.
     // mostly for codegen development use
     /* istanbul ignore if */
-    if (__DEV__) {
-      if ((!compiled.errors || !compiled.errors.length) && fnGenErrors.length) {
+    if (__DEV__ && (!compiled.errors || !compiled.errors.length) && fnGenErrors.length) {
         warn(
           `Failed to generate render function:\n\n` +
             fnGenErrors
@@ -111,7 +110,6 @@ export function createCompileToFunctionFn(compile: Function): Function {
               .join('\n'),
           vm
         )
-      }
     }
 
     return (cache[key] = res)

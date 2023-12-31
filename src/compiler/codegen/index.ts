@@ -477,13 +477,13 @@ function hash(str) {
 }
 
 function containsSlotChild(el: ASTNode): boolean {
-  if (el.type === 1) {
-    if (el.tag === 'slot') {
-      return true
-    }
-    return el.children.some(containsSlotChild)
+  if (el.type !== 1) {
+    return false
   }
-  return false
+  if (el.tag === 'slot') {
+    return true
+  }
+  return el.children.some(containsSlotChild)
 }
 
 function genScopedSlot(el: ASTElement, state: CodegenState): string {
@@ -518,30 +518,31 @@ export function genChildren(
   altGenNode?: Function
 ): string | void {
   const children = el.children
-  if (children.length) {
-    const el: any = children[0]
-    // optimize single v-for
-    if (
-      children.length === 1 &&
-      el.for &&
-      el.tag !== 'template' &&
-      el.tag !== 'slot'
-    ) {
-      const normalizationType = checkSkip
-        ? state.maybeComponent(el)
-          ? `,1`
-          : `,0`
-        : ``
-      return `${(altGenElement || genElement)(el, state)}${normalizationType}`
-    }
-    const normalizationType = checkSkip
-      ? getNormalizationType(children, state.maybeComponent)
-      : 0
-    const gen = altGenNode || genNode
-    return `[${children.map(c => gen(c, state)).join(',')}]${
-      normalizationType ? `,${normalizationType}` : ''
-    }`
+  if (!children.length) {
+    return
   }
+  const child: any = children[0]
+  // optimize single v-for
+  if (
+    children.length === 1 &&
+    child.for &&
+    child.tag !== 'template' &&
+    child.tag !== 'slot'
+  ) {
+    const normalizationType = checkSkip
+      ? state.maybeComponent(child)
+        ? `,1`
+        : `,0`
+      : ``
+    return `${(altGenElement || genElement)(child, state)}${normalizationType}`
+  }
+  const normalizationType = checkSkip
+    ? getNormalizationType(children, state.maybeComponent)
+    : 0
+  const gen = altGenNode || genNode
+  return `[${children.map(c => gen(c, state)).join(',')}]${
+    normalizationType ? `,${normalizationType}` : ''
+  }`
 }
 
 // determine the normalization needed for the children array.
