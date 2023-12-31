@@ -219,7 +219,11 @@ export function defineReactive(
  * already exist.
  */
 export function set<T>(array: T[], key: number, value: T): T
-export function set<T>(object: object, key: string | number, value: T): T
+export function set<T extends Record<keyof any, any>, K extends keyof T>(
+  object: T,
+  key: K,
+  value: T[K]
+): T
 export function set(
   target: any[] | Record<string, any>,
   key: any,
@@ -279,7 +283,10 @@ export function set(
  * Delete a property and trigger change if necessary.
  */
 export function del<T>(array: T[], key: number): void
-export function del(object: object, key: string | number): void
+export function del<T extends Record<keyof any, any>, K extends keyof T>(
+  object: T,
+  key: K
+): void
 export function del(target: any[] | object, key: any) {
   if (__DEV__ && (isUndef(target) || isPrimitive(target))) {
     warn(
