@@ -1,7 +1,7 @@
 import { inBrowser } from './env'
 
-export let mark
-export let measure
+export let mark: (tag: string) => void
+export let measure: (name: string, startTag: string, endTag: string) => void
 
 if (__DEV__) {
   const perf = inBrowser && window.performance
@@ -17,8 +17,8 @@ if (__DEV__) {
     // @ts-ignore
     perf.clearMeasures
   ) {
-    mark = tag => perf.mark(tag)
-    measure = (name, startTag, endTag) => {
+    mark = (tag: string) => perf.mark(tag)
+    measure = (name: string, startTag: string, endTag: string) => {
       perf.measure(name, startTag, endTag)
       perf.clearMarks(startTag)
       perf.clearMarks(endTag)

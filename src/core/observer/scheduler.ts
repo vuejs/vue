@@ -33,7 +33,7 @@ function resetSchedulerState() {
 // if the page has thousands of event listeners. Instead, we take a timestamp
 // every time the scheduler flushes and use that for all event listeners
 // attached during that flush.
-export let currentFlushTimestamp = 0
+export let currentFlushTimestamp: number = 0
 
 // Async edge case fix requires storing an event listener's attach timestamp.
 let getNow: () => number = Date.now
@@ -74,7 +74,7 @@ const sortCompareFn = (a: Watcher, b: Watcher): number => {
 function flushSchedulerQueue() {
   currentFlushTimestamp = getNow()
   flushing = true
-  let watcher, id
+  let watcher: Watcher, id: number
 
   // Sort queue before flush.
   // This ensures that:
@@ -131,7 +131,7 @@ function flushSchedulerQueue() {
 }
 
 function callUpdatedHooks(queue: Watcher[]) {
-  let i = queue.length
+  let i:number = queue.length
   while (i--) {
     const watcher = queue[i]
     const vm = watcher.vm
@@ -152,7 +152,7 @@ export function queueActivatedComponent(vm: Component) {
   activatedChildren.push(vm)
 }
 
-function callActivatedHooks(queue) {
+function callActivatedHooks(queue: string | any[]) {
   for (let i = 0; i < queue.length; i++) {
     queue[i]._inactive = true
     activateChildComponent(queue[i], true /* true */)

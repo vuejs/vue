@@ -41,7 +41,7 @@ export function initRender(vm: Component) {
   // normalization is always applied for the public version, used in
   // user-written render functions.
   // @ts-expect-error
-  vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
+  vm.$createElement = (a: any, b: any, c: any, d: any) => createElement(vm, a, b, c, d, true)
 
   // $attrs & $listeners are exposed for easier HOC creation.
   // they need to be reactive so that HOCs using them are always updated

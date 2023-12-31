@@ -253,7 +253,7 @@ export function defineComputed(
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
-function createComputedGetter(key) {
+function createComputedGetter(key: string) {
   return function computedGetter() {
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
@@ -276,7 +276,7 @@ function createComputedGetter(key) {
   }
 }
 
-function createGetterInvoker(fn) {
+function createGetterInvoker(fn: Function) {
   return function computedGetter() {
     return fn.call(this, this)
   }
