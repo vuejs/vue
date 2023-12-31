@@ -14,6 +14,7 @@ import {
   ComponentOptionsBase
 } from './v3-component-options'
 import { EmitFn, EmitsOptions } from './v3-setup-context'
+import { InjectOptions, InjectToObject } from './options'
 
 /**
  * Custom properties added to component instances in any way and can be accessed through `this`
@@ -33,7 +34,7 @@ export interface ComponentCustomProperties {}
 
 export type ComponentInstance = InstanceType<VueConstructor>
 
-export type OptionTypesKeys = 'P' | 'B' | 'D' | 'C' | 'M' | 'Defaults'
+export type OptionTypesKeys = 'P' | 'B' | 'D' | 'C' | 'M' | 'Defaults' | 'Inject'
 
 export type OptionTypesType<
   P = {},
@@ -41,14 +42,16 @@ export type OptionTypesType<
   D = {},
   C extends ComputedOptions = {},
   M extends MethodOptions = {},
-  Defaults = {}
+  Defaults = {},
+  Inject extends InjectOptions = {},
 > = {
   P: P
   B: B
   D: D
   C: C
   M: M
-  Defaults: Defaults
+  Defaults: Defaults,
+  Inject: Inject
 }
 
 type IsDefaultMixinComponent<T> = T extends ComponentOptionsMixin
@@ -67,9 +70,10 @@ type MixinToOptionTypes<T> = T extends ComponentOptionsBase<
   infer Extends,
   any,
   any,
-  infer Defaults
+  infer Defaults,
+  infer Inject
 >
-  ? OptionTypesType<P & {}, B & {}, D & {}, C & {}, M & {}, Defaults & {}> &
+  ? OptionTypesType<P & {}, B & {}, D & {}, C & {}, M & {}, Defaults & {}, Inject & {}> &
       IntersectionMixin<Mixin> &
       IntersectionMixin<Extends>
   : never
@@ -102,6 +106,7 @@ export type CreateComponentPublicInstance<
   PublicProps = P,
   Defaults = {},
   MakeDefaultsOptional extends boolean = false,
+  Inject extends InjectOptions = {},
   PublicMixin = IntersectionMixin<Mixin> & IntersectionMixin<Extends>,
   PublicP = UnwrapMixinsType<PublicMixin, 'P'> & EnsureNonVoid<P>,
   PublicB = UnwrapMixinsType<PublicMixin, 'B'> & EnsureNonVoid<B>,
@@ -111,7 +116,9 @@ export type CreateComponentPublicInstance<
   PublicM extends MethodOptions = UnwrapMixinsType<PublicMixin, 'M'> &
     EnsureNonVoid<M>,
   PublicDefaults = UnwrapMixinsType<PublicMixin, 'Defaults'> &
-    EnsureNonVoid<Defaults>
+    EnsureNonVoid<Defaults>,
+  PublicInject extends InjectOptions = UnwrapMixinsType<PublicMixin, 'Inject'> &
+    EnsureNonVoid<Inject>,
 > = ComponentPublicInstance<
   PublicP,
   PublicB,
@@ -121,7 +128,8 @@ export type CreateComponentPublicInstance<
   E,
   PublicProps,
   PublicDefaults,
-  MakeDefaultsOptional
+  MakeDefaultsOptional,
+  PublicInject
 >
 
 // public properties exposed on the proxy, which is used as the render context
@@ -136,6 +144,7 @@ export type ComponentPublicInstance<
   PublicProps = P,
   Defaults = {},
   MakeDefaultsOptional extends boolean = false,
+  Inject extends InjectOptions = {},
   Options = ComponentOptionsBase<
     any,
     any,
@@ -162,7 +171,8 @@ export type ComponentPublicInstance<
   UnwrapNestedRefs<D> &
   ExtractComputedReturns<C> &
   M &
-  ComponentCustomProperties
+  ComponentCustomProperties &
+  InjectToObject<Inject>
 
 interface Vue3Instance<
   D,

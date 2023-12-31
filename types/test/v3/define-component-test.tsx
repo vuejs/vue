@@ -1225,3 +1225,210 @@ describe('should report non-existent properties in instance', () => {
   // @ts-expect-error
   instance2.foo
 })
+
+
+describe('inject', () => {
+  test('with object inject', () => {
+    defineComponent({
+      props: {
+        a: String
+      },
+      inject: {
+        foo: 'foo',
+        bar: 'bar',
+      },
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+        //  @ts-expect-error
+        expectError(this.foobar = 1)
+      }
+    })
+  })
+
+  test('with array inject', () => {
+    defineComponent({
+      props: ['a', 'b'],
+      inject: ['foo', 'bar'],
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+        //  @ts-expect-error
+        expectError(this.foobar = 1)
+      }
+    })
+  })
+
+  test('with no props', () => {
+    defineComponent({
+      inject: {
+        foo: {
+          from: 'pfoo',
+          default: 'foo'
+        },
+        bar: {
+          from: 'pbar',
+          default: 'bar'
+        },
+      },
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+        //  @ts-expect-error
+        expectError(this.foobar = 1)
+      }
+    })
+  })
+  
+  test('without inject', () => {
+    defineComponent({
+      props: ['a', 'b'],
+      created() {
+        //  @ts-expect-error
+        expectError(this.foo = 1)
+        //  @ts-expect-error
+        expectError(this.bar = 1)
+      }
+    })
+  })
+
+  test('define mixins w/ no props', () => {
+    const MixinA = defineComponent({
+      inject: {
+        foo: 'foo'
+      },
+    })
+    const MixinB = defineComponent({
+      inject: ['bar'],
+    })
+    // with no props
+    defineComponent({
+      mixins: [MixinA, MixinB],
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+      }
+    })
+    // with object props
+    defineComponent({
+      mixins: [MixinA, MixinB],
+      props: {
+        baz: {
+          type: Number,
+          required: true
+        }
+      },
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+        expectType<number>(this.baz)
+      }
+    })
+    // with array props
+    defineComponent({
+      mixins: [MixinA, MixinB],
+      props: ['baz'],
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+        expectType<any>(this.baz)
+      }
+    })
+  })
+
+  test('define mixins w/ object props', () => {
+    const MixinA = defineComponent({
+      props: {
+        a: String
+      },
+      inject: {
+        foo: 'foo'
+      },
+    })
+    const MixinB = defineComponent({
+      props: {
+        b: String
+      },
+      inject: ['bar'],
+    })
+    // with no props
+    defineComponent({
+      mixins: [MixinA, MixinB],
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+      }
+    })
+    // with object props
+    defineComponent({
+      mixins: [MixinA, MixinB],
+      props: {
+        baz: {
+          type: Number,
+          required: true
+        }
+      },
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+        expectType<number>(this.baz)
+      }
+    })
+    // with array props
+    defineComponent({
+      mixins: [MixinA, MixinB],
+      props: ['baz'],
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+        expectType<any>(this.baz)
+      }
+    })
+  })
+
+  test('define mixins w/ array props', () => {
+    const MixinA = defineComponent({
+      props: ['a'],
+      inject: {
+        foo: 'foo'
+      },
+    })
+    const MixinB = defineComponent({
+      props: ['b'],
+      inject: ['bar'],
+    })
+    // with no props
+    defineComponent({
+      mixins: [MixinA, MixinB],
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+      }
+    })
+    // with object props
+    defineComponent({
+      mixins: [MixinA, MixinB],
+      props: {
+        baz: {
+          type: Number,
+          required: true
+        }
+      },
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+        expectType<number>(this.baz)
+      }
+    })
+    // with array props
+    defineComponent({
+      mixins: [MixinA, MixinB],
+      props: ['baz'],
+      created() {
+        expectType<unknown>(this.foo)
+        expectType<unknown>(this.bar)
+        expectType<any>(this.baz)
+      }
+    })
+  })
+})
