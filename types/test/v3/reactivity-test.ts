@@ -13,9 +13,10 @@ import {
   markRaw,
   shallowReadonly,
   set,
-  del
+  del,
+  ShallowRef
 } from '../../index'
-import { IsUnion, describe, expectType } from '../utils'
+import { IsUnion, describe, expectType, expectError } from '../utils'
 
 function plainType(arg: number | Ref<number>) {
   // ref coercing
@@ -163,6 +164,15 @@ if (shallowStatus.value === 'initial') {
   shallowStatus.value = 'invalidating'
 }
 
+{
+  // should return ShallowRef<T> | Ref<T>, not ShallowRef<T | Ref<T>>
+  expectType<ShallowRef<{ name: string }> | Ref<{ name: string }>>(
+    shallowRef({} as { name: string } | Ref<{ name: string }>)
+  )
+  expectType<ShallowRef<number> | Ref<string[]> | ShallowRef<string>>(
+    shallowRef('' as Ref<string[]> | string | number)
+  )
+}
 const refStatus = ref<Status>('initial')
 if (refStatus.value === 'initial') {
   expectType<Ref<Status>>(shallowStatus)
@@ -385,7 +395,6 @@ describe('set/del', () => {
   // @ts-expect-error
   del([], 'fse', 123)
 })
-
 
 {
   //#12978
