@@ -4,7 +4,7 @@ import type { Component } from 'types/component'
 
 export interface InjectionKey<T> extends Symbol {}
 
-export function provide<T>(key: InjectionKey<T> | string | number, value: T) {
+export function provide<T>(key: InjectionKey<T> | string, value: T) {
   if (!currentInstance) {
     if (__DEV__) {
       warn(`provide() can only be used inside setup().`)
