@@ -127,6 +127,28 @@ export function renderMixin(Vue: typeof Component) {
       setCurrentInstance(vm)
       currentRenderingInstance = vm
       vnode = render.call(vm._renderProxy, vm.$createElement)
+      // merge vnode hook listeners, example： vnode.data.on.click.fns = [fn1, fn2, fn3], vm.$vnode.data.on.click.fns = [fn4, fn5, fn6], then vnode.data.on.click.fns = [fn1, fn2, fn3, fn4, fn5, fn6]
+      if (vnode?.data?.on && vm?.$vnode?.data?.on) {
+        Object.keys(vm.$vnode.data.on).forEach((key) => {
+          if (vnode.data.on[key]) {
+            let fnsOnVnode = vnode.data.on[key];
+            if (typeof fnsOnVnode === 'function') {
+              fnsOnVnode = [fnsOnVnode];
+            }
+            let fnsOnVm = vm.$vnode?.data?.on?.[key];
+            if (typeof fnsOnVm === 'function') {
+              fnsOnVm = [fnsOnVm];
+            }
+            vnode.data.on[key] = [
+              ...fnsOnVnode,
+              ...(fnsOnVm || []),
+            ]
+            if (vm.$vnode?.data?.on?.[key]) {
+              delete vm.$vnode.data.on[key];
+            }
+          }
+        })
+      }
     } catch (e: any) {
       handleError(e, vm, `render`)
       // return error render result,
