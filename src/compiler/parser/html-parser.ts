@@ -12,7 +12,7 @@
 import { makeMap, no } from 'shared/util'
 import { isNonPhrasingTag } from 'web/compiler/util'
 import { unicodeRegExp } from 'core/util/lang'
-import { ASTAttr, CompilerOptions } from 'types/compiler'
+import { ASTAttr, ASTTempNode, CompilerOptions } from 'types/compiler'
 
 // Regular Expressions for parsing tags and attributes
 const attribute =
@@ -69,7 +69,7 @@ export interface HTMLParserOptions extends CompilerOptions {
 }
 
 export function parseHTML(html, options: HTMLParserOptions) {
-  const stack: any[] = []
+  const stack: ASTTempNode[] = []
   const expectHTML = options.expectHTML
   const isUnaryTag = options.isUnaryTag || no
   const canBeLeftOpenTag = options.canBeLeftOpenTag || no
