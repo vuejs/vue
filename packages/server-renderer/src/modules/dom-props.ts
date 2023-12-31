@@ -29,7 +29,6 @@ export default function renderDOMProps(node: VNodeWithData): string {
     } else if (key === 'value' && node.tag === 'textarea') {
       setText(node, toString(props[key]), false)
     } else {
-      // $flow-disable-line (WTF?)
       const attr = propsToAttrMap[key] || key.toLowerCase()
       if (
         isRenderableAttr(attr) &&
