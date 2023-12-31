@@ -5,6 +5,9 @@ on:
 
 name: Create Release
 
+permissions:
+  contents: write # to create release (yyx990803/release-tag)
+
 jobs:
   build:
     name: Create Release
