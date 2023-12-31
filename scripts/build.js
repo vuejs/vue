@@ -41,7 +41,13 @@ function buildEntry (config) {
   const isProd = /(min|prod)\.js$/.test(file)
   return rollup.rollup(config)
     .then(bundle => bundle.generate(output))
-    .then(async ({ output: [{ code }] }) => {
+    .then(async ({ output: [{ code, map }] }) => {
+      const hasMap = !!map;
+      const filename = file.split('/').pop();
+      if (hasMap) {
+        code = code + `\n//# sourceMappingURL=${filename}.map`;
+        write(`${file}.map`, JSON.stringify(map));
+      }
       if (isProd) {
         const {code: minifiedCode} =  await terser.minify(code, {
           toplevel: true,
