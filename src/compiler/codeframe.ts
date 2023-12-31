@@ -11,8 +11,8 @@ export function generateCodeFrame(
   for (let i = 0; i < lines.length; i++) {
     count += lines[i].length + 1
     if (count >= start) {
-      for (let j = i - range; j <= i + range || end > count; j++) {
-        if (j < 0 || j >= lines.length) continue
+      for (let j = i - range; j < lines.length && (j <= i + range || end > count); j++) {
+        if (j < 0) continue
         res.push(
           `${j + 1}${repeat(` `, 3 - String(j + 1).length)}|  ${lines[j]}`
         )
