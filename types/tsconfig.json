@@ -5,6 +5,7 @@
     "lib": ["dom", "esnext"],
     "types": ["node"],
     "module": "esnext",
+    "allowJs": true,
     "moduleResolution": "node",
     "jsx": "preserve",
     "strict": true,
@@ -14,5 +15,6 @@
     }
   },
   "include": ["."],
+  "files": ["./test/v3/define-component-test.js"],
   "compileOnSave": false
 }
