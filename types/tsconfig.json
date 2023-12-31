@@ -6,6 +6,7 @@
     "types": ["node"],
     "module": "esnext",
     "moduleResolution": "node",
+    "checkJs": true,
     "jsx": "preserve",
     "strict": true,
     "noEmit": true,
