@@ -682,6 +682,82 @@ describe('Component keep-alive', () => {
       .then(done)
   })
 
+  it('max change', done => {
+    const spyA = vi.fn()
+    const spyB = vi.fn()
+    const spyC = vi.fn()
+    const spyAD = vi.fn()
+    const spyBD = vi.fn()
+    const spyCD = vi.fn()
+
+    function assertCount(calls) {
+      expect([
+        spyA.mock.calls.length,
+        spyAD.mock.calls.length,
+        spyB.mock.calls.length,
+        spyBD.mock.calls.length,
+        spyC.mock.calls.length,
+        spyCD.mock.calls.length
+      ]).toEqual(calls)
+    }
+
+    const vm = new Vue({
+      template: `
+        <keep-alive :max="max">
+          <component :is="n"></component>
+        </keep-alive>
+      `,
+      data: {
+        n: 'aa',
+        max: 2
+      },
+      components: {
+        aa: {
+          template: '<div>a</div>',
+          created: spyA,
+          destroyed: spyAD
+        },
+        bb: {
+          template: '<div>bbb</div>',
+          created: spyB,
+          destroyed: spyBD
+        },
+        cc: {
+          template: '<div>ccc</div>',
+          created: spyC,
+          destroyed: spyCD
+        }
+      }
+    }).$mount()
+
+    assertCount([1, 0, 0, 0, 0, 0])
+    vm.n = 'bb'
+    waitForUpdate(() => {
+      assertCount([1, 0, 1, 0, 0, 0])
+      vm.n = 'cc'
+    })
+      .then(() => {
+        // should prune A because max cache reached
+        assertCount([1, 1, 1, 0, 1, 0])
+        vm.max = 1
+      })
+      .then(() => {
+        // should prune B because max cache reached
+        assertCount([1, 1, 1, 1, 1, 0])
+        vm.n = 'bb'
+      })
+      .then(() => {
+        // should prune C because max cache reached
+        assertCount([1, 1, 2, 1, 1, 1])
+        vm.n = 'aa'
+      })
+      .then(() => {
+        // should prune B because max cache reached
+        assertCount([2, 1, 2, 2, 1, 1])
+      })
+      .then(done)
+  })
+
   it('should warn unknown component inside', () => {
     new Vue({
       template: `<keep-alive><foo/></keep-alive>`

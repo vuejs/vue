@@ -121,6 +121,21 @@ export default {
     this.$watch('exclude', val => {
       pruneCache(this, name => !matches(val, name))
     })
+    this.$watch('max', (val, old) => {
+      // False value is regarded as not limit
+      if (!val) return
+
+      val = parseInt(val)
+      old = parseInt(old)
+      if (val < old) {
+        const { cache, keys } = this
+        const pruneNum = keys.length - val
+        if (pruneNum < 0) return
+        for (let i = 0; i < pruneNum; i++) {
+          pruneCacheEntry(cache, keys[i], keys)
+        }
+      }
+    })
   },
 
   updated() {
