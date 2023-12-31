@@ -966,6 +966,47 @@ describe('emits', () => {
       }
     }
   })
+
+  // should have `onXXX` props for emits
+  const a = defineComponent({
+    props: {
+      bar: String
+    },
+    emits: {
+      foo: (n: number) => n > 0
+    },
+    setup(props) {
+      expectType<((n: number) => boolean) | undefined>(props.onFoo)
+    }
+  })
+
+  const b = defineComponent({
+    extends: a,
+    props: {
+      bar2: String
+    },
+    emits: {
+      foo2: (n: number) => n > 0
+    },
+    setup(props) {
+      expectType<((n: number) => boolean) | undefined>(props.onFoo)
+    }
+  })
+
+  defineComponent({
+    mixins: [a, b],
+    props: {
+      bar3: String
+    },
+    emits: {
+      foo3: (n: number) => n > 0
+    },
+    setup(props) {
+      expectType<((n: number) => boolean) | undefined>(props.onFoo)
+      expectType<((n: number) => boolean) | undefined>(props.onFoo2)
+      expectType<((n: number) => boolean) | undefined>(props.onFoo3)
+    }
+  })
 })
 
 // describe('componentOptions setup should be `SetupContext`', () => {

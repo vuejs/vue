@@ -17,7 +17,7 @@ import {
   CreateComponentPublicInstance
 } from './v3-component-public-instance'
 import { Data, HasDefined } from './common'
-import { EmitsOptions } from './v3-setup-context'
+import { EmitsOptions, EmitsToProps } from './v3-setup-context'
 import { CreateElement, RenderContext } from './umd'
 
 export type DefineComponent<
@@ -31,9 +31,9 @@ export type DefineComponent<
   E extends EmitsOptions = {},
   EE extends string = string,
   Props = Readonly<
-    PropsOrPropOptions extends ComponentPropsOptions
+    (PropsOrPropOptions extends ComponentPropsOptions
       ? ExtractPropTypes<PropsOrPropOptions>
-      : PropsOrPropOptions
+      : PropsOrPropOptions) & EmitsToProps<E>
   >,
   Defaults = ExtractDefaultPropTypes<PropsOrPropOptions>
 > = ComponentPublicInstanceConstructor<

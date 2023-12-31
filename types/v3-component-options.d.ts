@@ -1,7 +1,7 @@
 import { Vue } from './vue'
 import { VNode } from './vnode'
 import { ComponentOptions as Vue2ComponentOptions } from './options'
-import { EmitsOptions, SetupContext } from './v3-setup-context'
+import { EmitsOptions, EmitsToProps, SetupContext } from './v3-setup-context'
 import { Data, LooseRequired, UnionToIntersection } from './common'
 import {
   ComponentPropsOptions,
@@ -52,7 +52,7 @@ export type SetupFunction<
   Emits extends EmitsOptions = {}
 > = (
   this: void,
-  props: Readonly<Props>,
+  props: Readonly<Props & EmitsToProps<Emits>>,
   ctx: SetupContext<Emits>
 ) => RawBindings | (() => VNode | null) | void
 
