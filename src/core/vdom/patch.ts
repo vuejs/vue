@@ -510,7 +510,10 @@ export function createPatchFunction(backend) {
           )
         } else {
           vnodeToMove = oldCh[idxInOld]
-          if (sameVnode(vnodeToMove, newStartVnode)) {
+          // when before patch: old keys like [a, b, c ...] new keys like [d, b, b, e, ....]
+          // when patch the second key "b" Vnode by new children
+          // the vnodeToMove will be undefined, so need add a condition for vnodeToMove
+          if (vnodeToMove && sameVnode(vnodeToMove, newStartVnode)) {
             patchVnode(
               vnodeToMove,
               newStartVnode,
