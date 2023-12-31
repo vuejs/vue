@@ -40,7 +40,6 @@ export function isRef(r: any): r is Ref {
   return !!(r && (r as Ref).__v_isRef === true)
 }
 
-export function ref<T extends Ref>(value: T): T
 export function ref<T>(value: T): Ref<UnwrapRef<T>>
 export function ref<T = any>(): Ref<T | undefined>
 export function ref(value?: unknown) {
