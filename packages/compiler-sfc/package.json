@@ -1,0 +1,37 @@
+{
+  "name": "@vue/compiler-sfc",
+  "version": "2.7.16",
+  "description": "compiler-sfc for Vue 2",
+  "main": "dist/compiler-sfc.js",
+  "types": "dist/compiler-sfc.d.ts",
+  "files": [
+    "dist"
+  ],
+  "dependencies": {
+    "@babel/parser": "^7.23.5",
+    "postcss": "^8.4.14",
+    "source-map": "^0.6.1"
+  },
+  "devDependencies": {
+    "@babel/types": "^7.23.5",
+    "@types/estree": "^0.0.48",
+    "@types/hash-sum": "^1.0.0",
+    "@types/lru-cache": "^5.1.1",
+    "@vue/consolidate": "^0.17.3",
+    "de-indent": "^1.0.2",
+    "estree-walker": "^2.0.2",
+    "hash-sum": "^2.0.0",
+    "less": "^4.1.3",
+    "lru-cache": "^5.1.1",
+    "magic-string": "^0.25.9",
+    "merge-source-map": "^1.1.0",
+    "postcss-modules": "^4.3.1",
+    "postcss-selector-parser": "^6.0.10",
+    "pug": "^3.0.2",
+    "sass": "^1.52.3",
+    "stylus": "^0.58.1"
+  },
+  "optionalDependencies": {
+    "prettier": "^1.18.2 || ^2.0.0"
+  }
+}
