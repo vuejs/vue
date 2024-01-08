@@ -112,6 +112,7 @@ export default {
     // in each iteration - which helps prevent layout thrashing.
     children.forEach(callPendingCbs)
     children.forEach(recordPosition)
+    children.forEach(recordStyle)
     children.forEach(applyTranslation)
 
     // force reflow to put everything in position
@@ -123,8 +124,9 @@ export default {
       if (c.data!.moved) {
         const el: any = c.elm
         const s: any = el.style
+        const os: any = c.data!.oldStyle
         addTransitionClass(el, moveClass)
-        s.transform = s.WebkitTransform = s.transitionDuration = ''
+        s.transform = os.transform, s.WebkitTransform = os.WebkitTransform, s.transitionDuration = os.transitionDuration
         el.addEventListener(
           transitionEndEvent,
           (el._moveCb = function cb(e) {
@@ -188,6 +190,16 @@ function callPendingCbs(
 
 function recordPosition(c: VNodeWithData) {
   c.data!.newPos = c.elm.getBoundingClientRect()
+}
+
+function recordStyle(c: VNodeWithData) {
+  const elStyles = c.elm.style
+
+  c.data!.oldStyle = {
+    transform: elStyles.transform,
+    WebkitTransform: elStyles.WebkitTransform,
+    transitionDuration: elStyles.transitionDuration
+  }
 }
 
 function applyTranslation(c: VNodeWithData) {
