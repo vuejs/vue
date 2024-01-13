@@ -1,5 +1,7 @@
 ## Vue 2 has reached End of Life
 
+New additions to the page here...
+
 **You are looking at the now inactive repository for Vue 2. The actively maintained repository for the latest version of Vue is [vuejs/core](https://github.com/vuejs/core).**
 
 Vue has reached End of Life on December 31st, 2023. It no longer receives new features, updates, or fixes. However, it is still available on all existing distribution channels (CDNs, package managers, Github, etc).
