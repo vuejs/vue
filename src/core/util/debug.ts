@@ -16,7 +16,7 @@ if (__DEV__) {
     str.replace(classifyRE, c => c.toUpperCase()).replace(/[-_]/g, '')
 
   warn = (msg, vm = currentInstance) => {
-    const trace = vm ? generateComponentTrace(vm) : ''
+    const trace = vm ? generateComponentTrace(vm) : '' // test
 
     if (config.warnHandler) {
       config.warnHandler.call(null, msg, vm, trace)
