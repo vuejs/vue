@@ -368,12 +368,9 @@ export function once<T extends (...args: any[]) => any>(fn: T): T {
   } as any
 }
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/is#polyfill
-const is = (x: unknown, y: unknown): boolean => {
-  if (x === y) {
-    return x !== 0 || 1 / x === 1 / (y as number);
-  }
-  return x !== x && y !== y;
-}
+const is = Object.is || function is(x: unknown, y: unknown) {
+  return x === y ? x !== 0 || 1 / x === 1 / (y as number) : x !== x && y !== y;
+};
 
 export function hasChanged(x: unknown, y: unknown): boolean {
   return !is(x, y);
