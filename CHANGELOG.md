@@ -362,7 +362,7 @@ Note that the new plugin does not handle Vue-specific JSX / TSX transform, which
 
 ### Volar Compatibility
 
-2.7 ships improved type definitions so it is no longer necessary to install `@vue/runtime-dom` just for Volar template type inference support. All you need now is the following config in `tsconfig.json`:
+2.7 ships improved type definitions, so it is no longer necessary to install `@vue/runtime-dom` just for Volar template type inference support. All you need now is the following config in `tsconfig.json`:
 
 ```json
 {
@@ -388,7 +388,7 @@ Vue Devtools 6.2.0 has added support for inspecting 2.7 Composition API state, b
 
 ### Bug Fixes
 
-* **compiler-sfc:** should transform non relative paths when base option is present ([008d78b](https://github.com/vuejs/vue/commit/008d78bd7280716d2d70e150e3ed2ac5ee8497f2))
+* **compiler-sfc:** should transform non-relative paths when base option is present ([008d78b](https://github.com/vuejs/vue/commit/008d78bd7280716d2d70e150e3ed2ac5ee8497f2))
 
 
 

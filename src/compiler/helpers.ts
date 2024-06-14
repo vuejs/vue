@@ -196,7 +196,7 @@ export function getBindingAttr(
 
 // note: this only removes the attr from the Array (attrsList) so that it
 // doesn't get processed by processAttrs.
-// By default it does NOT remove it from the map (attrsMap) because the map is
+// By default, it does NOT remove it from the map (attrsMap) because the map is
 // needed during codegen.
 export function getAndRemoveAttr(
   el: ASTElement,
