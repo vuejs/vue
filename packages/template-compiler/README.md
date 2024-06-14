@@ -130,7 +130,7 @@ This is only useful at runtime with pre-configured builds, so it doesn't accept 
 
 Same as `compiler.compile` but generates SSR-specific render function code by optimizing parts of the template into string concatenation in order to improve SSR performance.
 
-This is used by default in `vue-loader@>=12` and can be disabled using the [`optimizeSSR`](https://vue-loader.vuejs.org/en/options.html#optimizessr) option.
+This is used by default in `vue-loader@>=12` and can be disabled using the [`optimizeSSR`](https://vue-loader.vuejs.org/options.html#optimizessr) option.
 
 ---
 
