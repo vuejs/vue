@@ -82,7 +82,7 @@ export default class Dep {
       if (__DEV__ && info) {
         sub.onTrigger &&
           sub.onTrigger({
-            effect: subs[i],
+            effect: sub,
             ...info
           })
       }
