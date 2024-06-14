@@ -150,7 +150,9 @@ export default class TemplateRenderer {
         ? cssFiles
             .map(
               ({ file }) =>
-                `<link rel="stylesheet" href="${this.publicPath}${file}">`
+                `<link rel="stylesheet" href="${
+                  this.publicPath
+                }${file}"${getNonceAttribute(context)}>`
             )
             .join('')
         : '') +
@@ -193,7 +195,7 @@ export default class TemplateRenderer {
           }
           return `<link rel="preload" href="${this.publicPath}${file}"${
             asType !== '' ? ` as="${asType}"` : ''
-          }${extra}>`
+          }${extra}${getNonceAttribute(context)}>`
         })
         .join('')
     } else {
@@ -216,7 +218,9 @@ export default class TemplateRenderer {
           if (alreadyRendered(file)) {
             return ''
           }
-          return `<link rel="prefetch" href="${this.publicPath}${file}">`
+          return `<link rel="prefetch" href="${
+            this.publicPath
+          }${file}"${getNonceAttribute(context)}>`
         })
         .join('')
     } else {
@@ -234,9 +238,10 @@ export default class TemplateRenderer {
     const autoRemove = __DEV__
       ? ''
       : ';(function(){var s;(s=document.currentScript||document.scripts[document.scripts.length-1]).parentNode.removeChild(s);}());'
-    const nonceAttr = context.nonce ? ` nonce="${context.nonce}"` : ''
     return context[contextKey]
-      ? `<script${nonceAttr}>window.${windowKey}=${state}${autoRemove}</script>`
+      ? `<script${getNonceAttribute(
+          context
+        )}>window.${windowKey}=${state}${autoRemove}</script>`
       : ''
   }
 
@@ -249,7 +254,9 @@ export default class TemplateRenderer {
       const needed = [initial[0]].concat(async, initial.slice(1))
       return needed
         .map(({ file }) => {
-          return `<script src="${this.publicPath}${file}" defer></script>`
+          return `<script src="${
+            this.publicPath
+          }${file}" defer${getNonceAttribute(context)}></script>`
         })
         .join('')
     } else {
@@ -303,4 +310,8 @@ function getPreloadType(ext: string): string {
     // not exhausting all possibilities here, but above covers common cases
     return ''
   }
+}
+
+function getNonceAttribute(context: Record<string, any>): string {
+  return context.nonce ? ` nonce="${context.nonce}"` : ''
 }
