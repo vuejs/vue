@@ -174,7 +174,9 @@ export interface ComponentOptions<
   Props = DefaultProps,
   RawBindings = {},
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
-  Extends extends ComponentOptionsMixin = ComponentOptionsMixin
+  Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
+  Inject extends InjectOptions = {},
+  InjectNames extends string = string,
 > {
   data?: Data
   props?: PropsDef
@@ -225,7 +227,7 @@ export interface ComponentOptions<
   filters?: { [key: string]: Function }
 
   provide?: object | (() => object)
-  inject?: InjectOptions
+  inject?: Inject | InjectNames[]
 
   model?: {
     prop?: string
@@ -342,8 +344,20 @@ export interface DirectiveOptions {
 
 export type InjectKey = string | symbol
 
-export type InjectOptions =
-  | {
-      [key: string]: InjectKey | { from?: InjectKey; default?: any }
-    }
-  | string[]
+export type InjectOptions = string[] | ObjectInjectOptions
+
+type ObjectInjectOptions = Record<
+  InjectKey,
+  string | symbol | { from?: string | symbol; default?: unknown }
+>
+
+export type InjectToObject<T extends InjectOptions> =
+  T extends string[]
+    ? {
+        [K in T[number]]?: unknown
+      }
+    : T extends ObjectInjectOptions
+    ? {
+        [K in keyof T]?: unknown
+      }
+    : never

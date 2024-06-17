@@ -1,6 +1,6 @@
 import { Vue } from './vue'
 import { VNode } from './vnode'
-import { ComponentOptions as Vue2ComponentOptions } from './options'
+import { ComponentOptions as Vue2ComponentOptions, InjectOptions } from './options'
 import { EmitsOptions, SetupContext } from './v3-setup-context'
 import { Data, LooseRequired, UnionToIntersection } from './common'
 import {
@@ -82,9 +82,11 @@ export interface ComponentOptionsBase<
   Extends extends ComponentOptionsMixin,
   Emits extends EmitsOptions,
   EmitNames extends string = string,
-  Defaults = {}
+  Defaults = {},
+  Inject extends InjectOptions = {},
+  InjectNames extends string = string
 > extends Omit<
-      Vue2ComponentOptions<Vue, D, M, C, Props>,
+      Vue2ComponentOptions<Vue, D, M, C, Props, any, any, any, any, Inject, InjectNames>,
       'data' | 'computed' | 'methods' | 'setup' | 'props' | 'mixins' | 'extends'
     >,
     ComponentCustomOptions {
@@ -126,6 +128,7 @@ export type ComponentOptionsMixin = ComponentOptionsBase<
   any,
   any,
   any,
+  any,
   any
 >
 
@@ -147,6 +150,8 @@ export type ComponentOptionsWithProps<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
+  Inject extends InjectOptions = {},
+  InjectNames extends string = string,
   Props = ExtractPropTypes<PropsOptions>,
   Defaults = ExtractDefaultPropTypes<PropsOptions>
 > = ComponentOptionsBase<
@@ -159,9 +164,11 @@ export type ComponentOptionsWithProps<
   Extends,
   Emits,
   EmitsNames,
-  Defaults
+  Defaults,
+  Inject,
+  InjectNames
 > & {
-  props?: PropsOptions
+  props: PropsOptions
 } & ThisType<
     CreateComponentPublicInstance<
       Props,
@@ -171,7 +178,11 @@ export type ComponentOptionsWithProps<
       M,
       Mixin,
       Extends,
-      Emits
+      Emits,
+      Props,
+      Defaults,
+      false,
+      Inject
     >
   >
 
@@ -185,6 +196,8 @@ export type ComponentOptionsWithArrayProps<
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
   EmitsNames extends string = string,
+  Inject extends InjectOptions = {},
+  InjectNames extends string = string,
   Props = Readonly<{ [key in PropNames]?: any }>
 > = ComponentOptionsBase<
   Props,
@@ -196,9 +209,11 @@ export type ComponentOptionsWithArrayProps<
   Extends,
   Emits,
   EmitsNames,
-  {}
+  {},
+  Inject,
+  InjectNames
 > & {
-  props?: PropNames[]
+  props: PropNames[]
 } & ThisType<
     CreateComponentPublicInstance<
       Props,
@@ -208,7 +223,11 @@ export type ComponentOptionsWithArrayProps<
       M,
       Mixin,
       Extends,
-      Emits
+      Emits,
+      Props,
+      {},
+      false,
+      Inject
     >
   >
 
@@ -221,7 +240,9 @@ export type ComponentOptionsWithoutProps<
   Mixin extends ComponentOptionsMixin = ComponentOptionsMixin,
   Extends extends ComponentOptionsMixin = ComponentOptionsMixin,
   Emits extends EmitsOptions = {},
-  EmitsNames extends string = string
+  EmitsNames extends string = string,
+  Inject extends InjectOptions = {},
+  InjectNames extends string = string
 > = ComponentOptionsBase<
   Props,
   RawBindings,
@@ -232,7 +253,9 @@ export type ComponentOptionsWithoutProps<
   Extends,
   Emits,
   EmitsNames,
-  {}
+  {},
+  Inject,
+  InjectNames
 > & {
   props?: undefined
 } & ThisType<
@@ -244,7 +267,11 @@ export type ComponentOptionsWithoutProps<
       M,
       Mixin,
       Extends,
-      Emits
+      Emits,
+      Props,
+      {},
+      false,
+      Inject
     >
   >
 
