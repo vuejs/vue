@@ -90,7 +90,7 @@ export function enter(vnode: VNodeWithData, toggleDisplay?: () => void) {
     ? appearCancelled || enterCancelled
     : enterCancelled
 
-  const explicitEnterDuration: any = toNumber(
+  const explicitEnterDuration = toNumber(
     isObject(duration) ? duration.enter : duration
   )
 
@@ -291,7 +291,7 @@ function checkDuration(val, name, vnode) {
   }
 }
 
-function isValidDuration(val) {
+function isValidDuration(val): val is number {
   return typeof val === 'number' && !isNaN(val)
 }
 
