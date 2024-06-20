@@ -36,7 +36,7 @@ export interface CSSProperties
    * For examples and more information, visit:
    * https://github.com/frenic/csstype#what-should-i-do-when-i-get-type-errors
    */
-  [v: `--${string}`]: string | number | undefined
+  [v: '--${string}']: string | number | undefined
 }
 
 type Booleanish = boolean | 'true' | 'false'
