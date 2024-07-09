@@ -82,7 +82,7 @@ function updateStyle(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   // to mutate it.
   vnode.data.normalizedStyle = isDef(style.__ob__) ? extend({}, style) : style
 
-  const newStyle = getStyle(vnode, true)
+  const newStyle = getStyle(vnode, true) as any
 
   for (name in oldStyle) {
     if (isUndef(newStyle[name])) {
@@ -93,6 +93,14 @@ function updateStyle(oldVnode: VNodeWithData, vnode: VNodeWithData) {
     cur = newStyle[name]
     // ie9 setting to null has no effect, must use empty string
     setProp(el, name, cur == null ? '' : cur)
+  }
+  // determines if `v-show` is set, it has a higher priority.
+  if ('__vOriginalDisplay' in el) {
+    setProp(el, 'display', el.__vOriginalDisplay)
+    const vShowDirective = data.directives?.find(d => d.name === 'show')
+    if (vShowDirective && !vShowDirective.value) {
+      setProp(el, 'display', 'none')
+    }
   }
 }
 

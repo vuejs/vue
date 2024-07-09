@@ -94,4 +94,21 @@ describe('Directive v-show', () => {
       })
       .then(done)
   })
+
+  it('should prefer to use v-show to update display', done => {
+    const vm = new Vue({
+      template: '<div v-show="display" :style="style">{{ count }}</div>',
+      data: { display: false, count: 1, style: { display: 'block' } }
+    }).$mount()
+    expect(vm.$el.style.display).toBe('none')
+    vm.count++
+    waitForUpdate(() => {
+      expect(vm.$el.style.display).toBe('none')
+      vm.display = true
+    })
+    .then(() => {
+      expect(vm.$el.style.display).toBe('block')
+    })
+      .then(done)
+  })
 })
