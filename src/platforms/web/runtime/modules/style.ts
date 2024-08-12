@@ -82,7 +82,7 @@ function updateStyle(oldVnode: VNodeWithData, vnode: VNodeWithData) {
   // to mutate it.
   vnode.data.normalizedStyle = isDef(style.__ob__) ? extend({}, style) : style
 
-  const newStyle = getStyle(vnode, true) as any
+  const newStyle = getStyle(vnode, true)
 
   for (name in oldStyle) {
     if (isUndef(newStyle[name])) {
