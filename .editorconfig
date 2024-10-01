@@ -1,7 +1,7 @@
 # https://editorconfig.org
 
 root = true
-
+#added
 [*]
 charset = utf-8
 indent_style = space
