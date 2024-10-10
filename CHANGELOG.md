@@ -3,7 +3,7 @@
 
 ### Bug Fixes
 
-* **lifecycle:** esnure component effect scopes are disconnected ([56ce7f8](https://github.com/vuejs/vue/commit/56ce7f8c573116ed6683149206cf35c987249d42)), closes [#13134](https://github.com/vuejs/vue/issues/13134)
+* **lifecycle:** ensure component effect scopes are disconnected ([56ce7f8](https://github.com/vuejs/vue/commit/56ce7f8c573116ed6683149206cf35c987249d42)), closes [#13134](https://github.com/vuejs/vue/issues/13134)
 
 
 
@@ -706,7 +706,7 @@ In addition:
 - should consider presence of normal slots when caching normalized scoped slots ([9313cf9](https://github.com/vuejs/vue/commit/9313cf91740e1d43c43cf9e73d905dbab913beb5)), closes [#9644](https://github.com/vuejs/vue/issues/9644)
 - should not swallow user catch on rejected promise in methods ([7186940](https://github.com/vuejs/vue/commit/7186940143704acc4ec046132f6a56e9c983e510)), closes [#9694](https://github.com/vuejs/vue/issues/9694)
 - should use fallback for scoped slots with single falsy v-if ([781c705](https://github.com/vuejs/vue/commit/781c70514e01bc402828946805bfad7437c7175e)), closes [#9658](https://github.com/vuejs/vue/issues/9658)
-- **ssr:** fix nested async functional componet rendering ([#9673](https://github.com/vuejs/vue/issues/9673)) ([8082d2f](https://github.com/vuejs/vue/commit/8082d2f910d963f14c151fb445e0fcc5c975cca9)), closes [#9643](https://github.com/vuejs/vue/issues/9643)
+- **ssr:** fix nested async functional component rendering ([#9673](https://github.com/vuejs/vue/issues/9673)) ([8082d2f](https://github.com/vuejs/vue/commit/8082d2f910d963f14c151fb445e0fcc5c975cca9)), closes [#9643](https://github.com/vuejs/vue/issues/9643)
 - **ssr:** not push non-async css files into map ([#9677](https://github.com/vuejs/vue/issues/9677)) ([d282400](https://github.com/vuejs/vue/commit/d28240009c4c49fb2ef42a79206f0d9ad03f736c))
 - **transition:** fix appear check for transition wrapper components ([#9668](https://github.com/vuejs/vue/issues/9668)) ([4de4649](https://github.com/vuejs/vue/commit/4de4649d9637262a9b007720b59f80ac72a5620c))
 - v-bind object should be overridable by single bindings ([#9653](https://github.com/vuejs/vue/issues/9653)) ([0b57380](https://github.com/vuejs/vue/commit/0b57380f10986c6b07e3c240acc06bfd2eddfd1b)), closes [#9641](https://github.com/vuejs/vue/issues/9641)
@@ -909,7 +909,7 @@ In addition:
 - fix single v-for child optimization ([847e493](https://github.com/vuejs/vue/commit/847e493768371cec4718969e02bdb7f8463f4e03))
 - fix v-for component with undefined value ([4748760](https://github.com/vuejs/vue/commit/47487607fbb99339038cf84990ba341c25b5e20d)), closes [#9181](https://github.com/vuejs/vue/issues/9181)
 - **lifecycle:** beforeUpdated should not be called if component is destroyed ([#9171](https://github.com/vuejs/vue/issues/9171)) ([87bad80](https://github.com/vuejs/vue/commit/87bad80f0cb9a30b95d9410120ff6e3e2022a723)), closes [#8076](https://github.com/vuejs/vue/issues/8076)
-- **types:** accept primatives and falsy values in createElement children ([#9154](https://github.com/vuejs/vue/issues/9154)) ([d780dd2](https://github.com/vuejs/vue/commit/d780dd2e2adcf71f40c086055a659a9a2b4a8282)), closes [#8498](https://github.com/vuejs/vue/issues/8498)
+- **types:** accept primitive and falsy values in createElement children ([#9154](https://github.com/vuejs/vue/issues/9154)) ([d780dd2](https://github.com/vuejs/vue/commit/d780dd2e2adcf71f40c086055a659a9a2b4a8282)), closes [#8498](https://github.com/vuejs/vue/issues/8498)
 - **v-model:** properly handle multiline v-model expressions ([#9184](https://github.com/vuejs/vue/issues/9184)) ([3d44937](https://github.com/vuejs/vue/commit/3d449376d557c4533a9664f95df3a168ecee9bfa)), closes [#9183](https://github.com/vuejs/vue/issues/9183)
 - **weex:** support data class type that is string ([#9139](https://github.com/vuejs/vue/issues/9139)) ([d8285c5](https://github.com/vuejs/vue/commit/d8285c57a613c42eddf2d4f2b75c1cea6aa4703a)), closes [#9124](https://github.com/vuejs/vue/issues/9124)
 
@@ -1018,7 +1018,7 @@ In addition:
 - beforeUpdate should be called before render and allow state mutation ([#7822](https://github.com/vuejs/vue/issues/7822)) ([b7445a2](https://github.com/vuejs/vue/commit/b7445a2b945dcded287601ace8e711ab5cf35ab5)), closes [#7481](https://github.com/vuejs/vue/issues/7481)
 - **codegen:** support IE11 and Edge use of "Esc" key ([#7887](https://github.com/vuejs/vue/issues/7887)) ([1bd6196](https://github.com/vuejs/vue/commit/1bd6196fb234c28754d9a27095afe0b5b84990ad)), closes [#7880](https://github.com/vuejs/vue/issues/7880)
 - correct the `has` implementation in the `_renderProxy` ([#7878](https://github.com/vuejs/vue/issues/7878)) ([7b38739](https://github.com/vuejs/vue/commit/7b387390aa917edffc0eabce0b4186ea1ef40e2c))
-- ensure init/prepatch hooks are still repsected ([de42278](https://github.com/vuejs/vue/commit/de42278d34f6a800cec5c7eb781c1b8b83a829dd)), closes [vue-router#1338](https://github.com/vue-router/issues/1338)
+- ensure init/prepatch hooks are still respected ([de42278](https://github.com/vuejs/vue/commit/de42278d34f6a800cec5c7eb781c1b8b83a829dd)), closes [vue-router#1338](https://github.com/vue-router/issues/1338)
 - invoke component node create hooks before insertion ([#7823](https://github.com/vuejs/vue/issues/7823)) ([f43ce3a](https://github.com/vuejs/vue/commit/f43ce3a5d8f73e273f2d03c9d86ea5662cda481a)), closes [#7531](https://github.com/vuejs/vue/issues/7531)
 - **observer:** invoke getters on initial observation if setter defined ([#7828](https://github.com/vuejs/vue/issues/7828)) ([7a145d8](https://github.com/vuejs/vue/commit/7a145d86430bad65271f4d6ab1344b215fefe52a))
 
@@ -1049,7 +1049,7 @@ In addition:
 
 ### Bug Fixes
 
-- do not traverse VNodes when regsitering dependencies ([84a9a9d](https://github.com/vuejs/vue/commit/84a9a9d61057f6f40a9ad2bee456b39ef0a8f001)), closes [#7786](https://github.com/vuejs/vue/issues/7786)
+- do not traverse VNodes when registering dependencies ([84a9a9d](https://github.com/vuejs/vue/commit/84a9a9d61057f6f40a9ad2bee456b39ef0a8f001)), closes [#7786](https://github.com/vuejs/vue/issues/7786)
 
 ## [2.5.14](https://github.com/vuejs/vue/compare/v2.5.13...v2.5.14) (2018-03-09)
 
@@ -1314,7 +1314,7 @@ In addition:
 - support denoting normal elements as scoped slot ([dae173d](https://github.com/vuejs/vue/commit/dae173d96d15f47de6ce6961354d5c05e4273005))
 - support RegExp in ignoredElements ([#6769](https://github.com/vuejs/vue/issues/6769)) ([795b908](https://github.com/vuejs/vue/commit/795b908095b29e76435479879c1ade7ef759ce7b))
 - **types:** further improve Vue type declarations for canonical usage ([#6391](https://github.com/vuejs/vue/issues/6391)) ([db138e2](https://github.com/vuejs/vue/commit/db138e2254d71f6b96e033acf66ba43ad269841a))
-- **v-model:** craete non-existent properties as reactive ([e1da0d5](https://github.com/vuejs/vue/commit/e1da0d585c797860533d6cb10ea3d09c7fb711fc)), closes [#5932](https://github.com/vuejs/vue/issues/5932)
+- **v-model:** create non-existent properties as reactive ([e1da0d5](https://github.com/vuejs/vue/commit/e1da0d585c797860533d6cb10ea3d09c7fb711fc)), closes [#5932](https://github.com/vuejs/vue/issues/5932)
 - **v-model:** support dynamic input type binding ([f3fe012](https://github.com/vuejs/vue/commit/f3fe012d5499f607656b152ce5fcb506c641f9f4))
 - v-on automatic key inference ([4987eeb](https://github.com/vuejs/vue/commit/4987eeb3a734a16a4978d1061f73039002d351e6))
 
@@ -1386,7 +1386,7 @@ In addition:
 
 - checkbox v-model="array" ignore false-value ([#6180](https://github.com/vuejs/vue/issues/6180)) ([3d14e85](https://github.com/vuejs/vue/commit/3d14e855e422b656859d1b419af43b94320fcfce)), closes [#6178](https://github.com/vuejs/vue/issues/6178)
 - **compile:** properly generate comments with special character ([#6156](https://github.com/vuejs/vue/issues/6156)) ([d03fa26](https://github.com/vuejs/vue/commit/d03fa26687605a43d9a0c3f395d1d32375f7eaee)), closes [#6150](https://github.com/vuejs/vue/issues/6150)
-- ensure looseEqual is not dependant on key enumeration order ([a8ac129](https://github.com/vuejs/vue/commit/a8ac129a5876a7eeae0137bf2f1b0968d4d6ffad)), closes [#5908](https://github.com/vuejs/vue/issues/5908)
+- ensure looseEqual is not dependent on key enumeration order ([a8ac129](https://github.com/vuejs/vue/commit/a8ac129a5876a7eeae0137bf2f1b0968d4d6ffad)), closes [#5908](https://github.com/vuejs/vue/issues/5908)
 - include boolean in isPrimitive check ([#6127](https://github.com/vuejs/vue/issues/6127)) ([be3dc9c](https://github.com/vuejs/vue/commit/be3dc9c6e923248bcf81eb8240dd4f3c168fac59)), closes [#6126](https://github.com/vuejs/vue/issues/6126)
 - **parser:** only ignore the first newline in `<pre>` ([082fc39](https://github.com/vuejs/vue/commit/082fc3967db4d3290e901a38504dcd9bb698e561)), closes [#6146](https://github.com/vuejs/vue/issues/6146)
 - **provide/inject:** merge provide properly from mixins ([3036551](https://github.com/vuejs/vue/commit/303655116f8ec78f3b0ac99569637ad868dfe246)), closes [#6175](https://github.com/vuejs/vue/issues/6175)
