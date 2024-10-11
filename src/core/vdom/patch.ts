@@ -510,7 +510,7 @@ export function createPatchFunction(backend) {
           )
         } else {
           vnodeToMove = oldCh[idxInOld]
-          if (sameVnode(vnodeToMove, newStartVnode)) {
+          if (isDef(vnodeToMove) && sameVnode(vnodeToMove, newStartVnode)) {
             patchVnode(
               vnodeToMove,
               newStartVnode,
