@@ -94,6 +94,14 @@ function updateStyle(oldVnode: VNodeWithData, vnode: VNodeWithData) {
     // ie9 setting to null has no effect, must use empty string
     setProp(el, name, cur == null ? '' : cur)
   }
+  // determines if `v-show` is set, it has a higher priority.
+  if ('__vOriginalDisplay' in el) {
+    setProp(el, 'display', el.__vOriginalDisplay)
+    const vShowDirective = data.directives?.find(d => d.name === 'show')
+    if (vShowDirective && !vShowDirective.value) {
+      setProp(el, 'display', 'none')
+    }
+  }
 }
 
 export default {
