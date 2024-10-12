@@ -8,7 +8,7 @@ import type { Component } from 'types/component'
 
 export const MAX_UPDATE_COUNT = 100
 
-const queue: Array<Watcher> = []
+let queue: Array<Watcher> = []
 const activatedChildren: Array<Component> = []
 let has: { [key: number]: true | undefined | null } = {}
 let circular: { [key: number]: number } = {}
@@ -96,6 +96,12 @@ function flushSchedulerQueue() {
     id = watcher.id
     has[id] = null
     watcher.run()
+    //when flushing,new watchers will be added to the queue and they should be resort
+    queue = [
+      ...queue.slice(0, index + 1),
+      ...queue.slice(index + 1).sort(sortCompareFn)
+    ]
+
     // in dev build, check and stop circular updates.
     if (__DEV__ && has[id] != null) {
       circular[id] = (circular[id] || 0) + 1

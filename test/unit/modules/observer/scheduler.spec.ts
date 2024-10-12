@@ -151,6 +151,36 @@ describe('Scheduler', () => {
     }).then(done)
   })
 
+  // Github issue #12897
+  it('should call newly pushed watcher orderly via the flush attribute after current watcher is done', done => {
+    const callOrder: any[] = []
+    queueWatcher({
+      id: 1,
+      user: true,
+      run() {
+        callOrder.push(1)
+
+        queueWatcher({
+          id: 3,
+          run() {
+            callOrder.push(4)
+          },
+          post: true
+        })
+        queueWatcher({
+          id: 4,
+          run() {
+            callOrder.push(3)
+          }
+        }),
+          callOrder.push(2)
+      }
+    })
+    waitForUpdate(() => {
+      expect(callOrder).toEqual([1, 2, 3, 4])
+    }).then(done)
+  })
+
   // GitHub issue #5191
   it('emit should work when updated hook called', done => {
     const el = document.createElement('div')
