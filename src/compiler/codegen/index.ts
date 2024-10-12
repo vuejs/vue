@@ -432,7 +432,7 @@ function genScopedSlots(
   // it's possible for the same component to be reused but with different
   // compiled slot content. To avoid that, we generate a unique key based on
   // the generated code of all the slot contents.
-  let needsKey = !!el.if
+  let needsKey = !!(el.if || el.elseif || el.else)
 
   // OR when it is inside another scoped slot or v-for (the reactivity may be
   // disconnected due to the intermediate scope variable)
@@ -449,7 +449,7 @@ function genScopedSlots(
         needsForceUpdate = true
         break
       }
-      if (parent.if) {
+      if (parent.if || parent.elseif) {
         needsKey = true
       }
       parent = parent.parent

@@ -1267,7 +1267,7 @@ describe('Component scoped slot', () => {
     }).then(done)
   })
 
-  // #9534
+  // #9534 #12922
   it('should detect conditional reuse with different slot content', done => {
     const Foo = {
       template: `<div><slot :n="1" /></div>`
@@ -1276,25 +1276,44 @@ describe('Component scoped slot', () => {
     const vm = new Vue({
       components: { Foo },
       data: {
-        ok: true
+        value: 'a'
       },
       template: `
         <div>
-          <div v-if="ok">
+          <div v-if="value==='a'">
             <foo v-slot="{ n }">{{ n }}</foo>
           </div>
-          <div v-if="!ok">
+          <div v-else-if="value==='b'">
             <foo v-slot="{ n }">{{ n + 1 }}</foo>
+          </div>
+          <div v-else-if="value==='c'">
+            <foo v-slot="{ n }">{{ n + 2 }}</foo>
+          </div>
+          <div v-else>
+            <foo v-slot="{ n }">{{ n + 3 }}</foo>
           </div>
         </div>
       `
     }).$mount()
 
     expect(vm.$el.textContent.trim()).toBe(`1`)
-    vm.ok = false
+    vm.value = 'b'
     waitForUpdate(() => {
       expect(vm.$el.textContent.trim()).toBe(`2`)
-    }).then(done)
+    })
+      .then(() => {
+        vm.value = 'c'
+      })
+      .then(() => {
+        expect(vm.$el.textContent.trim()).toBe(`3`)
+      })
+      .then(() => {
+        vm.value = 'd'
+      })
+      .then(() => {
+        expect(vm.$el.textContent.trim()).toBe(`4`)
+      })
+      .then(done)
   })
 
   // #9644
@@ -1402,5 +1421,43 @@ describe('Component scoped slot', () => {
     waitForUpdate(() => {
       expect(parent.$el.textContent).toMatch(``)
     }).then(done)
+  })
+  // #12223
+  it('should update when switching between components with slot', done => {
+    const Foo = {
+      template: `<div><slot :n="1" /></div>`
+    }
+
+    const vm = new Vue({
+      template: `<div>
+        <Foo v-if="value==='a'"><template v-slot="{ n }">{{ n }}</template></Foo>
+        <Foo v-else-if="value==='b'"><template v-slot="{ n }">{{ n + 1 }}</template></Foo>
+        <Foo v-else-if="value==='c'"><template v-slot="{ n }">{{ n + 2 }}</template></Foo>
+        <Foo v-else><template v-slot="{ n}">{{ n + 3 }}</template></Foo>
+      </div>`,
+      data: {
+        value: 'a'
+      },
+      components: { Foo }
+    }).$mount()
+
+    expect(vm.$el.textContent.trim()).toBe(`1`)
+    vm.value = 'b'
+    waitForUpdate(() => {
+      expect(vm.$el.textContent.trim()).toBe(`2`)
+    })
+      .then(() => {
+        vm.value = 'c'
+      })
+      .then(() => {
+        expect(vm.$el.textContent.trim()).toBe(`3`)
+      })
+      .then(() => {
+        vm.value = 'd'
+      })
+      .then(() => {
+        expect(vm.$el.textContent.trim()).toBe(`4`)
+      })
+      .then(done)
   })
 })
