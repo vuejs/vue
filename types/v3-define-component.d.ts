@@ -16,7 +16,6 @@ import {
   ComponentPublicInstanceConstructor,
   CreateComponentPublicInstance
 } from './v3-component-public-instance'
-import { Data, HasDefined } from './common'
 import { EmitsOptions } from './v3-setup-context'
 import { CreateElement, RenderContext } from './umd'
 
@@ -150,30 +149,17 @@ export function defineComponent<
   EmitsNames extends string = string,
   PropsOptions extends ComponentPropsOptions = ComponentPropsOptions
 >(
-  options: HasDefined<Props> extends true
-    ? { functional?: never } & ComponentOptionsWithProps<
-        PropsOptions,
-        RawBindings,
-        D,
-        C,
-        M,
-        Mixin,
-        Extends,
-        Emits,
-        EmitsNames,
-        Props
-      >
-    : { functional?: never } & ComponentOptionsWithProps<
-        PropsOptions,
-        RawBindings,
-        D,
-        C,
-        M,
-        Mixin,
-        Extends,
-        Emits,
-        EmitsNames
-      >
+  options: { functional?: never } & ComponentOptionsWithProps<
+    PropsOptions,
+    RawBindings,
+    D,
+    C,
+    M,
+    Mixin,
+    Extends,
+    Emits,
+    EmitsNames
+  >
 ): DefineComponent<PropsOptions, RawBindings, D, C, M, Mixin, Extends, Emits>
 
 /**
