@@ -1302,7 +1302,7 @@ type EventHandlers<E> = {
     : (payload: E[K]) => void
 }
 
-type ReservedProps = {
+interface ReservedProps {
   key?: string | number | symbol
   ref?: VNodeData['ref']
   /**

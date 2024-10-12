@@ -55,6 +55,8 @@ const Foo = defineComponent({
 // @ts-expect-error
 ;<Foo />
 // @ts-expect-error
+;<Foo foo="bax" />
+// @ts-expect-error
 ;<Foo bar="1" />
 // @ts-expect-error
 ;<Foo bar={1} foo={2} />
