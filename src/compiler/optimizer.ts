@@ -8,10 +8,10 @@ const genStaticKeysCached = cached(genStaticKeys)
 
 /**
  * Goal of the optimizer: walk the generated template AST tree
- * and detect sub-trees that are purely static, i.e. parts of
+ * and detect subtrees that are purely static, i.e. parts of
  * the DOM that never needs to change.
  *
- * Once we detect these sub-trees, we can:
+ * Once we detect these subtrees, we can:
  *
  * 1. Hoist them into constants, so that we no longer need to
  *    create fresh nodes for them on each re-render;
@@ -75,7 +75,7 @@ function markStaticRoots(node: ASTNode, isInFor: boolean) {
       node.staticInFor = isInFor
     }
     // For a node to qualify as a static root, it should have children that
-    // are not just static text. Otherwise the cost of hoisting out will
+    // are not just static text. Otherwise, the cost of hoisting out will
     // outweigh the benefits and it's better off to just always render it fresh.
     if (
       node.static &&
