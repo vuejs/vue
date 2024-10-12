@@ -147,6 +147,49 @@ describe('create-element', () => {
     expect(vnode.children[0].children[1].ns).toBe('svg')
   })
 
+  // #11315
+  it('render svg foreignObject nested component slot with correct namespace', () => {
+    const vm = new Vue({
+      template: `
+        <svg>
+          <box></box>
+        </svg>
+      `,
+      components: {
+        'box': {
+          template: `
+            <foreignObject>
+              <comp-with-slot>
+                <p></p><svg></svg>
+              </comp-with-slot>
+            </foreignObject>
+          `,
+          components: {
+            'comp-with-slot': {
+              template: `
+                <div>
+                  <slot />
+                </div>
+              `
+            }
+          }
+        }
+      }
+    }).$mount()
+    const box = vm.$children[0]
+    const compWithSlot = box.$children[0]
+    expect(box.$vnode.ns).toBe('svg')
+    expect(box._vnode.tag).toBe('foreignObject')
+    expect(box._vnode.ns).toBe('svg')
+    expect(compWithSlot.$vnode.ns).toBeUndefined()
+    expect(compWithSlot._vnode.tag).toBe('div')
+    expect(compWithSlot._vnode.ns).toBeUndefined()
+    expect(compWithSlot._vnode.children[0].tag).toBe('p')
+    expect(compWithSlot._vnode.children[0].ns).toBeUndefined()
+    expect(compWithSlot._vnode.children[1].tag).toBe('svg')
+    expect(compWithSlot._vnode.children[1].ns).toBe('svg')
+  })
+
   // #6642
   it('render svg foreignObject component with correct namespace', () => {
     const vm = new Vue({

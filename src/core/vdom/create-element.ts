@@ -146,9 +146,14 @@ function applyNS(vnode, ns, force?: boolean) {
     ns = undefined
     force = true
   }
-  if (isDef(vnode.children)) {
-    for (let i = 0, l = vnode.children.length; i < l; i++) {
-      const child = vnode.children[i]
+  const children =
+    vnode.children ||
+    // #11315
+    (vnode.componentOptions && vnode.componentOptions.children)
+
+  if (isDef(children)) {
+    for (let i = 0, l = children.length; i < l; i++) {
+      const child = children[i]
       if (
         isDef(child.tag) &&
         (isUndef(child.ns) || (isTrue(force) && child.tag !== 'svg'))
