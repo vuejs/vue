@@ -15,7 +15,7 @@ import {
   set,
   del
 } from '../../index'
-import { IsUnion, describe, expectType } from '../utils'
+import { IsUnion, describe, expectType, IsAny } from '../utils'
 
 function plainType(arg: number | Ref<number>) {
   // ref coercing
@@ -45,6 +45,10 @@ function plainType(arg: number | Ref<number>) {
   const trueRef = ref<true>(true)
   expectType<Ref<true>>(trueRef)
   expectType<true>(trueRef.value)
+
+  // any value should return Ref<any>, not any
+  const a = ref(1 as any)
+  expectType<IsAny<typeof a>>(false)
 
   // tuple
   expectType<[number, string]>(unref(ref([1, '1'])))
@@ -386,7 +390,6 @@ describe('set/del', () => {
   del([], 'fse', 123)
 })
 
-
 {
   //#12978
   type Steps = { step: '1' } | { step: '2' }
@@ -395,4 +398,10 @@ describe('set/del', () => {
 
   expectType<IsUnion<typeof shallowUnionGenParam>>(false)
   expectType<IsUnion<typeof shallowUnionAsCast>>(false)
+}
+
+{
+  // any value should return Ref<any>, not any
+  const a = shallowRef(1 as any)
+  expectType<IsAny<typeof a>>(false)
 }
