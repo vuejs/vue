@@ -557,7 +557,7 @@ export function createPatchFunction(backend) {
   }
 
   function checkDuplicateKeys(children) {
-    const seenKeys = {}
+    const seenKeys = Object.create(null)
     for (let i = 0; i < children.length; i++) {
       const vnode = children[i]
       const key = vnode.key
