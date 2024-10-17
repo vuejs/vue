@@ -39,6 +39,7 @@ export function resolveSlots(
   }
   // ignore slots that contains only whitespace
   for (const name in slots) {
+    if (!slots.hasOwnProperty(name)) break;
     if (slots[name].every(isWhitespace)) {
       delete slots[name]
     }
