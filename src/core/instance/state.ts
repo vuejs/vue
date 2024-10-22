@@ -305,7 +305,11 @@ function initMethods(vm: Component, methods: Object) {
         )
       }
     }
-    vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
+    function changeMethodsThis() {
+      return () => methods[key].call(this)
+    }
+
+    vm[key] = typeof methods[key] !== 'function' ? noop : changeMethodsThis.call(vm)
   }
 }
 
