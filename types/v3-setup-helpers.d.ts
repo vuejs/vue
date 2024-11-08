@@ -43,7 +43,20 @@ export function defineProps<
   PP extends ComponentObjectPropsOptions = ComponentObjectPropsOptions
 >(props: PP): Readonly<ExtractPropTypes<PP>>
 // overload 3: typed-based declaration
-export function defineProps<TypeProps>(): Readonly<TypeProps>
+export function defineProps<TypeProps>(): DefineProps<
+  TypeProps,
+  BooleanKey<TypeProps>
+>
+
+type DefineProps<T, BKeys extends keyof T> = Readonly<T> & {
+  readonly [K in BKeys]-?: boolean
+}
+
+type BooleanKey<T, K extends keyof T = keyof T> = K extends any
+  ? [T[K]] extends [boolean | undefined]
+  ? K
+  : never
+  : never
 
 /**
  * Vue `<script setup>` compiler macro for declaring a component's emitted
@@ -96,26 +109,26 @@ export function defineExpose<
 type NotUndefined<T> = T extends undefined ? never : T
 
 type InferDefaults<T> = {
-  [K in keyof T]?: InferDefault<T, NotUndefined<T[K]>>
+  [K in keyof T]?: InferDefault<T, T[K]>
 }
 
-type InferDefault<P, T> = T extends
-  | null
-  | number
-  | string
-  | boolean
-  | symbol
-  | Function
-  ? T | ((props: P) => T)
-  : (props: P) => T
+type NativeType = null | number | string | boolean | symbol | Function
 
-type PropsWithDefaults<Base, Defaults> = Base & {
-  [K in keyof Defaults]: K extends keyof Base
-    ? Defaults[K] extends undefined
-      ? Base[K]
-      : NotUndefined<Base[K]>
-    : never
-}
+type InferDefault<P, T> =
+  | ((props: P) => T & {})
+  | (T extends NativeType ? T : never)
+
+type PropsWithDefaults<
+  T,
+  Defaults extends InferDefaults<T>,
+  BKeys extends keyof T
+> = Omit<T, keyof Defaults> & {
+  [K in keyof Defaults]-?: K extends keyof T
+  ? Defaults[K] extends undefined
+  ? T[K]
+  : NotUndefined<T[K]>
+  : never
+} & { readonly [K in BKeys]-?: boolean }
 
 /**
  * Vue `<script setup>` compiler macro for providing props default values when
@@ -135,10 +148,14 @@ type PropsWithDefaults<Base, Defaults> = Base & {
  * This is only usable inside `<script setup>`, is compiled away in the output
  * and should **not** be actually called at runtime.
  */
-export function withDefaults<Props, Defaults extends InferDefaults<Props>>(
-  props: Props,
+export function withDefaults<
+  T,
+  BKeys extends keyof T,
+  Defaults extends InferDefaults<T>
+>(
+  props: DefineProps<T, BKeys>,
   defaults: Defaults
-): PropsWithDefaults<Props, Defaults>
+): PropsWithDefaults<T, Defaults, BKeys>
 
 // make them global
 type _defineProps = typeof defineProps
