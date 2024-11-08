@@ -98,6 +98,40 @@ describe('defineProps w/ runtime declaration', () => {
   props2.baz
 })
 
+describe('defineProps w/ generic type declaration + withDefaults', <T extends number, TA extends {
+  a: string
+}, TString extends string>() => {
+  const res = withDefaults(
+    defineProps<{
+      n?: number
+      bool?: boolean
+
+      generic1?: T[] | { x: T }
+      generic2?: { x: T }
+      generic3?: TString
+      generic4?: TA
+    }>(),
+    {
+      n: 123,
+
+      generic1: () => [123, 33] as T[],
+      generic2: () => ({ x: 123 } as { x: T }),
+
+      generic3: () => 'test' as TString,
+      generic4: () => ({ a: 'test' } as TA)
+    }
+  )
+
+  res.n + 1
+
+  expectType<T[] | { x: T }>(res.generic1)
+  expectType<{ x: T }>(res.generic2)
+  expectType<TString>(res.generic3)
+  expectType<TA>(res.generic4)
+
+  expectType<boolean>(res.bool)
+})
+
 describe('defineEmits w/ type declaration', () => {
   const emit = defineEmits<(e: 'change') => void>()
   emit('change')
