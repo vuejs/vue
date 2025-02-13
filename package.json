@@ -88,7 +88,8 @@
   "homepage": "https://github.com/vuejs/vue#readme",
   "dependencies": {
     "@vue/compiler-sfc": "workspace:*",
-    "csstype": "^3.1.0"
+    "csstype": "^3.1.0",
+    "@vue/cli-service": "^4.5.0"
   },
   "devDependencies": {
     "@babel/parser": "^7.23.5",
