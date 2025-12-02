@@ -152,7 +152,7 @@ export function queueActivatedComponent(vm: Component) {
   activatedChildren.push(vm)
 }
 
-function callActivatedHooks(queue) {
+function callActivatedHooks(queue: Component[]) {
   for (let i = 0; i < queue.length; i++) {
     queue[i]._inactive = true
     activateChildComponent(queue[i], true /* true */)
