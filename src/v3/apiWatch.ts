@@ -53,6 +53,7 @@ export interface WatchOptionsBase extends DebuggerOptions {
 export interface WatchOptions<Immediate = boolean> extends WatchOptionsBase {
   immediate?: Immediate
   deep?: boolean
+  equals?: (value: any, oldValue: any) => boolean
 }
 
 export type WatchStopHandle = () => void
@@ -159,7 +160,8 @@ function doWatch(
     deep,
     flush = 'pre',
     onTrack,
-    onTrigger
+    onTrigger,
+    equals
   }: WatchOptions = emptyObject
 ): WatchStopHandle {
   if (__DEV__ && !cb) {
@@ -175,6 +177,17 @@ function doWatch(
           `watch(source, callback, options?) signature.`
       )
     }
+    if (equals !== undefined) {
+      warn(
+        `watch() "equals" option is only respected when using the ` +
+          `watch(source, callback, options?) signature.`
+      )
+    }
+  }
+
+  const equalsFn = isFunction(equals) ? equals : undefined
+  if (__DEV__ && equals !== undefined && !equalsFn) {
+    warn(`watch() "equals" option must be a function.`)
   }
 
   const warnInvalidSource = (s: unknown) => {
@@ -275,7 +288,18 @@ function doWatch(
   })
   watcher.noRecurse = !cb
 
-  let oldValue = isMultiSource ? [] : INITIAL_WATCHER_VALUE
+  let oldValue: any = INITIAL_WATCHER_VALUE
+  const hasChangedValue = (newValue: any, oldValue: any) => {
+    if (equalsFn) {
+      return !equalsFn(newValue, oldValue)
+    }
+    if (isMultiSource) {
+      return (newValue as any[]).some((v, i) =>
+        hasChanged(v, (oldValue as any[])[i])
+      )
+    }
+    return hasChanged(newValue, oldValue)
+  }
   // overwrite default run
   watcher.run = () => {
     if (!watcher.active) {
@@ -284,14 +308,12 @@ function doWatch(
     if (cb) {
       // watch(source, cb)
       const newValue = watcher.get()
+      const isInitialValue = oldValue === INITIAL_WATCHER_VALUE
       if (
-        deep ||
-        forceTrigger ||
-        (isMultiSource
-          ? (newValue as any[]).some((v, i) =>
-              hasChanged(v, (oldValue as any[])[i])
-            )
-          : hasChanged(newValue, oldValue))
+        isInitialValue ||
+        (equalsFn
+          ? hasChangedValue(newValue, oldValue)
+          : deep || forceTrigger || hasChangedValue(newValue, oldValue))
       ) {
         // cleanup before running cb again
         if (cleanup) {
@@ -300,7 +322,7 @@ function doWatch(
         call(cb, WATCHER_CB, [
           newValue,
           // pass undefined as the old value when it's changed for the first time
-          oldValue === INITIAL_WATCHER_VALUE ? undefined : oldValue,
+          isInitialValue ? (isMultiSource ? [] : undefined) : oldValue,
           onCleanup
         ])
         oldValue = newValue

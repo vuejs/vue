@@ -305,6 +305,39 @@ describe('api: watch', () => {
     expect(cleanup).toHaveBeenCalledTimes(2)
   })
 
+  it('respects equals to skip cleanup when values are equivalent', async () => {
+    const state = ref({ count: 0 })
+    const cleanup = vi.fn()
+    const cb = vi.fn((_value, _oldValue, onCleanup) => {
+      onCleanup(cleanup)
+    })
+
+    watch(state, cb, {
+      deep: true,
+      equals: (value, oldValue) => value.count === oldValue.count
+    })
+
+    state.value = { count: 0 }
+    await nextTick()
+    expect(cb).toHaveBeenCalledTimes(0)
+    expect(cleanup).toHaveBeenCalledTimes(0)
+
+    state.value = { count: 1 }
+    await nextTick()
+    expect(cb).toHaveBeenCalledTimes(1)
+    expect(cleanup).toHaveBeenCalledTimes(0)
+
+    state.value = { count: 1 }
+    await nextTick()
+    expect(cb).toHaveBeenCalledTimes(1)
+    expect(cleanup).toHaveBeenCalledTimes(0)
+
+    state.value = { count: 2 }
+    await nextTick()
+    expect(cb).toHaveBeenCalledTimes(2)
+    expect(cleanup).toHaveBeenCalledTimes(1)
+  })
+
   it('flush timing: pre (default)', async () => {
     const count = ref(0)
     const count2 = ref(0)
