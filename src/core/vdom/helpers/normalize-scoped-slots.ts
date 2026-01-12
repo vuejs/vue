@@ -14,7 +14,13 @@ export function normalizeScopedSlots(
 ): any {
   let res
   const hasNormalSlots = Object.keys(normalSlots).length > 0
-  const isStable = scopedSlots ? !!scopedSlots.$stable : !hasNormalSlots
+  const hasNormalizedSlots =
+    scopedSlots && scopedSlots.$hasNormal !== undefined
+  const isStable = scopedSlots
+    ? hasNormalizedSlots
+      ? false
+      : !!scopedSlots.$stable
+    : !hasNormalSlots
   const key = scopedSlots && scopedSlots.$key
   if (!scopedSlots) {
     res = {}

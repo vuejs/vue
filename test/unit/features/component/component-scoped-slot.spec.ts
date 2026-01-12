@@ -1380,6 +1380,43 @@ describe('Component scoped slot', () => {
     }).then(done)
   })
 
+  // #13066
+  it('updates forwarded $scopedSlots when normal and scoped slots coexist', done => {
+    const inner = {
+      data: () => ({ msg: 'hi' }),
+      render(h) {
+        return h('div', this.$scopedSlots.default({ msg: this.msg }))
+      }
+    }
+
+    const wrapper = {
+      render(h) {
+        return h(inner, { scopedSlots: this.$scopedSlots })
+      }
+    }
+
+    const vm = new Vue({
+      data: { count: 0 },
+      render(h) {
+        return h(
+          wrapper,
+          {
+            scopedSlots: {
+              default: props => h('span', `${props.msg} ${this.count}`)
+            }
+          },
+          [h('span', { slot: 'footer' }, this.count)]
+        )
+      }
+    }).$mount()
+
+    expect(vm.$el.textContent).toBe('hi 0')
+    vm.count++
+    waitForUpdate(() => {
+      expect(vm.$el.textContent).toBe('hi 1')
+    }).then(done)
+  })
+
   // #11652
   it('should update when switching between two components with slot and without slot', done => {
     const Child = {
