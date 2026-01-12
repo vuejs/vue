@@ -503,6 +503,70 @@ describe('Options provide/inject', () => {
     expect(injected).toEqual(['foo', 'bar'])
   })
 
+  // #13005
+  it('should merge reactive inject from mixins', () => {
+    const reactiveInjectKey = '__reactiveInject__'
+
+    const mixinA = {
+      data() {
+        return {
+          serviceA: 'A'
+        }
+      },
+      provide() {
+        const provided = Object.create(null)
+        provided[reactiveInjectKey] = Object.create(
+          this[reactiveInjectKey] || {}
+        )
+        Object.defineProperty(provided[reactiveInjectKey], 'serviceA', {
+          enumerable: true,
+          configurable: true,
+          get: () => this.serviceA
+        })
+        provided.serviceA = this.serviceA
+        return provided
+      }
+    }
+
+    const mixinB = {
+      data() {
+        return {
+          serviceB: 'B'
+        }
+      },
+      provide() {
+        const provided = Object.create(null)
+        provided[reactiveInjectKey] = Object.create(
+          this[reactiveInjectKey] || {}
+        )
+        Object.defineProperty(provided[reactiveInjectKey], 'serviceB', {
+          enumerable: true,
+          configurable: true,
+          get: () => this.serviceB
+        })
+        provided.serviceB = this.serviceB
+        return provided
+      }
+    }
+
+    const child = {
+      inject: { reactive: reactiveInjectKey },
+      render() {},
+      created() {
+        injected = [this.reactive.serviceA, this.reactive.serviceB]
+      }
+    }
+
+    new Vue({
+      mixins: [mixinA, mixinB],
+      render(h) {
+        return h(child)
+      }
+    }).$mount()
+
+    expect(injected).toEqual(['A', 'B'])
+  })
+
   it('should merge provide from mixins (mix of objects and functions)', () => {
     const mixinA = { provide: { foo: 'foo' } }
     const mixinB = { provide: () => ({ bar: 'bar' }) }

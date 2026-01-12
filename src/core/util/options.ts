@@ -264,18 +264,68 @@ strats.props =
       return ret
     }
 
+const reactiveInjectKey = '__reactiveInject__'
+
+function mergeReactiveInject(
+  target: Record<string, any>,
+  parentProvide: Record<string, any> | null | undefined,
+  childProvide: Record<string, any> | null | undefined
+) {
+  const parentInject =
+    parentProvide && typeof parentProvide === 'object'
+      ? parentProvide[reactiveInjectKey]
+      : null
+  const childInject =
+    childProvide && typeof childProvide === 'object'
+      ? childProvide[reactiveInjectKey]
+      : null
+
+  if (!parentInject && !childInject) return
+
+  const baseInject =
+    (parentInject && Object.getPrototypeOf(parentInject)) ||
+    (childInject && Object.getPrototypeOf(childInject)) ||
+    {}
+  const mergedInject = Object.create(baseInject)
+
+  copyReactiveInject(mergedInject, parentInject)
+  copyReactiveInject(mergedInject, childInject)
+
+  target[reactiveInjectKey] = mergedInject
+}
+
+function copyReactiveInject(
+  target: Record<PropertyKey, any>,
+  source: Record<PropertyKey, any> | null | undefined
+) {
+  if (!source || typeof source !== 'object') return
+  const keys = hasSymbol ? Reflect.ownKeys(source) : Object.keys(source)
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i]
+    if (key === '__ob__') continue
+    const desc = Object.getOwnPropertyDescriptor(source, key)
+    if (desc) {
+      Object.defineProperty(target, key, desc)
+    }
+  }
+}
+
 strats.provide = function (parentVal: Object | null, childVal: Object | null) {
   if (!parentVal) return childVal
   return function () {
     const ret = Object.create(null)
-    mergeData(ret, isFunction(parentVal) ? parentVal.call(this) : parentVal)
+    const parentProvide = isFunction(parentVal) ? parentVal.call(this) : parentVal
+    mergeData(ret, parentProvide)
+    let childProvide
     if (childVal) {
+      childProvide = isFunction(childVal) ? childVal.call(this) : childVal
       mergeData(
         ret,
-        isFunction(childVal) ? childVal.call(this) : childVal,
+        childProvide,
         false // non-recursive
       )
     }
+    mergeReactiveInject(ret, parentProvide, childProvide)
     return ret
   }
 }
