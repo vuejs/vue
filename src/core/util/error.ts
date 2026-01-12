@@ -4,6 +4,8 @@ import { inBrowser } from './env'
 import { isPromise } from 'shared/util'
 import { pushTarget, popTarget } from '../observer/dep'
 
+let isHandlingError = false
+
 export function handleError(err: Error, vm: any, info: string) {
   // Deactivate deps tracking while processing error handler to avoid possible infinite rendering.
   // See: https://github.com/vuejs/vuex/issues/1505
@@ -55,7 +57,12 @@ export function invokeWithErrorHandling(
 
 function globalHandleError(err, vm, info) {
   if (config.errorHandler) {
+    if (isHandlingError) {
+      logError(err, vm, info)
+      return
+    }
     try {
+      isHandlingError = true
       return config.errorHandler.call(null, err, vm, info)
     } catch (e: any) {
       // if the user intentionally throws the original error in the handler,
@@ -63,6 +70,8 @@ function globalHandleError(err, vm, info) {
       if (e !== err) {
         logError(e, null, 'config.errorHandler')
       }
+    } finally {
+      isHandlingError = false
     }
   }
   logError(err, vm, info)

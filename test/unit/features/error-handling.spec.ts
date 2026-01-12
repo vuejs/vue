@@ -216,6 +216,34 @@ describe('Error handling', () => {
     Vue.config.errorHandler = undefined
   })
 
+  it('should avoid recursive error handling when errorHandler triggers another error', () => {
+    const originalHandler = Vue.config.errorHandler
+    let handlerCalls = 0
+    Vue.config.errorHandler = (err, instance) => {
+      handlerCalls++
+      if (handlerCalls === 1 && instance) {
+        instance.$emit('boom')
+      }
+    }
+    new Vue({
+      created() {
+        this.$on('boom', () => {
+          throw new Error('error in boom')
+        })
+      },
+      render(h) {
+        throw new Error('error in render')
+      },
+      renderError(h, err) {
+        return h('div', err.toString())
+      }
+    }).$mount()
+    expect(handlerCalls).toBe(1)
+    expect('Error in event handler for "boom"').toHaveBeenWarned()
+    expect('Error: error in boom').toHaveBeenWarned()
+    Vue.config.errorHandler = originalHandler
+  })
+
   // event handlers that can throw errors or return rejected promise
   ;[
     ['single handler', '<div v-on:click="bork"></div>'],
