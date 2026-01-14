@@ -109,7 +109,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
   let root
   let currentParent
   let inVPre = false
-  let inPre = false
+  let inPre = 0
   let warned = false
 
   function warnOnce(msg, range) {
@@ -173,7 +173,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
       inVPre = false
     }
     if (platformIsPreTag(element.tag)) {
-      inPre = false
+      inPre = Math.max(inPre - 1, 0)
     }
     // apply post-transforms
     for (let i = 0; i < postTransforms.length; i++) {
@@ -287,7 +287,7 @@ export function parse(template: string, options: CompilerOptions): ASTElement {
         }
       }
       if (platformIsPreTag(element.tag)) {
-        inPre = true
+        inPre += 1
       }
       if (inVPre) {
         processRawAttrs(element)

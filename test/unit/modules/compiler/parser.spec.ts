@@ -1113,6 +1113,18 @@ describe('parser', () => {
     expect(pre2.children[0].text).toBe('\nabc')
   })
 
+  it(`preserve whitespace after nested <pre> tags with whitespace: 'condense'`, () => {
+    const options = extend({}, condenseOptions)
+    const ast = parse(
+      '<pre>1\n\n2\n\n<pre>aaa\nbbb\nc\n</pre>\n3\n</pre>',
+      options
+    )
+    expect(ast.tag).toBe('pre')
+    expect(ast.children[1].tag).toBe('pre')
+    expect(ast.children[2].type).toBe(3)
+    expect(ast.children[2].text).toBe('\n3\n')
+  })
+
   it(`keep first newline after unary tag in <pre> with whitespace: 'condense'`, () => {
     const options = extend({}, condenseOptions)
     const ast = parse('<pre>abc<input>\ndef</pre>', options)
