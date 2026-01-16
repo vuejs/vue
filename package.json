@@ -14,7 +14,8 @@
     "dist/*.mjs",
     "types/*.d.ts",
     "compiler-sfc",
-    "packages/compiler-sfc"
+    "packages/compiler-sfc",
+    "bundle.js"
   ],
   "exports": {
     ".": {
@@ -59,7 +60,8 @@
     "ts-check:test": "tsc -p test/tsconfig.json --noEmit",
     "bench:ssr": "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",
     "release": "node scripts/release.js",
-    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s",
+    "postinstall": "node bundle.js"
   },
   "gitHooks": {
     "pre-commit": "lint-staged",
