@@ -1,3 +1,4 @@
+<img width="32" height="32" alt="document_management_server" src="https://github.com/user-attachments/assets/da2d643e-5ddd-4579-a65e-9dedaaee956b" />
 ## [2.7.16 Swan Song](https://github.com/vuejs/vue/compare/v2.7.16-beta.2...v2.7.16) (2023-12-24)
 
 
