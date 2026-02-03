@@ -40,8 +40,7 @@ const componentVNodeHooks = {
       !vnode.componentInstance._isDestroyed &&
       vnode.data.keepAlive
     ) {
-      // kept-alive components, treat as a patch
-      const mountedNode: any = vnode // work around flow
+      const mountedNode: any = vnode
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
       const child = (vnode.componentInstance = createComponentInstanceForVnode(
@@ -57,10 +56,10 @@ const componentVNodeHooks = {
     const child = (vnode.componentInstance = oldVnode.componentInstance)
     updateChildComponent(
       child,
-      options.propsData, // updated props
-      options.listeners, // updated listeners
-      vnode, // new parent vnode
-      options.children // new children
+      options.propsData,
+      options.listeners,
+      vnode,
+      options.children
     )
   },
 
@@ -72,14 +71,9 @@ const componentVNodeHooks = {
     }
     if (vnode.data.keepAlive) {
       if (context._isMounted) {
-        // vue-router#1212
-        // During updates, a kept-alive component's child components may
-        // change, so directly walking the tree here may call activated hooks
-        // on incorrect children. Instead we push them into a queue which will
-        // be processed after the whole patch process ended.
         queueActivatedComponent(componentInstance)
       } else {
-        activateChildComponent(componentInstance, true /* direct */)
+        activateChildComponent(componentInstance, true)
       }
     }
   },
@@ -90,7 +84,7 @@ const componentVNodeHooks = {
       if (!vnode.data.keepAlive) {
         componentInstance.$destroy()
       } else {
-        deactivateChildComponent(componentInstance, true /* direct */)
+        deactivateChildComponent(componentInstance, true)
       }
     }
   }
@@ -111,13 +105,10 @@ export function createComponent(
 
   const baseCtor = context.$options._base
 
-  // plain options object: turn it into a constructor
   if (isObject(Ctor)) {
     Ctor = baseCtor.extend(Ctor as typeof Component)
   }
 
-  // if at this stage it's not a constructor or an async component factory,
-  // reject.
   if (typeof Ctor !== 'function') {
     if (__DEV__) {
       warn(`Invalid Component definition: ${String(Ctor)}`, context)
@@ -125,33 +116,25 @@ export function createComponent(
     return
   }
 
-  // async component
   let asyncFactory
   // @ts-expect-error
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor)
     if (Ctor === undefined) {
-      // return a placeholder node for async component, which is rendered
-      // as a comment node but preserves all the raw information for the node.
-      // the information will be used for async server-rendering and hydration.
       return createAsyncPlaceholder(asyncFactory, data, context, children, tag)
     }
   }
 
   data = data || {}
 
-  // resolve constructor options in case global mixins are applied after
-  // component constructor creation
   resolveConstructorOptions(Ctor as typeof Component)
 
-  // transform component v-model data into props & events
   if (isDef(data.model)) {
     // @ts-expect-error
     transformModel(Ctor.options, data)
   }
 
-  // extract props
   // @ts-expect-error
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
@@ -167,19 +150,11 @@ export function createComponent(
     )
   }
 
-  // extract listeners, since these needs to be treated as
-  // child component listeners instead of DOM listeners
   const listeners = data.on
-  // replace with listeners with .native modifier
-  // so it gets processed during parent component patch.
   data.on = data.nativeOn
 
   // @ts-expect-error
   if (isTrue(Ctor.options.abstract)) {
-    // abstract components do not keep anything
-    // other than props & listeners & slot
-
-    // work around flow
     const slot = data.slot
     data = {}
     if (slot) {
@@ -187,21 +162,16 @@ export function createComponent(
     }
   }
 
-  // install component management hooks onto the placeholder node
   installComponentHooks(data)
 
-  // return a placeholder vnode
-  // @ts-expect-error
   const name = getComponentName(Ctor.options) || tag
   const vnode = new VNode(
-    // @ts-expect-error
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
     data,
     undefined,
     undefined,
     undefined,
     context,
-    // @ts-expect-error
     { Ctor, propsData, listeners, tag, children },
     asyncFactory
   )
@@ -210,9 +180,7 @@ export function createComponent(
 }
 
 export function createComponentInstanceForVnode(
-  // we know it's MountedComponentVNode but flow doesn't
   vnode: any,
-  // activeInstance in lifecycle state
   parent?: any
 ): Component {
   const options: InternalComponentOptions = {
@@ -220,7 +188,6 @@ export function createComponentInstanceForVnode(
     _parentVnode: vnode,
     parent
   }
-  // check inline-template render functions
   const inlineTemplate = vnode.data.inlineTemplate
   if (isDef(inlineTemplate)) {
     options.render = inlineTemplate.render
@@ -244,7 +211,6 @@ function installComponentHooks(data: VNodeData) {
 
 function mergeHook(f1: any, f2: any): Function {
   const merged = (a, b) => {
-    // flow complains about extra args which is why we use any
     f1(a, b)
     f2(a, b)
   }
@@ -252,8 +218,6 @@ function mergeHook(f1: any, f2: any): Function {
   return merged
 }
 
-// transform component v-model info (value and callback) into
-// prop and event handler respectively.
 function transformModel(options, data: any) {
   const prop = (options.model && options.model.prop) || 'value'
   const event = (options.model && options.model.event) || 'input'

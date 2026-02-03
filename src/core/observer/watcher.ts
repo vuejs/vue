@@ -260,6 +260,7 @@ export default class Watcher implements DepTarget {
   /**
    * Remove self from all dependencies' subscriber list.
    */
+  
   teardown() {
     if (this.vm && !this.vm._isBeingDestroyed) {
       remove(this.vm._scope.effects, this)

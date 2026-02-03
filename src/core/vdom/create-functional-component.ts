@@ -26,6 +26,10 @@ export function FunctionalRenderContext(
   Ctor: typeof Component
 ) {
   const options = Ctor.options
+
+  // 🔹 NEW: store functional component watchers
+  this._functionalWatchers = []
+
   // ensure the createElement function in functional components
   // gets a unique context - this is necessary for correct named slot check
   let contextVm
@@ -40,6 +44,7 @@ export function FunctionalRenderContext(
     // @ts-ignore
     parent = parent._original
   }
+
   const isCompiled = isTrue(options._compiled)
   const needNormalization = !isCompiled
 
@@ -107,6 +112,7 @@ export function createFunctionalComponent(
   const options = Ctor.options
   const props = {}
   const propOptions = options.props
+
   if (isDef(propOptions)) {
     for (const key in propOptions) {
       props[key] = validateProp(key, propOptions, propsData || emptyObject)
@@ -157,12 +163,13 @@ function cloneAndMarkFunctionalResult(
   options,
   renderContext
 ) {
-  // #7817 clone node before setting fnContext, otherwise if the node is reused
-  // (e.g. it was from a cached normal slot) the fnContext causes named slots
-  // that should not be matched to match.
   const clone = cloneVNode(vnode)
   clone.fnContext = contextVm
   clone.fnOptions = options
+
+  // 🔹 NEW: attach functional watchers to vnode
+  clone._functionalWatchers = renderContext._functionalWatchers
+
   if (__DEV__) {
     ;(clone.devtoolsMeta = clone.devtoolsMeta || ({} as any)).renderContext =
       renderContext
