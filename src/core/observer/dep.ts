@@ -21,6 +21,7 @@ export interface DepTarget extends DebuggerOptions {
   id: number
   addDep(dep: Dep): void
   update(): void
+  active?: boolean
 }
 
 /**
@@ -45,14 +46,11 @@ export default class Dep {
   }
 
   removeSub(sub: DepTarget) {
-    // #12696 deps with massive amount of subscribers are extremely slow to
-    // clean up in Chromium
-    // to workaround this, we unset the sub for now, and clear them on
-    // next scheduler flush.
-    this.subs[this.subs.indexOf(sub)] = null
-    if (!this._pending) {
-      this._pending = true
-      pendingCleanupDeps.push(this)
+    const index = this.subs.indexOf(sub)
+    if (index > -1) {
+      this.subs.splice(index, 1)
+      // 🔧 STEP 4.6: defensive cleanup
+      sub.active = false
     }
   }
 

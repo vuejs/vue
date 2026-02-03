@@ -349,18 +349,27 @@ export function createPatchFunction(backend) {
   }
 
   function invokeDestroyHook(vnode) {
-    let i, j
-    const data = vnode.data
-    if (isDef(data)) {
-      if (isDef((i = data.hook)) && isDef((i = i.destroy))) i(vnode)
-      for (i = 0; i < cbs.destroy.length; ++i) cbs.destroy[i](vnode)
+  let i, j
+  const data = vnode.data
+  if (vnode._functionalWatchers) {
+    for (let i = 0; i < vnode._functionalWatchers.length; i++) {
+      vnode._functionalWatchers[i].teardown()
     }
-    if (isDef((i = vnode.children))) {
-      for (j = 0; j < vnode.children.length; ++j) {
-        invokeDestroyHook(vnode.children[j])
-      }
+    vnode._functionalWatchers.length = 0
+  }
+
+  if (isDef(data)) {
+    if (isDef((i = data.hook)) && isDef((i = i.destroy))) i(vnode)
+    for (i = 0; i < cbs.destroy.length; ++i) cbs.destroy[i](vnode)
+  }
+
+  if (isDef((i = vnode.children))) {
+    for (j = 0; j < vnode.children.length; ++j) {
+      invokeDestroyHook(vnode.children[j])
     }
   }
+}
+
 
   function removeVnodes(vnodes, startIdx, endIdx) {
     for (; startIdx <= endIdx; ++startIdx) {

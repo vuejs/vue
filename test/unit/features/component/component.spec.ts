@@ -457,3 +457,26 @@ describe('Component', () => {
     ).toHaveBeenWarned()
   })
 })
+
+
+
+it('cleans up watchers for functional components on destroy', done => {
+  let vm = new Vue({
+    render(h) {
+      return h({
+        functional: true,
+        render(h, ctx) {
+          return h('div', ctx.props.msg)
+        }
+      }, { props: { msg: 'hello' }})
+    }
+  }).$mount()
+
+  const vnode = vm._vnode
+  expect(vnode._functionalWatchers.length).toBeGreaterThan(0)
+
+  vm.$destroy()
+
+  expect(vnode._functionalWatchers.length).toBe(0)
+  done()
+})
