@@ -1,6 +1,6 @@
 import { isFunction, warn } from 'core/util'
 import { currentInstance } from './currentInstance'
-import type { Component } from 'types/component'
+type { Component } from 'types/component'
 
 export interface InjectionKey<T> extends Symbol {}
 
@@ -63,7 +63,7 @@ export function inject(
         ? defaultValue.call(instance)
         : defaultValue
     } else if (__DEV__) {
-      warn(`injection "${String(key)}" not found.`)
+      warn(`injection "${String(key)}" not found. Key used: ${String(key)}.`)
     }
   } else if (__DEV__) {
     warn(`inject() can only be used inside setup() or functional components.`)
