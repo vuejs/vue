@@ -63,7 +63,7 @@ export function inject(
         ? defaultValue.call(instance)
         : defaultValue
     } else if (__DEV__) {
-      warn(`injection "${String(key)}" not found.`)
+      warn(`injection "${String(key)}" not found. Key: ${key}`)
     }
   } else if (__DEV__) {
     warn(`inject() can only be used inside setup() or functional components.`)
