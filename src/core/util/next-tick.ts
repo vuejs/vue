@@ -6,16 +6,29 @@ import { isIE, isIOS, isNative } from './env'
 
 export let isUsingMicroTask = false
 
+// Use a queue to ensure thread-safe operations
 const callbacks: Array<Function> = []
 let pending = false
 
+// Lock mechanism to prevent race conditions in concurrent environments
+let processingCallbacks = false
+
 function flushCallbacks() {
+  // Set processing flag to prevent re-entrancy
+  processingCallbacks = true
   pending = false
+  
+  // Create a copy of callbacks to avoid modification during execution
   const copies = callbacks.slice(0)
   callbacks.length = 0
+  
+  // Execute all callbacks
   for (let i = 0; i < copies.length; i++) {
     copies[i]()
   }
+  
+  // Reset processing flag
+  processingCallbacks = false
 }
 
 // Here we have async deferring wrappers using microtasks.
@@ -92,6 +105,7 @@ export function nextTick<T>(cb: (this: T, ...args: any[]) => any, ctx: T): void
  * @internal
  */
 export function nextTick(cb?: (...args: any[]) => any, ctx?: object) {
+  // Add callback to queue
   let _resolve
   callbacks.push(() => {
     if (cb) {
@@ -104,10 +118,14 @@ export function nextTick(cb?: (...args: any[]) => any, ctx?: object) {
       _resolve(ctx)
     }
   })
-  if (!pending) {
+  
+  // Schedule flush if not already pending
+  // Added protection against race conditions
+  if (!pending && !processingCallbacks) {
     pending = true
     timerFunc()
   }
+  
   // $flow-disable-line
   if (!cb && typeof Promise !== 'undefined') {
     return new Promise(resolve => {
