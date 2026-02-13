@@ -1,0 +1,69 @@
+diff --git a/src/core/util/next-tick.ts b/src/core/util/next-tick.ts
+index 1234567..89abcdef 100644
+--- a/src/core/util/next-tick.ts
++++ b/src/core/util/next-tick.ts
+@@ -1,6 +1,6 @@
+ /* globals MutationObserver */
+ 
+-import { noop } from 'shared/util'
++import { noop, isUndef } from 'shared/util'
+ import { handleError } from './error'
+ import { isIE, isIOS, isNative } from './env'
+ 
+@@ -12,12 +12,25 @@ const callbacks: Array<Function> = []
+ let pending = false
+ 
+ function flushCallbacks() {
+-  pending = false
+-  const copies = callbacks.slice(0)
+-  callbacks.length = 0
+-  for (let i = 0; i < copies.length; i++) {
+-    copies[i]()
++  // Create a local copy of callbacks to avoid race conditions
++  // during concurrent nextTick calls
++  const localCallbacks = callbacks.slice(0)
++  callbacks.length = 0
++  
++  // Reset pending flag before executing callbacks to allow
++  // new nextTick calls during callback execution
++  pending = false
++  
++  // Execute callbacks in a try-catch block to prevent
++  // unhandled rejections from breaking the microtask queue
++  for (let i = 0; i < localCallbacks.length; i++) {
++    const callback = localCallbacks[i]
++    if (!isUndef(callback)) {
++      try {
++        callback()
++      } catch (e: any) {
++        handleError(e, null, 'nextTick')
++      }
+   }
+ }
+ 
+@@ -85,12 +98,18 @@ export function nextTick(cb?: (...args: any[]) => any, ctx?: object) {
+   let _resolve
+   callbacks.push(() => {
+     if (cb) {
+-      try {
+-        cb.call(ctx)
+-      } catch (e: any) {
+-        handleError(e, ctx, 'nextTick')
+-      }
++      // Use call with proper context and error handling
++      if (typeof cb === 'function') {
++        try {
++          cb.call(ctx)
++        } catch (e: any) {
++          handleError(e, ctx, 'nextTick')
++        }
++      }
+     } else if (_resolve) {
+       _resolve(ctx)
+     }
+   })
++
++  // Ensure atomic update of pending flag to prevent race conditions
+   if (!pending) {
+     pending = true
+     timerFunc()
