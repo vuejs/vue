@@ -194,6 +194,14 @@ export function queueWatcher(watcher: Watcher) {
       flushSchedulerQueue()
       return
     }
+  let isProcessing = false;
+  if (!isProcessing) {
+    isProcessing = true;
+    nextTick(() => {
+      flushSchedulerQueue();
+      isProcessing = false;
+    });
+  }
     nextTick(flushSchedulerQueue)
   }
 }
