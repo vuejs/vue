@@ -324,6 +324,34 @@ describe('Directive v-on', () => {
     expect(spy.mock.calls.length).toBe(1)
   })
 
+  // #12319
+  it('should support all system modifiers with exact', () => {
+    vm = new Vue({
+      el,
+      template: `
+        <div>
+          <input ref="input" @keydown.ctrl.shift.alt.meta.exact="foo">
+        </div>
+      `,
+      methods: { foo: spy }
+    })
+
+    // should not trigger without all modifiers
+    triggerEvent(vm.$refs.input, 'keydown', e => {
+      e.ctrlKey = true
+    })
+    expect(spy.mock.calls.length).toBe(0)
+
+    // should trigger with all modifiers
+    triggerEvent(vm.$refs.input, 'keydown', e => {
+      e.ctrlKey = true
+      e.shiftKey = true
+      e.altKey = true
+      e.metaKey = true
+    })
+    expect(spy.mock.calls.length).toBe(1)
+  })
+
   it('should support number keyCode', () => {
     vm = new Vue({
       el,

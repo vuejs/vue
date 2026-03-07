@@ -455,6 +455,11 @@ describe('codegen', () => {
       '<input @click.ctrl.exact="onClick">',
       `with(this){return _c('input',{on:{"click":function($event){if(!$event.ctrlKey)return null;if($event.shiftKey||$event.altKey||$event.metaKey)return null;return onClick.apply(null, arguments)}}})}`
     )
+    // #12319
+    assertCodegen(
+      '<input @keydown.ctrl.shift.alt.meta.exact="onClick">',
+      `with(this){return _c('input',{on:{"keydown":function($event){if(!$event.ctrlKey)return null;if(!$event.shiftKey)return null;if(!$event.altKey)return null;if(!$event.metaKey)return null;return onClick.apply(null, arguments)}}})}`
+    )
   })
 
   it('generate events with multiple modifiers', () => {
