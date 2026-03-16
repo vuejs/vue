@@ -114,12 +114,13 @@ function genHandler(
         }
       } else if (key === 'exact') {
         const modifiers = handler.modifiers
-        genModifierCode += genGuard(
-          ['ctrl', 'shift', 'alt', 'meta']
-            .filter(keyModifier => !modifiers[keyModifier])
-            .map(keyModifier => `$event.${keyModifier}Key`)
-            .join('||')
-        )
+        const exactModifiers = ['ctrl', 'shift', 'alt', 'meta']
+          .filter(keyModifier => !modifiers[keyModifier])
+          .map(keyModifier => `$event.${keyModifier}Key`)
+          .join('||')
+        if (exactModifiers) {
+          genModifierCode += genGuard(exactModifiers)
+        }
       } else {
         keys.push(key)
       }
