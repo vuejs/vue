@@ -493,7 +493,7 @@ describe('vdom patch: edge cases', () => {
       },
       template: `
         <transition-group>
-          <v-switch key="swicth" v-foo :on="isOn"/>
+          <v-switch key="switch" v-foo :on="isOn"/>
         </transition-group>
       `
     }).$mount()

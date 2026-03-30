@@ -42,7 +42,7 @@ describe('Dep', () => {
       _target = Dep.target
     })
 
-    afterAll(() => {
+    after all(() => {
       Dep.target = _target
     })
 

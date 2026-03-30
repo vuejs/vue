@@ -30,7 +30,7 @@ describe('Component async', () => {
     }
   })
 
-  afterAll(function () {
+  after all(function () {
     global.setTimeout = oldSetTimeout
     global.clearTimeout = oldClearTimeout
   })
