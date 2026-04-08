@@ -120,3 +120,34 @@ Thank you to all the people who already contributed to Vue!
 [MIT](https://opensource.org/licenses/MIT)
 
 Copyright (c) 2013-present, Yuxi (Evan) You
+
+---
+
+## 🚀 Project Overview
+Enhanced README documentation for clarity, badges, and contribution guidance.
+
+## ✨ Features
+- Improved documentation structure
+- Repository metadata and badges
+- Automated activity insights
+- Contribution guidance
+
+## 🤝 Contributing
+Contributions are welcome.  
+Feel free to open issues or submit pull requests.
+
+## 📊 Repository Statistics
+![Stars](https://shields.io)
+![Forks](https://shields.io)
+![Issues](https://shields.io)
+![License](https://shields.io)
+
+## 📜 Recent Repository Activity
+- 9e88707 chore: fix spelling mistakes (#13216) (Toddneal Stallworth, 2024-10-10)
+
+## 🕒 Last Updated
+Wed Apr  8 18:00:41 +04 2026
+
+---
+
+### 🤖 Automated Documentation Update
