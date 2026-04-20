@@ -66,7 +66,7 @@ export function setupPuppeteer() {
     await page.close()
   })
 
-  after all(async () => {
+  afterAll(async () => {
     await browser.close()
   })
 
