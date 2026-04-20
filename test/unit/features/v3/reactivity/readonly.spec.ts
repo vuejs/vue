@@ -505,7 +505,7 @@ describe('reactivity/readonly', () => {
     expect(r.value).toBe(ro)
   })
 
-  test('compatiblity with classes', () => {
+  test('compatibility with classes', () => {
     const spy = vi.fn()
     class Foo {
       x = 1
