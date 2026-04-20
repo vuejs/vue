@@ -351,6 +351,9 @@ export function createPatchFunction(backend) {
   function invokeDestroyHook(vnode) {
     let i, j
     const data = vnode.data
+    if (vnode.devtoolsMeta && vnode.devtoolsMeta.renderContext) {
+      vnode.devtoolsMeta.renderContext.teardown()
+    }
     if (isDef(data)) {
       if (isDef((i = data.hook)) && isDef((i = i.destroy))) i(vnode)
       for (i = 0; i < cbs.destroy.length; ++i) cbs.destroy[i](vnode)

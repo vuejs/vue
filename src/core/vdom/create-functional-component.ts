@@ -93,6 +93,14 @@ export function FunctionalRenderContext(
     this._c = (a, b, c, d) =>
       createElement(contextVm, a, b, c, d, needNormalization)
   }
+  this.vnodes = []
+}
+
+FunctionalRenderContext.prototype.teardown = function () {
+  this.vnodes.forEach(vnode => {
+    if (vnode.devtoolsMeta) vnode.devtoolsMeta.renderContext = null
+  })
+  this.vnodes = []
 }
 
 installRenderHelpers(FunctionalRenderContext.prototype)
@@ -166,6 +174,7 @@ function cloneAndMarkFunctionalResult(
   if (__DEV__) {
     ;(clone.devtoolsMeta = clone.devtoolsMeta || ({} as any)).renderContext =
       renderContext
+    renderContext.vnodes.push(clone)
   }
   if (data.slot) {
     ;(clone.data || (clone.data = {})).slot = data.slot
