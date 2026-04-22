@@ -125,7 +125,7 @@ describe('Global API: set/delete', () => {
       Vue.set(obj, 'foo', 1)
       expect(obj.foo).toBe(1)
       expect(
-        'Set operation on key "foo" failed: target is not reactive'
+        'Set operation on key "foo" performed but will not trigger reactivity updates: target is not reactive'
       ).toHaveBeenWarned()
     })
 
@@ -163,7 +163,7 @@ describe('Global API: set/delete', () => {
       Vue.delete(obj, 'foo')
       expect(obj.hasOwnProperty('foo')).toBe(false)
       expect(
-        'Delete operation on key "foo" failed: target is not reactive'
+        'Delete operation on key "foo" performed but will not trigger reactivity updates: target is not reactive'
       ).toHaveBeenWarned()
     })
 

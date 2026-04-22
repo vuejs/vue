@@ -259,8 +259,8 @@ export function set(
   if (!ob) {
     if (__DEV__) {
       warn(
-        `Set operation on key "${key}" failed: target is not reactive. ` +
-          `Please make sure the target object is initialized as reactive data first.`
+        `Set operation on key "${key}" performed but will not trigger reactivity updates: ` +
+          `target is not reactive. Please make sure the target object is initialized as reactive data first.`
       )
     }
     target[key] = val
@@ -313,16 +313,18 @@ export function del(target: any[] | object, key: any) {
   if (!hasOwn(target, key)) {
     return
   }
-  delete target[key]
+  const ob = (target as any).__ob__
   if (!ob) {
+    delete target[key]
     if (__DEV__) {
       warn(
-        `Delete operation on key "${key}" failed: target is not reactive. ` +
-          `Please make sure the target object is initialized as reactive data first.`
+        `Delete operation on key "${key}" performed but will not trigger reactivity updates: ` +
+          `target is not reactive. Please make sure the target object is initialized as reactive data first.`
       )
     }
     return
   }
+  delete target[key]
   if (__DEV__) {
     ob.dep.notify({
       type: TriggerOpTypes.DELETE,
