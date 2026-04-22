@@ -257,6 +257,12 @@ export function set(
     return val
   }
   if (!ob) {
+    if (__DEV__) {
+      warn(
+        `Set operation on key "${key}" failed: target is not reactive. ` +
+          `Please make sure the target object is initialized as reactive data first.`
+      )
+    }
     target[key] = val
     return val
   }
@@ -309,6 +315,12 @@ export function del(target: any[] | object, key: any) {
   }
   delete target[key]
   if (!ob) {
+    if (__DEV__) {
+      warn(
+        `Delete operation on key "${key}" failed: target is not reactive. ` +
+          `Please make sure the target object is initialized as reactive data first.`
+      )
+    }
     return
   }
   if (__DEV__) {

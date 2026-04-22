@@ -119,6 +119,21 @@ describe('Global API: set/delete', () => {
       expect(vm.data.hasOwnProperty('bar')).toBe(false)
       expect(vm.data._bar).toBe(123)
     })
+
+    it('should warn when setting property on non-reactive object', () => {
+      const obj = {}
+      Vue.set(obj, 'foo', 1)
+      expect(obj.foo).toBe(1)
+      expect(
+        'Set operation on key "foo" failed: target is not reactive'
+      ).toHaveBeenWarned()
+    })
+
+    it('should NOT warn when updating existing property on non-reactive object', () => {
+      const obj = { foo: 1 }
+      Vue.set(obj, 'foo', 2)
+      expect(obj.foo).toBe(2)
+    })
   })
 
   describe('Vue.delete', () => {
@@ -141,6 +156,20 @@ describe('Global API: set/delete', () => {
           expect(vm.$el.innerHTML).toBe('')
         })
         .then(done)
+    })
+
+    it('should warn when deleting property on non-reactive object', () => {
+      const obj = { foo: 1 }
+      Vue.delete(obj, 'foo')
+      expect(obj.hasOwnProperty('foo')).toBe(false)
+      expect(
+        'Delete operation on key "foo" failed: target is not reactive'
+      ).toHaveBeenWarned()
+    })
+
+    it('should NOT warn when deleting non-existent property', () => {
+      const obj = {}
+      Vue.delete(obj, 'foo')
     })
 
     it('be able to delete an item in array', done => {
