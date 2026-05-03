@@ -830,4 +830,395 @@ describe('Component keep-alive', () => {
       })
       .then(done)
   })
+
+  // Route meta based cache strategy tests
+  describe('route meta based cache strategy', () => {
+    it('should not cache when vnode.data.keepAlive === false (highest priority)', done => {
+      const Foo = {
+        name: 'foo',
+        template: `<div>foo</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+
+      const vm = new Vue({
+        data: { keepAliveFlag: undefined as boolean | undefined, view: 'foo' },
+        components: { Foo },
+        render(h) {
+          const vnode = h('keep-alive', [
+            h('foo', {
+              keepAlive: this.keepAliveFlag
+            })
+          ])
+          return vnode
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('foo')
+      expect(Foo.created).toHaveBeenCalledTimes(1)
+      expect(Foo.destroyed).toHaveBeenCalledTimes(0)
+
+      // Switch away
+      vm.keepAliveFlag = false
+      waitForUpdate(() => {
+        expect(Foo.destroyed).toHaveBeenCalledTimes(1)
+      })
+        .then(() => {
+          // Switch back - should recreate since keepAliveFlag was false
+          Foo.created.mockClear()
+          vm.keepAliveFlag = undefined
+        })
+        .then(() => {
+          expect(Foo.created).toHaveBeenCalledTimes(1)
+        })
+        .then(done)
+    })
+
+    it('should force cache when vnode.data.keepAlive === true (bypass include/exclude)', done => {
+      const Foo = {
+        name: 'foo',
+        template: `<div>foo</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+      const Bar = {
+        name: 'bar',
+        template: `<div>bar</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+
+      const vm = new Vue({
+        data: { view: 'foo' },
+        components: { Foo, Bar },
+        render(h) {
+          const child = this.view === 'foo'
+            ? h('foo', { keepAlive: true })
+            : h('bar')
+          return h('keep-alive', {
+            props: {
+              exclude: 'foo'
+            }
+          }, [child])
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('foo')
+      expect(Foo.created).toHaveBeenCalledTimes(1)
+      expect(Foo.destroyed).toHaveBeenCalledTimes(0)
+
+      // Switch to bar
+      vm.view = 'bar'
+      waitForUpdate(() => {
+        expect(vm.$el.textContent).toBe('bar')
+        expect(Foo.destroyed).toHaveBeenCalledTimes(0)
+        expect(Bar.created).toHaveBeenCalledTimes(1)
+      })
+        .then(() => {
+          // Switch back to foo - should be cached even though exclude='foo'
+          Foo.created.mockClear()
+          vm.view = 'foo'
+        })
+        .then(() => {
+          expect(vm.$el.textContent).toBe('foo')
+          expect(Foo.created).toHaveBeenCalledTimes(0)
+        })
+        .then(done)
+    })
+
+    it('should cache based on metaKey with include', done => {
+      const List = {
+        name: 'list',
+        template: `<div>list</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn(),
+        activated: vi.fn(),
+        deactivated: vi.fn()
+      }
+      const Detail = {
+        name: 'detail',
+        template: `<div>detail</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn(),
+        activated: vi.fn(),
+        deactivated: vi.fn()
+      }
+
+      const vm = new Vue({
+        data: {
+          view: 'list',
+          listMeta: { keepAlive: 'cacheable' } as any,
+          detailMeta: { keepAlive: 'transient' } as any
+        },
+        components: { List, Detail },
+        render(h) {
+          const child = this.view === 'list'
+            ? h('list', { meta: this.listMeta })
+            : h('detail', { meta: this.detailMeta })
+          return h('keep-alive', {
+            props: {
+              metaKey: 'keepAlive',
+              include: 'cacheable'
+            }
+          }, [child])
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('list')
+      expect(List.created).toHaveBeenCalledTimes(1)
+      expect(List.activated).toHaveBeenCalledTimes(1)
+      expect(Detail.created).toHaveBeenCalledTimes(0)
+
+      // Switch to detail
+      vm.view = 'detail'
+      waitForUpdate(() => {
+        expect(vm.$el.textContent).toBe('detail')
+        expect(List.deactivated).toHaveBeenCalledTimes(1)
+        expect(Detail.created).toHaveBeenCalledTimes(1)
+        expect(Detail.activated).toHaveBeenCalledTimes(0)
+      })
+        .then(() => {
+          // Switch back to list - should be cached
+          List.created.mockClear()
+          vm.view = 'list'
+        })
+        .then(() => {
+          expect(vm.$el.textContent).toBe('list')
+          expect(List.created).toHaveBeenCalledTimes(0)
+          expect(List.activated).toHaveBeenCalledTimes(2)
+          expect(Detail.destroyed).toHaveBeenCalledTimes(1)
+        })
+        .then(done)
+    })
+
+    it('should exclude based on metaKey', done => {
+      const List = {
+        name: 'list',
+        template: `<div>list</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+      const Form = {
+        name: 'form',
+        template: `<div>form</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+
+      const vm = new Vue({
+        data: {
+          view: 'list',
+          listMeta: { cacheKey: 'page' } as any,
+          formMeta: { cacheKey: 'modal' } as any
+        },
+        components: { List, Form },
+        render(h) {
+          const child = this.view === 'list'
+            ? h('list', { meta: this.listMeta })
+            : h('form', { meta: this.formMeta })
+          return h('keep-alive', {
+            props: {
+              metaKey: 'cacheKey',
+              exclude: 'modal'
+            }
+          }, [child])
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('list')
+      expect(List.created).toHaveBeenCalledTimes(1)
+
+      // Switch to form (should NOT cache)
+      vm.view = 'form'
+      waitForUpdate(() => {
+        expect(vm.$el.textContent).toBe('form')
+        expect(Form.created).toHaveBeenCalledTimes(1)
+        expect(List.destroyed).toHaveBeenCalledTimes(0)
+      })
+        .then(() => {
+          // Switch back to list (should be cached)
+          List.created.mockClear()
+          vm.view = 'list'
+        })
+        .then(() => {
+          expect(List.created).toHaveBeenCalledTimes(0)
+          expect(Form.destroyed).toHaveBeenCalledTimes(1)
+        })
+        .then(done)
+    })
+
+    it('should prune cache when include changes with metaKey', done => {
+      const PageA = {
+        name: 'page-a',
+        template: `<div>page-a</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+      const PageB = {
+        name: 'page-b',
+        template: `<div>page-b</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+
+      const vm = new Vue({
+        data: {
+          view: 'a',
+          includeList: ['cached']
+        },
+        components: { PageA, PageB },
+        render(h) {
+          const child = this.view === 'a'
+            ? h('page-a', { meta: { keepAlive: 'cached' } })
+            : h('page-b', { meta: { keepAlive: 'cached' } })
+          return h('keep-alive', {
+            props: {
+              metaKey: 'keepAlive',
+              include: this.includeList
+            }
+          }, [child])
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('page-a')
+      expect(PageA.created).toHaveBeenCalledTimes(1)
+
+      // Switch to B
+      vm.view = 'b'
+      waitForUpdate(() => {
+        expect(vm.$el.textContent).toBe('page-b')
+        expect(PageB.created).toHaveBeenCalledTimes(1)
+        expect(PageA.destroyed).toHaveBeenCalledTimes(0)
+      })
+        .then(() => {
+          // Change include list - should prune cached entries
+          vm.includeList = ['other']
+        })
+        .then(() => {
+          expect(PageA.destroyed).toHaveBeenCalledTimes(1)
+          expect(PageB.destroyed).toHaveBeenCalledTimes(1)
+        })
+        .then(done)
+    })
+
+    it('metaKey with number values in array pattern', done => {
+      const Comp1 = {
+        name: 'comp-1',
+        template: `<div>1</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+      const Comp2 = {
+        name: 'comp-2',
+        template: `<div>2</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+
+      const vm = new Vue({
+        data: {
+          view: 1
+        },
+        components: { Comp1, Comp2 },
+        render(h) {
+          const child = this.view === 1
+            ? h('comp-1', { meta: { level: 1 } })
+            : h('comp-2', { meta: { level: 2 } })
+          return h('keep-alive', {
+            props: {
+              metaKey: 'level',
+              include: [1]
+            }
+          }, [child])
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('1')
+      expect(Comp1.created).toHaveBeenCalledTimes(1)
+
+      // Switch to 2 (not in include)
+      vm.view = 2
+      waitForUpdate(() => {
+        expect(vm.$el.textContent).toBe('2')
+        expect(Comp2.created).toHaveBeenCalledTimes(1)
+        expect(Comp1.destroyed).toHaveBeenCalledTimes(0)
+      })
+        .then(() => {
+          // Switch back to 1
+          Comp1.created.mockClear()
+          vm.view = 1
+        })
+        .then(() => {
+          expect(Comp1.created).toHaveBeenCalledTimes(0)
+          expect(Comp2.destroyed).toHaveBeenCalledTimes(1)
+        })
+        .then(done)
+    })
+
+    it('metaKey with regex pattern', done => {
+      const UserList = {
+        name: 'user-list',
+        template: `<div>user list</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+      const UserDetail = {
+        name: 'user-detail',
+        template: `<div>user detail</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+      const Product = {
+        name: 'product',
+        template: `<div>product</div>`,
+        created: vi.fn(),
+        destroyed: vi.fn()
+      }
+
+      const vm = new Vue({
+        data: {
+          view: 'userList'
+        },
+        components: { UserList, UserDetail, Product },
+        render(h) {
+          let child
+          if (this.view === 'userList') {
+            child = h('user-list', { meta: { cacheGroup: 'user-page' } })
+          } else if (this.view === 'userDetail') {
+            child = h('user-detail', { meta: { cacheGroup: 'user-detail' } })
+          } else {
+            child = h('product', { meta: { cacheGroup: 'product-page' } })
+          }
+          return h('keep-alive', {
+            props: {
+              metaKey: 'cacheGroup',
+              include: /^user-/
+            }
+          }, [child])
+        }
+      }).$mount()
+
+      expect(vm.$el.textContent).toBe('user list')
+      expect(UserList.created).toHaveBeenCalledTimes(1)
+
+      // Switch to product (not matching regex)
+      vm.view = 'product'
+      waitForUpdate(() => {
+        expect(vm.$el.textContent).toBe('product')
+        expect(Product.created).toHaveBeenCalledTimes(1)
+        expect(UserList.destroyed).toHaveBeenCalledTimes(0)
+      })
+        .then(() => {
+          // Switch to userDetail (matches regex)
+          vm.view = 'userDetail'
+        })
+        .then(() => {
+          expect(vm.$el.textContent).toBe('user detail')
+          expect(UserDetail.created).toHaveBeenCalledTimes(1)
+          expect(Product.destroyed).toHaveBeenCalledTimes(1)
+          expect(UserList.destroyed).toHaveBeenCalledTimes(0)
+        })
+        .then(done)
+    })
+  })
 })

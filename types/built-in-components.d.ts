@@ -52,12 +52,13 @@ export type TransitionGroupProps = Omit<TransitionProps, 'mode'> & {
 
 export declare const TransitionGroup: DefineComponent<TransitionGroupProps>
 
-type MatchPattern = string | RegExp | (string | RegExp)[]
+type MatchPattern = string | RegExp | (string | number | symbol | RegExp)[]
 
 export interface KeepAliveProps {
   include?: MatchPattern
   exclude?: MatchPattern
   max?: number | string
+  metaKey?: string | symbol
 }
 
 export declare const KeepAlive: DefineComponent<KeepAliveProps>
