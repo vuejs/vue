@@ -1,7 +1,7 @@
-import { isRegExp, isArray, remove } from 'shared/util'
+import { isRegExp, isArray, remove, isPrimitive } from 'shared/util'
 import { getFirstComponentChild } from 'core/vdom/helpers/index'
 import type VNode from 'core/vdom/vnode'
-import type { VNodeComponentOptions } from 'types/vnode'
+import type { VNodeComponentOptions, VNodeData } from 'types/vnode'
 import type { Component } from 'types/component'
 import { getComponentName } from '../vdom/create-component'
 
@@ -9,24 +9,43 @@ type CacheEntry = {
   name?: string
   tag?: string
   componentInstance?: Component
+  metaKey?: string | number | symbol
 }
 
 type CacheEntryMap = Record<string, CacheEntry | null>
+
+type MatchKey = string | number | symbol
 
 function _getComponentName(opts?: VNodeComponentOptions): string | null {
   return opts && (getComponentName(opts.Ctor.options as any) || opts.tag)
 }
 
+function _getMetaKey(vnodeData: VNodeData | undefined, metaKey: string | symbol): MatchKey | null {
+  if (!vnodeData || !vnodeData.meta) return null
+  const value = (vnodeData.meta as any)[metaKey]
+  if (value == null) return null
+  if (isPrimitive(value)) {
+    return value as MatchKey
+  }
+  return null
+}
+
 function matches(
-  pattern: string | RegExp | Array<string>,
-  name: string
+  pattern: string | RegExp | Array<string | number | symbol>,
+  key: MatchKey
 ): boolean {
   if (isArray(pattern)) {
-    return pattern.indexOf(name) > -1
+    return pattern.indexOf(key as any) > -1
   } else if (typeof pattern === 'string') {
-    return pattern.split(',').indexOf(name) > -1
+    if (typeof key === 'string') {
+      return pattern.split(',').indexOf(key) > -1
+    }
+    return false
   } else if (isRegExp(pattern)) {
-    return pattern.test(name)
+    if (typeof key === 'string' || typeof key === 'number') {
+      return pattern.test(String(key))
+    }
+    return false
   }
   /* istanbul ignore next */
   return false
@@ -38,15 +57,15 @@ function pruneCache(
     keys: string[]
     _vnode: VNode
     $vnode: VNode
+    metaKey?: string | symbol
   },
-  filter: Function
+  filter: (name?: string, metaKey?: MatchKey) => boolean
 ) {
   const { cache, keys, _vnode, $vnode } = keepAliveInstance
   for (const key in cache) {
     const entry = cache[key]
     if (entry) {
-      const name = entry.name
-      if (name && !filter(name)) {
+      if (!filter(entry.name, entry.metaKey)) {
         pruneCacheEntry(cache, key, keys, _vnode)
       }
     }
@@ -79,18 +98,23 @@ export default {
   props: {
     include: patternTypes,
     exclude: patternTypes,
-    max: [String, Number]
+    max: [String, Number],
+    metaKey: [String, Symbol]
   },
 
   methods: {
     cacheVNode() {
-      const { cache, keys, vnodeToCache, keyToCache } = this
+      const { cache, keys, vnodeToCache, keyToCache, metaKey } = this
       if (vnodeToCache) {
-        const { tag, componentInstance, componentOptions } = vnodeToCache
+        const { tag, componentInstance, componentOptions, data } = vnodeToCache
+        const entryMetaKey = metaKey
+          ? _getMetaKey(data, metaKey)
+          : undefined
         cache[keyToCache] = {
           name: _getComponentName(componentOptions),
           tag,
-          componentInstance
+          componentInstance,
+          metaKey: entryMetaKey
         }
         keys.push(keyToCache)
         // prune oldest entry
@@ -116,10 +140,26 @@ export default {
   mounted() {
     this.cacheVNode()
     this.$watch('include', val => {
-      pruneCache(this, name => matches(val, name))
+      pruneCache(this, (name, metaKey) => {
+        if (this.metaKey && metaKey != null) {
+          return matches(val, metaKey)
+        }
+        if (name) {
+          return matches(val, name)
+        }
+        return true
+      })
     })
     this.$watch('exclude', val => {
-      pruneCache(this, name => !matches(val, name))
+      pruneCache(this, (name, metaKey) => {
+        if (this.metaKey && metaKey != null) {
+          return !matches(val, metaKey)
+        }
+        if (name) {
+          return !matches(val, name)
+        }
+        return true
+      })
     })
   },
 
@@ -132,16 +172,44 @@ export default {
     const vnode = getFirstComponentChild(slot)
     const componentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
-      // check pattern
-      const name = _getComponentName(componentOptions)
-      const { include, exclude } = this
-      if (
-        // not included
-        (include && (!name || !matches(include, name))) ||
-        // excluded
-        (exclude && name && matches(exclude, name))
-      ) {
+      const { include, exclude, metaKey } = this
+      const vnodeData = vnode.data
+
+      // Priority 1: Explicit vnode.data.keepAlive control (highest priority)
+      // This allows dynamic control via vnode data (e.g., from vue-router meta)
+      // When vnode.data.keepAlive === false: explicitly skip caching
+      // When vnode.data.keepAlive === true: explicitly enable caching
+      // When undefined or null: continue to other checks
+      if (vnodeData && vnodeData.keepAlive === false) {
         return vnode
+      }
+      if (vnodeData && vnodeData.keepAlive === true) {
+        // Explicitly enabled, skip include/exclude checks
+      } else {
+        // Priority 2: Check by metaKey (if specified)
+        // This allows matching based on route meta information
+        if (metaKey) {
+          const currentMetaKey = _getMetaKey(vnodeData, metaKey)
+          if (
+            // not included by metaKey
+            (include && (currentMetaKey == null || !matches(include, currentMetaKey))) ||
+            // excluded by metaKey
+            (exclude && currentMetaKey != null && matches(exclude, currentMetaKey))
+          ) {
+            return vnode
+          }
+        } else {
+          // Priority 3: Check by component name (default behavior)
+          const name = _getComponentName(componentOptions)
+          if (
+            // not included
+            (include && (!name || !matches(include, name))) ||
+            // excluded
+            (exclude && name && matches(exclude, name))
+          ) {
+            return vnode
+          }
+        }
       }
 
       const { cache, keys } = this
