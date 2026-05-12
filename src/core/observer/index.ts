@@ -245,6 +245,14 @@ export function set(
     return val
   }
   if (key in target && !(key in Object.prototype)) {
+    // warn if $set is used on an existing property
+    if (__DEV__ && !isArray(target)) {
+      warn(
+        `Avoid using $set on an existing property "${key}" - ` +
+        `this will not trigger reactivity updates. ` +
+        `Use direct assignment instead: target.${key} = value`
+      )
+    }
     target[key] = val
     return val
   }
