@@ -777,6 +777,15 @@ function processAttrs(el) {
     name = rawName = list[i].name
     value = list[i].value
     if (dirRE.test(name)) {
+      // check for :v-if shorthand misuse
+      if (__DEV__ && /^:v-/.test(name)) {
+        const directive = name.slice(1)
+        warn(
+          `Unexpected colon shorthand for directive "${directive}". ` +
+          `Did you mean "${directive}" without the colon?`,
+          list[i]
+        )
+      }
       // mark element as dynamic
       el.hasBindings = true
       // modifiers
