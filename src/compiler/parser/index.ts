@@ -749,6 +749,18 @@ function getSlotName(binding) {
 function processSlotOutlet(el) {
   if (el.tag === 'slot') {
     el.slotName = getBindingAttr(el, 'name')
+    // check for interpolation in slot name
+    if (__DEV__ && el.slotName) {
+      const rawSlotName = el.attrsMap['name']
+      if (rawSlotName && parseText(rawSlotName, delimiters)) {
+        warn(
+          `\`name\` attribute on <slot> cannot use interpolation. ` +
+          `Use v-bind or the colon shorthand instead. For example, ` +
+          `instead of <slot name="{{ name }}">, use <slot :name="name">.`,
+          el.rawAttrsMap['name']
+        )
+      }
+    }
     if (__DEV__ && el.key) {
       warn(
         `\`key\` does not work on <slot> because slots are abstract outlets ` +
@@ -777,6 +789,15 @@ function processAttrs(el) {
     name = rawName = list[i].name
     value = list[i].value
     if (dirRE.test(name)) {
+      // check for :v-if shorthand misuse
+      if (__DEV__ && /^:v-/.test(name)) {
+        const directive = name.slice(1)
+        warn(
+          `Unexpected colon shorthand for directive "${directive}". ` +
+          `Did you mean "${directive}" without the colon?`,
+          list[i]
+        )
+      }
       // mark element as dynamic
       el.hasBindings = true
       // modifiers
