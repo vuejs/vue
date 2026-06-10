@@ -1,3 +1,14 @@
+
+<!-- AUTO-PACKAGE-BADGES:START -->
+<!-- Auto-generated package badges -->
+
+![npm version](https://img.shields.io/npm/v/vue?style=flat-square&logo=npm&color=blue) ![npm downloads](https://img.shields.io/npm/dw/vue?style=flat-square&color=brightgreen) ![npm license](https://img.shields.io/npm/l/vue?style=flat-square) [![Deployed](https://img.shields.io/badge/deployed-2.7.16-blue?style=flat-square)](https://www.npmjs.com/package/vue)
+![npm version](https://img.shields.io/npm/v/%40vue%2Fcompiler-sfc?style=flat-square&logo=npm&color=blue) ![npm downloads](https://img.shields.io/npm/dw/%40vue%2Fcompiler-sfc?style=flat-square&color=brightgreen) ![npm license](https://img.shields.io/npm/l/%40vue%2Fcompiler-sfc?style=flat-square) [![Deployed](https://img.shields.io/badge/deployed-2.7.16-blue?style=flat-square)](https://www.npmjs.com/package/@vue/compiler-sfc)
+![npm version](https://img.shields.io/npm/v/vue-server-renderer?style=flat-square&logo=npm&color=blue) ![npm downloads](https://img.shields.io/npm/dw/vue-server-renderer?style=flat-square&color=brightgreen) ![npm license](https://img.shields.io/npm/l/vue-server-renderer?style=flat-square) [![Deployed](https://img.shields.io/badge/deployed-2.7.16-blue?style=flat-square)](https://www.npmjs.com/package/vue-server-renderer)
+![npm version](https://img.shields.io/npm/v/vue-template-compiler?style=flat-square&logo=npm&color=blue) ![npm downloads](https://img.shields.io/npm/dw/vue-template-compiler?style=flat-square&color=brightgreen) ![npm license](https://img.shields.io/npm/l/vue-template-compiler?style=flat-square) [![Deployed](https://img.shields.io/badge/deployed-2.7.16-blue?style=flat-square)](https://www.npmjs.com/package/vue-template-compiler)
+
+<!-- AUTO-PACKAGE-BADGES:END -->
+
 ## Vue 2 has reached End of Life
 
 **You are looking at the now inactive repository for Vue 2. The actively maintained repository for the latest version of Vue is [vuejs/core](https://github.com/vuejs/core).**
