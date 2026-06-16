@@ -99,6 +99,7 @@ describe('vdom patch: hydration', () => {
     expect(
       'The client-side rendered virtual DOM tree is not matching'
     ).toHaveBeenWarned()
+    expect('Hydration child mismatch').toHaveBeenWarned()
   })
 
   // component hydration is better off with a more e2e approach
