@@ -216,6 +216,32 @@ describe('Error handling', () => {
     Vue.config.errorHandler = undefined
   })
 
+  // #13241
+  it('should not cause infinite recursion when errorHandler throws', () => {
+    const calls = { count: 0 }
+    Vue.config.errorHandler = () => {
+      calls.count++
+      throw new Error('error in errorHandler')
+    }
+    const vm = new Vue({
+      render(h) {
+        throw new Error('error in render')
+      },
+      renderError(h, err) {
+        return h('div', err.toString())
+      }
+    }).$mount()
+    // Without the fix, this would cause a stack overflow.
+    // With the fix, handleError should only be called once.
+    expect(calls.count).toBe(1)
+    expect(vm.$el.textContent).toContain('error in render')
+    expect('Error in config.errorHandler').toHaveBeenWarned()
+    expect('Error in render').toHaveBeenWarned()
+    expect('error in errorHandler').toHaveBeenWarned()
+    expect('error in render').toHaveBeenWarned()
+    Vue.config.errorHandler = undefined
+  })
+
   // event handlers that can throw errors or return rejected promise
   ;[
     ['single handler', '<div v-on:click="bork"></div>'],
