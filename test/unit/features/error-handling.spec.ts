@@ -235,6 +235,10 @@ describe('Error handling', () => {
     // With the fix, handleError should only be called once.
     expect(calls.count).toBe(1)
     expect(vm.$el.textContent).toContain('error in render')
+    expect('Error in config.errorHandler').toHaveBeenWarned()
+    expect('Error in render').toHaveBeenWarned()
+    expect('error in errorHandler').toHaveBeenWarned()
+    expect('error in render').toHaveBeenWarned()
     Vue.config.errorHandler = undefined
   })
 
