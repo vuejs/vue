@@ -717,15 +717,18 @@ export function createPatchFunction(backend) {
           ) {
             if (i !== elm.innerHTML) {
               /* istanbul ignore if */
-              if (
-                __DEV__ &&
-                typeof console !== 'undefined' &&
-                !hydrationBailed
-              ) {
+              if (__DEV__ && !hydrationBailed) {
                 hydrationBailed = true
-                console.warn('Parent: ', elm)
-                console.warn('server innerHTML: ', i)
-                console.warn('client innerHTML: ', elm.innerHTML)
+                warn(
+                  'Hydration innerHTML mismatch on <' +
+                    (elm.tagName && elm.tagName.toLowerCase()) +
+                    '>: ' +
+                    'server innerHTML: "' +
+                    i +
+                    '", client innerHTML: "' +
+                    elm.innerHTML +
+                    '"'
+                )
               }
               return false
             }
@@ -747,17 +750,17 @@ export function createPatchFunction(backend) {
             // longer than the virtual children list.
             if (!childrenMatch || childNode) {
               /* istanbul ignore if */
-              if (
-                __DEV__ &&
-                typeof console !== 'undefined' &&
-                !hydrationBailed
-              ) {
+              if (__DEV__ && !hydrationBailed) {
                 hydrationBailed = true
-                console.warn('Parent: ', elm)
-                console.warn(
-                  'Mismatching childNodes vs. VNodes: ',
-                  elm.childNodes,
-                  children
+                warn(
+                  'Hydration child mismatch on <' +
+                    (elm.tagName && elm.tagName.toLowerCase()) +
+                    '>: ' +
+                    'server has ' +
+                    elm.childNodes.length +
+                    ' child nodes, client expects ' +
+                    children.length +
+                    ' vnodes.'
                 )
               }
               return false
