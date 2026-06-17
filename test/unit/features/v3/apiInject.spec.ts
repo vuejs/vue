@@ -321,6 +321,17 @@ describe('api: provide/inject', () => {
     expect(`injection "foo" not found.`).not.toHaveBeenWarned()
   })
 
+  it('should warn with key when used outside setup', () => {
+    inject('foo')
+    expect(
+      `inject() can only be used inside setup() or functional components. Injection key: "foo".`
+    ).toHaveBeenWarned()
+
+    const key: InjectionKey<unknown> = Symbol('bar')
+    inject(key)
+    expect(`Injection key: "Symbol(bar)".`).toHaveBeenWarned()
+  })
+
   // #2400
   it('should not self-inject', () => {
     const Comp = {
