@@ -66,6 +66,9 @@ export function inject(
       warn(`injection "${String(key)}" not found.`)
     }
   } else if (__DEV__) {
-    warn(`inject() can only be used inside setup() or functional components.`)
+    warn(
+      `inject() can only be used inside setup() or functional components. ` +
+        `Injection key: "${String(key)}".`
+    )
   }
 }
