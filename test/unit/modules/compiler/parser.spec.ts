@@ -555,6 +555,18 @@ describe('parser', () => {
     expect(ast.ifConditions[0].exp).toBe('show')
   })
 
+  it('warn directive used with v-bind or v-on shorthand', () => {
+    parse('<p :v-if="show">hello world</p>', baseOptions)
+    expect(
+      '":v-if" does not make sense on directive "v-if". Did you mean "v-if"?'
+    ).toHaveBeenWarned()
+
+    parse('<p @v-html="foo">hello world</p>', baseOptions)
+    expect(
+      '"@v-html" does not make sense on directive "v-html". Did you mean "v-html"?'
+    ).toHaveBeenWarned()
+  })
+
   it('v-else-if directive syntax', () => {
     const ast = parse(
       '<div><p v-if="show">hello</p><span v-else-if="2">elseif</span><p v-else>world</p></div>',
