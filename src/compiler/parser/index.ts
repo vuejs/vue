@@ -3,7 +3,7 @@ import { parseHTML } from './html-parser'
 import { parseText } from './text-parser'
 import { parseFilters } from './filter-parser'
 import { genAssignmentCode } from '../directives/model'
-import { extend, cached, no, camelize, hyphenate } from 'shared/util'
+import { extend, cached, no, camelize, hyphenate, makeMap } from 'shared/util'
 import { isIE, isEdge, isServerRendering } from 'core/util/env'
 
 import {
@@ -50,6 +50,9 @@ const whitespaceRE = /[ \f\t\r\n]+/g
 const invalidAttributeRE = /[\s"'<>\/=]/
 
 const decodeHTMLCached = cached(he.decode)
+const isBuiltInDirective = makeMap(
+  'bind,cloak,else,else-if,for,html,if,model,on,once,pre,show,slot,text'
+)
 
 export const emptySlotScopeToken = `_empty_`
 
@@ -791,6 +794,9 @@ function processAttrs(el) {
       if (bindRE.test(name)) {
         // v-bind
         name = name.replace(bindRE, '')
+        if (__DEV__) {
+          warnIfDirectiveBinding(rawName, name, list[i])
+        }
         value = parseFilters(value)
         isDynamic = dynamicArgRE.test(name)
         if (isDynamic) {
@@ -858,6 +864,9 @@ function processAttrs(el) {
       } else if (onRE.test(name)) {
         // v-on
         name = name.replace(onRE, '')
+        if (__DEV__) {
+          warnIfDirectiveBinding(rawName, name, list[i])
+        }
         isDynamic = dynamicArgRE.test(name)
         if (isDynamic) {
           name = name.slice(1, -1)
@@ -916,6 +925,17 @@ function processAttrs(el) {
         addProp(el, name, 'true', list[i])
       }
     }
+  }
+}
+
+function warnIfDirectiveBinding(rawName: string, name: string, range?: any) {
+  const directiveName = name.replace(/^v-/, '')
+  if (isBuiltInDirective(directiveName)) {
+    warn(
+      `"${rawName}" does not make sense on directive "v-${directiveName}". ` +
+        `Did you mean "v-${directiveName}"?`,
+      range
+    )
   }
 }
 
