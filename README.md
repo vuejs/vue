@@ -64,7 +64,7 @@ Vue.js supports all browsers that are [ES5-compliant](https://compat-table.githu
 [vuex]: https://github.com/vuejs/vuex
 [vue-cli]: https://github.com/vuejs/vue-cli
 [vue-loader]: https://github.com/vuejs/vue-loader
-[vue-server-renderer]: https://github.com/vuejs/vue/tree/dev/packages/vue-server-renderer
+[vue-server-renderer]: https://github.com/vuejs/vue/tree/main/packages/server-renderer
 [vue-class-component]: https://github.com/vuejs/vue-class-component
 [vue-rx]: https://github.com/vuejs/vue-rx
 [vue-devtools]: https://github.com/vuejs/vue-devtools
@@ -95,7 +95,7 @@ For questions and support please use [the official forum](https://forum.vuejs.or
 
 ## Issues
 
-Please make sure to read the [Issue Reporting Checklist](https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md#issue-reporting-guidelines) before opening an issue. Issues not conforming to the guidelines may be closed immediately.
+Please make sure to read the [Issue Reporting Checklist](https://github.com/vuejs/vue/blob/main/.github/CONTRIBUTING.md#issue-reporting-guidelines) before opening an issue. Issues not conforming to the guidelines may be closed immediately.
 
 ## Changelog
 
@@ -109,7 +109,7 @@ Detailed changes for each release are documented in the [release notes](https://
 
 ## Contribution
 
-Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md) before making a pull request. If you have a Vue-related project/component/tool, add it with a pull request to [this curated list](https://github.com/vuejs/awesome-vue)!
+Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/blob/main/.github/CONTRIBUTING.md) before making a pull request. If you have a Vue-related project/component/tool, add it with a pull request to [this curated list](https://github.com/vuejs/awesome-vue)!
 
 Thank you to all the people who already contributed to Vue!
 
