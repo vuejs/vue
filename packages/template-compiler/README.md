@@ -1,6 +1,6 @@
 # vue-template-compiler
 
-> This package is auto-generated. For pull requests please see [src/platforms/web/entry-compiler.js](https://github.com/vuejs/vue/tree/dev/src/platforms/web/entry-compiler.js).
+> This package is auto-generated. For pull requests please see [src/platforms/web/entry-compiler.ts](https://github.com/vuejs/vue/blob/main/src/platforms/web/entry-compiler.ts).
 
 This package can be used to pre-compile Vue 2.0 templates into render functions to avoid runtime-compilation overhead and CSP restrictions. In most cases you should be using it with [`vue-loader`](https://github.com/vuejs/vue-loader), you will only need it separately if you are writing build tools with very specific needs.
 
@@ -81,7 +81,7 @@ Note the returned function code uses `with` and thus cannot be used in strict mo
 
   It's possible to hook into the compilation process to support custom template features. **However, beware that by injecting custom compile-time modules, your templates will not work with other build tools built on standard built-in modules, e.g `vue-loader` and `vueify`.**
 
-  An array of compiler modules. For details on compiler modules, refer to the `ModuleOptions` type in [flow declarations](https://github.com/vuejs/vue/blob/dev/flow/compiler.js#L47-L59) and the [built-in modules](https://github.com/vuejs/vue/tree/dev/src/platforms/web/compiler/modules).
+  An array of compiler modules. For details on compiler modules, refer to the `ModuleOptions` type in [type declarations](https://github.com/vuejs/vue/blob/main/src/types/compiler.ts#L53-L65) and the [built-in modules](https://github.com/vuejs/vue/tree/main/src/platforms/web/compiler/modules).
 
 - `directives`
 
@@ -99,7 +99,7 @@ Note the returned function code uses `with` and thus cannot be used in strict mo
 
   By default, a compile-time directive will extract the directive and the directive will not be present at runtime. If you want the directive to also be handled by a runtime definition, return `true` in the transform function.
 
-  Refer to the implementation of some [built-in compile-time directives](https://github.com/vuejs/vue/tree/dev/src/platforms/web/compiler/directives).
+  Refer to the implementation of some [built-in compile-time directives](https://github.com/vuejs/vue/tree/main/src/platforms/web/compiler/directives).
 
 - `preserveWhitespace` **Deprecated since 2.6**
   - Type: `boolean`
@@ -144,7 +144,7 @@ Same as `compiler.compileToFunction` but generates SSR-specific render function 
 
 ### compiler.parseComponent(file, [options])
 
-Parse a SFC (single-file component, or `*.vue` file) into a descriptor (refer to the `SFCDescriptor` type in [flow declarations](https://github.com/vuejs/vue/blob/dev/flow/compiler.js)). This is used in SFC build tools like `vue-loader` and `vueify`.
+Parse a SFC (single-file component, or `*.vue` file) into a descriptor (refer to the `SFCDescriptor` type in [type declarations](https://github.com/vuejs/vue/blob/main/packages/compiler-sfc/src/parseComponent.ts)). This is used in SFC build tools like `vue-loader` and `vueify`.
 
 ---
 
