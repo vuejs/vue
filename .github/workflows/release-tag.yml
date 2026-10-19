@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@master
+        uses: actions/checkout@v7
       - name: Create Release for Tag
         id: release_tag
         uses: yyx990803/release-tag@master
