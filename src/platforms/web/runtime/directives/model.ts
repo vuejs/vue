@@ -10,7 +10,8 @@ import { warn, isIE9, isIE, isEdge } from 'core/util/index'
 
 /* istanbul ignore if */
 if (isIE9) {
-  // http://www.matts411.com/post/internet-explorer-9-oninput/
+  // IE9 does not fire input events when text is deleted. Use selection changes
+  // to keep v-model in sync with the active input.
   document.addEventListener('selectionchange', () => {
     const el = document.activeElement
     // @ts-expect-error
