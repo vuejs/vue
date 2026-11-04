@@ -69,7 +69,7 @@ $ npm test
 
 There are some other scripts available in the `scripts` section of the `package.json` file.
 
-The default test script will do the following: lint with ESLint -> type check with Flow -> unit tests with coverage -> e2e tests. **Please make sure to have this pass successfully before submitting a PR.** Although the same tests will be run against your PR on the CI server, it is better to have it working locally.
+The default test script will do the following: type check source with TypeScript (`ts-check`) -> type check public types (`test:types`) -> unit tests (`test:unit`) -> e2e tests (`test:e2e`) -> SSR tests (`test:ssr`) -> SFC compiler tests (`test:sfc`). **Please make sure to have this pass successfully before submitting a PR.** Although the same tests will be run against your PR on the CI server, it is better to have it working locally.
 
 ## Project Structure
 
@@ -93,9 +93,9 @@ The default test script will do the following: lint with ESLint -> type check wi
 
   - `compiler-sfc` is an internal package that is distributed as part of the main `vue` package. It's aliased and can be imported as `vue/compiler-sfc` similar to Vue 3.
 
-- **`test`**: contains all tests. The unit tests are written with [Jasmine](http://jasmine.github.io/2.3/introduction.html) and run with [Karma](http://karma-runner.github.io/0.13/index.html). The e2e tests are written for and run with [Nightwatch.js](http://nightwatchjs.org/).
+- **`test`**: contains all tests. The unit, e2e, SSR and SFC tests are run with [Vitest](https://vitest.dev/); the e2e tests drive a browser via [Puppeteer](https://pptr.dev/). Only the transition tests in `test/transition` still use [Jasmine](https://jasmine.github.io/) and [Karma](https://karma-runner.github.io/), and are run with `npm run test:transition`.
 
-- **`src`**: contains the source code. The codebase is written in ES2015 with [Flow](https://flowtype.org/) type annotations.
+- **`src`**: contains the source code. The codebase is written in [TypeScript](https://www.typescriptlang.org/).
 
   - **`compiler`**: contains code for the template-to-render-function compiler.
 
