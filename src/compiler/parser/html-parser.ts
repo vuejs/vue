@@ -55,6 +55,379 @@ function decodeAttr(value, shouldDecodeNewlines) {
   return value.replace(re, match => decodingMap[match])
 }
 
+// #10628: a `</script>` (or `</style>`) sequence inside a JS/CSS
+// string, template literal, comment or regular expression must not
+// terminate a plain-text block. The helpers below scan the raw text
+// in a language-aware way and return the first closing tag that
+// occurs in actual code context.
+//
+// If the scan reaches the end of input without finding a closing
+// tag in code context, or encounters an unterminated string /
+// comment / regex (i.e. the code is malformed), `null` is returned
+// and the caller falls back to the historical "first closing tag"
+// behaviour. This preserves error-recovery for invalid code and
+// for non-JS contexts such as JSX text where a lone apostrophe
+// would otherwise be mistaken for a string delimiter.
+
+function matchPlainTextEndTag(html, index, tag) {
+  // Returns index just after the `>` of a valid `</tag ...>` at
+  // `index`, or -1. A valid end tag requires the tag name to be
+  // followed by whitespace, `/` or `>` (HTML spec), so that e.g.
+  // `</scriptfoo>` does not close a `<script>` block.
+  if (html[index] !== '<' || html[index + 1] !== '/') {
+    return -1
+  }
+  if (html.substr(index + 2, tag.length).toLowerCase() !== tag) {
+    return -1
+  }
+  const after = index + 2 + tag.length
+  if (after >= html.length) {
+    return -1
+  }
+  const next = html[after]
+  if (next !== '>' && next !== '/' && !/\s/.test(next)) {
+    return -1
+  }
+  const gt = html.indexOf('>', after)
+  if (gt < 0) {
+    return -1
+  }
+  return gt + 1
+}
+
+function findPlainTextEnd(html, tag) {
+  if (tag === 'script') {
+    return findEndTagInScript(html, tag)
+  }
+  if (tag === 'style') {
+    return findEndTagInStyle(html, tag)
+  }
+  // textarea and any other plain-text element: no string context,
+  // the first valid closing tag terminates the block.
+  let i = html.indexOf('<')
+  while (i !== -1) {
+    const tagEnd = matchPlainTextEndTag(html, i, tag)
+    if (tagEnd !== -1) {
+      return { textEnd: i, tagEnd }
+    }
+    i = html.indexOf('<', i + 1)
+  }
+  return null
+}
+
+// Keywords after which a `/` starts a regex literal rather than
+// being a division operator.
+const regexAllowedKeywords = {
+  return: true,
+  throw: true,
+  case: true,
+  delete: true,
+  void: true,
+  typeof: true,
+  instanceof: true,
+  in: true,
+  of: true,
+  new: true,
+  yield: true,
+  await: true,
+  else: true,
+  do: true
+}
+
+function findEndTagInScript(html, tag) {
+  const stack: any[] = [
+    { type: 'code', braceDepth: 0, interpolation: false }
+  ]
+  let canBeRegex = true
+  let i = 0
+  while (i < html.length) {
+    const frame = stack[stack.length - 1]
+    const c = html[i]
+    const next = i + 1 < html.length ? html[i + 1] : ''
+
+    if (frame.type === 'single' || frame.type === 'double') {
+      const quote = frame.type === 'single' ? "'" : '"'
+      if (c === '\\') {
+        i += 2
+        continue
+      }
+      if (c === quote) {
+        stack.pop()
+        canBeRegex = false
+        i++
+        continue
+      }
+      // An unescaped newline cannot occur in a valid single /
+      // double quoted string - bail out to the fallback.
+      if (c === '\n' || c === '\r') {
+        return null
+      }
+      i++
+      continue
+    }
+
+    if (frame.type === 'template') {
+      if (c === '\\') {
+        i += 2
+        continue
+      }
+      if (c === '`') {
+        stack.pop()
+        canBeRegex = false
+        i++
+        continue
+      }
+      if (c === '$' && next === '{') {
+        stack.push({ type: 'code', braceDepth: 1, interpolation: true })
+        canBeRegex = true
+        i += 2
+        continue
+      }
+      i++
+      continue
+    }
+
+    if (frame.type === 'lineComment') {
+      if (c === '\n' || c === '\r') {
+        stack.pop()
+        i++
+        continue
+      }
+      i++
+      continue
+    }
+
+    if (frame.type === 'blockComment') {
+      if (c === '*' && next === '/') {
+        stack.pop()
+        i += 2
+        continue
+      }
+      i++
+      continue
+    }
+
+    if (frame.type === 'regex') {
+      if (c === '\\') {
+        i += 2
+        continue
+      }
+      if (c === '[') {
+        stack.push({ type: 'regexClass' })
+        i++
+        continue
+      }
+      if (c === '/') {
+        stack.pop()
+        canBeRegex = false
+        i++
+        // regex flags
+        while (i < html.length && /[a-zA-Z]/.test(html[i])) {
+          i++
+        }
+        continue
+      }
+      if (c === '\n' || c === '\r') {
+        return null
+      }
+      i++
+      continue
+    }
+
+    if (frame.type === 'regexClass') {
+      if (c === '\\') {
+        i += 2
+        continue
+      }
+      if (c === ']') {
+        stack.pop()
+        i++
+        continue
+      }
+      if (c === '\n' || c === '\r') {
+        return null
+      }
+      i++
+      continue
+    }
+
+    // code context - the only place a closing tag terminates
+    // the block.
+    if (c === '<') {
+      const tagEnd = matchPlainTextEndTag(html, i, tag)
+      if (tagEnd !== -1) {
+        return { textEnd: i, tagEnd }
+      }
+      if (next === '/') {
+        // `</...>` that is not the closing tag for this block
+        // (e.g. a JSX closing tag, or `</scriptfoo>`). The `/`
+        // is part of the tag-like sequence, not the start of a
+        // regex literal or division operator, so consume both
+        // characters without entering regex mode. Otherwise
+        // `</scriptfoo>` would start a "regex" that swallows the
+        // real closing tag.
+        canBeRegex = true
+        i += 2
+        continue
+      }
+      canBeRegex = true
+      i++
+      continue
+    }
+    if (c === "'") {
+      stack.push({ type: 'single' })
+      i++
+      continue
+    }
+    if (c === '"') {
+      stack.push({ type: 'double' })
+      i++
+      continue
+    }
+    if (c === '`') {
+      stack.push({ type: 'template' })
+      i++
+      continue
+    }
+    if (c === '/' && next === '/') {
+      stack.push({ type: 'lineComment' })
+      i += 2
+      continue
+    }
+    if (c === '/' && next === '*') {
+      stack.push({ type: 'blockComment' })
+      i += 2
+      continue
+    }
+    if (c === '/' && canBeRegex) {
+      stack.push({ type: 'regex' })
+      i++
+      continue
+    }
+    if (c === '{') {
+      frame.braceDepth++
+      canBeRegex = true
+      i++
+      continue
+    }
+    if (c === '}') {
+      if (frame.interpolation) {
+        frame.braceDepth--
+        if (frame.braceDepth === 0) {
+          stack.pop()
+          i++
+          continue
+        }
+      }
+      canBeRegex = true
+      i++
+      continue
+    }
+    if (/[A-Za-z_$]/.test(c) || c.charCodeAt(0) >= 128) {
+      let j = i + 1
+      while (
+        j < html.length &&
+        (/[\w$]/.test(html[j]) || html[j].charCodeAt(0) >= 128)
+      ) {
+        j++
+      }
+      const word = html.slice(i, j)
+      canBeRegex = !!regexAllowedKeywords[word]
+      i = j
+      continue
+    }
+    if (/[0-9]/.test(c)) {
+      let j = i + 1
+      while (j < html.length && /[\w.]/.test(html[j])) {
+        j++
+      }
+      canBeRegex = false
+      i = j
+      continue
+    }
+    if ((c === '+' || c === '-') && next === c) {
+      // `++` / `--`: prefix vs postfix depends on the previous
+      // token, so `canBeRegex` is intentionally left unchanged.
+      i += 2
+      continue
+    }
+    if (c === ')' || c === ']') {
+      canBeRegex = false
+      i++
+      continue
+    }
+    if (/\s/.test(c)) {
+      i++
+      continue
+    }
+    // Any other punctuation / operator (including division `/`).
+    // After such a token a regex literal may follow.
+    canBeRegex = true
+    i++
+  }
+  return null
+}
+
+function findEndTagInStyle(html, tag) {
+  let mode = 'code'
+  let quote = ''
+  let i = 0
+  while (i < html.length) {
+    const c = html[i]
+    const next = i + 1 < html.length ? html[i + 1] : ''
+
+    if (mode === 'string') {
+      if (c === '\\') {
+        i += 2
+        continue
+      }
+      if (c === quote) {
+        mode = 'code'
+        i++
+        continue
+      }
+      if (c === '\n' || c === '\r') {
+        return null
+      }
+      i++
+      continue
+    }
+
+    if (mode === 'comment') {
+      if (c === '*' && next === '/') {
+        mode = 'code'
+        i += 2
+        continue
+      }
+      i++
+      continue
+    }
+
+    // code context
+    if (c === '<') {
+      const tagEnd = matchPlainTextEndTag(html, i, tag)
+      if (tagEnd !== -1) {
+        return { textEnd: i, tagEnd }
+      }
+      i++
+      continue
+    }
+    if (c === "'" || c === '"') {
+      mode = 'string'
+      quote = c
+      i++
+      continue
+    }
+    if (c === '/' && next === '*') {
+      mode = 'comment'
+      i += 2
+      continue
+    }
+    i++
+  }
+  return null
+}
+
 export interface HTMLParserOptions extends CompilerOptions {
   start?: (
     tag: string,
@@ -167,13 +540,17 @@ export function parseHTML(html, options: HTMLParserOptions) {
     } else {
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
-      const reStackedTag =
-        reCache[stackedTag] ||
-        (reCache[stackedTag] = new RegExp(
-          '([\\s\\S]*?)(</' + stackedTag + '[^>]*>)',
-          'i'
-        ))
-      const rest = html.replace(reStackedTag, function (all, text, endTag) {
+      let rest
+      // #10628: prefer a language-aware search for the closing tag
+      // so that `</script>` / `</style>` inside strings, template
+      // literals, comments or regex literals do not truncate the
+      // block. Fall back to the historical regex when the
+      // language-aware scan cannot determine a closing tag (no
+      // closing tag, or unterminated string/comment/regex).
+      const plainTextEnd = findPlainTextEnd(html, stackedTag)
+      if (plainTextEnd) {
+        let text = html.slice(0, plainTextEnd.textEnd)
+        const endTag = html.slice(plainTextEnd.textEnd, plainTextEnd.tagEnd)
         endTagLength = endTag.length
         if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
           text = text
@@ -186,8 +563,30 @@ export function parseHTML(html, options: HTMLParserOptions) {
         if (options.chars) {
           options.chars(text)
         }
-        return ''
-      })
+        rest = html.slice(plainTextEnd.tagEnd)
+      } else {
+        const reStackedTag =
+          reCache[stackedTag] ||
+          (reCache[stackedTag] = new RegExp(
+            '([\\s\\S]*?)(</' + stackedTag + '[^>]*>)',
+            'i'
+          ))
+        rest = html.replace(reStackedTag, function (all, text, endTag) {
+          endTagLength = endTag.length
+          if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
+            text = text
+              .replace(/<!\--([\s\S]*?)-->/g, '$1') // #7298
+              .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1')
+          }
+          if (shouldIgnoreFirstNewline(stackedTag, text)) {
+            text = text.slice(1)
+          }
+          if (options.chars) {
+            options.chars(text)
+          }
+          return ''
+        })
+      }
       index += html.length - rest.length
       html = rest
       parseEndTag(stackedTag, index - endTagLength, index)

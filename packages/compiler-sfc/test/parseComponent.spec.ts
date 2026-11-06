@@ -266,4 +266,106 @@ describe('Single File Component parser', () => {
     expect(res.errors.length).toBe(1)
     expect((res.errors[0] as WarningMessage).start).toBe(0)
   })
+
+  // #10628
+  it('should not truncate script block at </script> inside a string', () => {
+    const res = parseComponent(
+      `<script>const s = "</script>"; export default {}</script>`
+    )
+    expect(res.script!.content).toBe(
+      'const s = "</script>"; export default {}'
+    )
+  })
+
+  it('should handle long string literal concatenated with + on many lines (#10628)', () => {
+    const source = `<template>
+  <div>Test</div>
+</template>
+
+<script>
+export default {
+  name: 'ViewAdvertisementAd1',
+  data: function () {
+    return {
+      model: '    <div class="ui medium rectangle ad">\\n' +
+      '      <script async="" src="//example.com/ads.js"></script>\\n' +
+      '      <script>\\n' +
+      '      (adsbygoogle = window.adsbygoogle || []).push({});\\n' +
+      '      </script>\\n' +
+      '    </div>\\n',
+    };
+  },
+};
+</script>
+`
+    const res = parseComponent(source)
+    expect(res.script!.content).toContain('</script>')
+    expect(res.script!.content).toContain('</div>')
+    expect(res.script!.content.trim().endsWith('};')).toBe(true)
+    expect(res.template!.content.trim()).toBe('<div>Test</div>')
+  })
+
+  it('should ignore </script> in template literals, comments and regex literals (#10628)', () => {
+    expect(
+      parseComponent(
+        "<script>const s = `a\n</script>\n${'</scr'+'ipt>'}`;</script>"
+      ).script!.content
+    ).toBe("const s = `a\n</script>\n${'</scr'+'ipt>'}`;")
+    expect(
+      parseComponent(
+        `<script>// </script>\nconst a = 1 /* </script> */</script>`
+      ).script!.content
+    ).toBe(`// </script>\nconst a = 1 /* </script> */`)
+    expect(
+      parseComponent(
+        `<script>const r = /a</script>/; const y = a / b / c;</script>`
+      ).script!.content
+    ).toBe(`const r = /a</script>/; const y = a / b / c;`)
+    // escaped quotes, JSX closing tags and escaped slash
+    expect(
+      parseComponent(
+        `<script>const a='it\\'s </script> ok'; const el = <div>hi</div>;</script>`
+      ).script!.content
+    ).toBe(`const a='it\\'s </script> ok'; const el = <div>hi</div>;`)
+    expect(
+      parseComponent(`<script>const a="<\\/script>";</script>`)
+        .script!.content
+    ).toBe(`const a="<\\/script>";`)
+  })
+
+  it('should not close script on </scriptfoo> and should handle </SCRIPT> / </script > (#10628)', () => {
+    expect(
+      parseComponent(`<script>const a = 1</scriptfoo> const b = 2</script>`)
+        .script!.content
+    ).toBe(`const a = 1</scriptfoo> const b = 2`)
+    expect(parseComponent(`<script>const a = 1</SCRIPT>`)
+      .script!.content).toBe(`const a = 1`)
+    expect(parseComponent(`<script>const a = 1</script >`)
+      .script!.content).toBe(`const a = 1`)
+  })
+
+  it('should parse blocks after a script containing </script> in a string (#10628)', () => {
+    const res = parseComponent(
+      `<script>const s = "</script>"</script><template><div>hi</div></template><style>h1 {}</style>`
+    )
+    expect(res.script!.content).toBe(`const s = "</script>"`)
+    expect(res.template!.content.trim()).toBe(`<div>hi</div>`)
+    expect(res.styles[0].content).toBe(`h1 {}`)
+  })
+
+  it('should not truncate style block at </style> inside a string or comment', () => {
+    const res = parseComponent(
+      `<style>a { content: "</style>" }</style><style>/* </style> */ b {}</style>`
+    )
+    expect(res.styles.length).toBe(2)
+    expect(res.styles[0].content).toBe(`a { content: "</style>" }`)
+    expect(res.styles[1].content).toBe(`/* </style> */ b {}`)
+  })
+
+  it('should fall back to first closing tag for unterminated string (#10628)', () => {
+    const res = parseComponent(
+      `<script>const s = "unterminated\n</script>`
+    )
+    expect(res.script!.content).toContain('unterminated')
+  })
 })
