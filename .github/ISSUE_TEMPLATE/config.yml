@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Vue 2 has reached EOL!
+    url: https://v2.vuejs.org/eol/
+    about: Vue 2 has reached EOL and is no longer actively maintained. Click the link on the right for more details.
+  - name: Vue 2 NES by HeroDevs
+    url: https://www.herodevs.com/support/nes-vue?utm_source=vuejs-github&utm_medium=issue-form
+    about: Learn more about Vue 2 NES if you have security or compliance requirements for continued Vue 2 usage.

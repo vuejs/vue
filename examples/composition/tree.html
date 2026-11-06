@@ -1,0 +1,124 @@
+<script src="../../dist/vue.min.js"></script>
+
+<!-- item template -->
+<script type="text/x-template" id="item-template">
+  <li>
+    <div
+      :class="{bold: isFolder}"
+      @click="toggle"
+      @dblclick="changeType">
+      {{model.name}}
+      <span v-if="isFolder">[{{open ? '-' : '+'}}]</span>
+    </div>
+    <ul v-if="isFolder" v-show="open">
+      <tree-item
+        class="item"
+        v-for="model in model.children"
+        :model="model">
+      </tree-item>
+      <li class="add" @click="addChild">+</li>
+    </ul>
+  </li>
+</script>
+<!-- item script -->
+<script>
+  const { reactive, computed, toRefs } = Vue
+
+  const TreeItem = {
+    name: 'TreeItem', // necessary for self-reference
+    template: '#item-template',
+    props: {
+      model: Object
+    },
+    setup(props) {
+      const state = reactive({
+        open: false,
+        isFolder: computed(() => {
+          return props.model.children && props.model.children.length
+        })
+      })
+
+      function toggle() {
+        state.open = !state.open
+      }
+
+      function changeType() {
+        if (!state.isFolder) {
+          Vue.set(props.model, 'children', [])
+          addChild()
+          state.open = true
+        }
+      }
+
+      function addChild() {
+        props.model.children.push({ name: 'new stuff' })
+      }
+
+      return {
+        ...toRefs(state),
+        toggle,
+        changeType,
+        addChild
+      }
+    }
+  }
+</script>
+
+<p>(You can double click on an item to turn it into a folder.)</p>
+
+<!-- the app root element -->
+<ul id="demo">
+  <tree-item class="item" :model="treeData"></tree-item>
+</ul>
+
+<script>
+  const treeData = {
+    name: 'My Tree',
+    children: [
+      { name: 'hello' },
+      { name: 'wat' },
+      {
+        name: 'child folder',
+        children: [
+          {
+            name: 'child folder',
+            children: [{ name: 'hello' }, { name: 'wat' }]
+          },
+          { name: 'hello' },
+          { name: 'wat' },
+          {
+            name: 'child folder',
+            children: [{ name: 'hello' }, { name: 'wat' }]
+          }
+        ]
+      }
+    ]
+  }
+
+  new Vue({
+    components: {
+      TreeItem
+    },
+    data: () => ({
+      treeData
+    })
+  }).$mount('#demo')
+</script>
+
+<style>
+  body {
+    font-family: Menlo, Consolas, monospace;
+    color: #444;
+  }
+  .item {
+    cursor: pointer;
+  }
+  .bold {
+    font-weight: bold;
+  }
+  ul {
+    padding-left: 1em;
+    line-height: 1.5em;
+    list-style-type: dot;
+  }
+</style>

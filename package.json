@@ -1,0 +1,136 @@
+{
+  "name": "vue",
+  "version": "2.7.16",
+  "packageManager": "pnpm@8.9.2",
+  "description": "Reactive, component-oriented view layer for modern web interfaces.",
+  "main": "dist/vue.runtime.common.js",
+  "module": "dist/vue.runtime.esm.js",
+  "unpkg": "dist/vue.js",
+  "jsdelivr": "dist/vue.js",
+  "typings": "types/index.d.ts",
+  "files": [
+    "src",
+    "dist/*.js",
+    "dist/*.mjs",
+    "types/*.d.ts",
+    "compiler-sfc",
+    "packages/compiler-sfc"
+  ],
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": {
+        "node": "./dist/vue.runtime.mjs",
+        "default": "./dist/vue.runtime.esm.js"
+      },
+      "require": "./dist/vue.runtime.common.js"
+    },
+    "./compiler-sfc": {
+      "types": "./compiler-sfc/index.d.ts",
+      "import": "./compiler-sfc/index.mjs",
+      "require": "./compiler-sfc/index.js"
+    },
+    "./dist/*": "./dist/*",
+    "./types/*": [
+      "./types/*.d.ts",
+      "./types/*"
+    ],
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "scripts": {
+    "dev": "rollup -w -c scripts/config.js --environment TARGET:full-dev",
+    "dev:cjs": "rollup -w -c scripts/config.js --environment TARGET:runtime-cjs-dev",
+    "dev:esm": "rollup -w -c scripts/config.js --environment TARGET:runtime-esm",
+    "dev:ssr": "rollup -w -c scripts/config.js --environment TARGET:server-renderer",
+    "dev:compiler": "rollup -w -c scripts/config.js --environment TARGET:compiler ",
+    "build": "node scripts/build.js",
+    "build:ssr": "npm run build -- runtime-cjs,server-renderer",
+    "build:types": "rimraf temp && tsc --declaration --emitDeclarationOnly --outDir temp && api-extractor run && api-extractor run -c packages/compiler-sfc/api-extractor.json",
+    "test": "npm run ts-check && npm run test:types && npm run test:unit && npm run test:e2e && npm run test:ssr && npm run test:sfc",
+    "test:unit": "vitest run test/unit",
+    "test:ssr": "npm run build:ssr && vitest run server-renderer",
+    "test:sfc": "vitest run compiler-sfc",
+    "test:e2e": "npm run build -- full-prod,server-renderer-basic && vitest run test/e2e",
+    "test:transition": "karma start test/transition/karma.conf.js",
+    "test:types": "npm run build:types && tsc -p ./types/tsconfig.json",
+    "format": "prettier --write --parser typescript \"(src|test|packages|types)/**/*.ts\"",
+    "ts-check": "tsc -p tsconfig.json --noEmit",
+    "ts-check:test": "tsc -p test/tsconfig.json --noEmit",
+    "bench:ssr": "npm run build:ssr && node benchmarks/ssr/renderToString.js && node benchmarks/ssr/renderToStream.js",
+    "release": "node scripts/release.js",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s"
+  },
+  "gitHooks": {
+    "pre-commit": "lint-staged",
+    "commit-msg": "node scripts/verify-commit-msg.js"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write"
+    ],
+    "*.ts": [
+      "prettier --parser=typescript --write"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vuejs/vue.git"
+  },
+  "keywords": [
+    "vue"
+  ],
+  "author": "Evan You",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/vuejs/vue/issues"
+  },
+  "homepage": "https://github.com/vuejs/vue#readme",
+  "dependencies": {
+    "@vue/compiler-sfc": "workspace:*",
+    "csstype": "^3.1.0"
+  },
+  "devDependencies": {
+    "@babel/parser": "^7.23.5",
+    "@microsoft/api-extractor": "^7.25.0",
+    "@rollup/plugin-alias": "^3.1.9",
+    "@rollup/plugin-commonjs": "^22.0.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-replace": "^4.0.0",
+    "@types/he": "^1.1.2",
+    "@types/node": "^20.10.3",
+    "chalk": "^4.1.2",
+    "conventional-changelog-cli": "^2.2.2",
+    "cross-spawn": "^7.0.3",
+    "enquirer": "^2.3.6",
+    "esbuild": "^0.19.8",
+    "execa": "^4.1.0",
+    "he": "^1.2.0",
+    "jasmine-core": "^4.2.0",
+    "jsdom": "^19.0.0",
+    "karma": "^6.3.20",
+    "karma-chrome-launcher": "^3.1.1",
+    "karma-cli": "^2.0.0",
+    "karma-esbuild": "^2.2.5",
+    "karma-jasmine": "^5.0.1",
+    "lint-staged": "^12.5.0",
+    "lodash": "^4.17.21",
+    "marked": "^4.0.16",
+    "minimist": "^1.2.6",
+    "postcss": "^8.4.14",
+    "prettier": "^2.6.2",
+    "puppeteer": "^14.3.0",
+    "rimraf": "^3.0.2",
+    "rollup": "^2.79.1",
+    "rollup-plugin-typescript2": "^0.32.0",
+    "semver": "^7.3.7",
+    "shelljs": "^0.8.5",
+    "terser": "^5.14.0",
+    "todomvc-app-css": "^2.4.2",
+    "ts-node": "^10.8.1",
+    "tslib": "^2.4.0",
+    "typescript": "^4.8.4",
+    "vitest": "^1.0.4",
+    "yorkie": "^2.0.0"
+  }
+}

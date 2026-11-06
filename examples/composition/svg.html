@@ -1,0 +1,172 @@
+<script src="../../dist/vue.min.js"></script>
+<script>
+  const { ref, computed, createApp } = Vue
+
+  // math helper...
+  function valueToPoint(value, index, total) {
+    var x = 0
+    var y = -value * 0.8
+    var angle = ((Math.PI * 2) / total) * index
+    var cos = Math.cos(angle)
+    var sin = Math.sin(angle)
+    var tx = x * cos - y * sin + 100
+    var ty = x * sin + y * cos + 100
+    return {
+      x: tx,
+      y: ty
+    }
+  }
+
+  const AxisLabel = {
+    template: '<text :x="point.x" :y="point.y">{{stat.label}}</text>',
+    props: {
+      stat: Object,
+      index: Number,
+      total: Number
+    },
+    setup(props) {
+      return {
+        point: computed(() =>
+          valueToPoint(+props.stat.value + 10, props.index, props.total)
+        )
+      }
+    }
+  }
+</script>
+
+<!-- template for the polygraph component. -->
+<script type="text/x-template" id="polygraph-template">
+  <g>
+    <polygon :points="points"></polygon>
+    <circle cx="100" cy="100" r="80"></circle>
+    <axis-label
+      v-for="(stat, index) in stats"
+      :stat="stat"
+      :index="index"
+      :total="stats.length">
+    </axis-label>
+  </g>
+</script>
+
+<script>
+  const Polygraph = {
+    props: ['stats'],
+    template: '#polygraph-template',
+    setup(props) {
+      return {
+        points: computed(() => {
+          const total = props.stats.length
+          return props.stats
+            .map((stat, i) => {
+              const point = valueToPoint(stat.value, i, total)
+              return point.x + ',' + point.y
+            })
+            .join(' ')
+        })
+      }
+    },
+    components: {
+      AxisLabel
+    }
+  }
+</script>
+
+<!-- demo root element -->
+<div id="demo">
+  <!-- Use the polygraph component -->
+  <svg width="200" height="200">
+    <polygraph :stats="stats"></polygraph>
+  </svg>
+  <!-- controls -->
+  <div v-for="stat in stats">
+    <label>{{stat.label}}</label>
+    <input type="range" v-model="stat.value" min="0" max="100" />
+    <span>{{stat.value}}</span>
+    <button @click="remove(stat)" class="remove">X</button>
+  </div>
+  <form id="add">
+    <input name="newlabel" v-model="newLabel" />
+    <button @click="add">Add a Stat</button>
+  </form>
+  <pre id="raw">{{ stats }}</pre>
+</div>
+
+<script>
+  const globalStats = [
+    { label: 'A', value: 100 },
+    { label: 'B', value: 100 },
+    { label: 'C', value: 100 },
+    { label: 'D', value: 100 },
+    { label: 'E', value: 100 },
+    { label: 'F', value: 100 }
+  ]
+
+  new Vue({
+    components: {
+      Polygraph
+    },
+    setup() {
+      const newLabel = ref('')
+      const stats = ref(globalStats)
+
+      function add(e) {
+        e.preventDefault()
+        if (!newLabel.value) return
+        stats.value.push({
+          label: newLabel.value,
+          value: 100
+        })
+        newLabel.value = ''
+      }
+
+      function remove(stat) {
+        if (stats.value.length > 3) {
+          stats.value.splice(stats.value.indexOf(stat), 1)
+        } else {
+          alert("Can't delete more!")
+        }
+      }
+
+      return {
+        newLabel,
+        stats,
+        add,
+        remove
+      }
+    }
+  }).$mount('#demo')
+</script>
+
+<style>
+  body {
+    font-family: Helvetica Neue, Arial, sans-serif;
+  }
+
+  polygon {
+    fill: #42b983;
+    opacity: 0.75;
+  }
+
+  circle {
+    fill: transparent;
+    stroke: #999;
+  }
+
+  text {
+    font-family: Helvetica Neue, Arial, sans-serif;
+    font-size: 10px;
+    fill: #666;
+  }
+
+  label {
+    display: inline-block;
+    margin-left: 10px;
+    width: 20px;
+  }
+
+  #raw {
+    position: absolute;
+    top: 0;
+    left: 300px;
+  }
+</style>
