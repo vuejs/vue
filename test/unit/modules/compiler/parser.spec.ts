@@ -971,6 +971,30 @@ describe('parser', () => {
     expect(ast.children[0].text).toBe(`&gt;<foo>&lt;`)
   })
 
+  // #10628
+  it('should not truncate script tags at </script> inside a string', () => {
+    const options = extend({}, baseOptions)
+    const ast = parse(
+      `<script>const s = "</script>"; alert(s)</script>`,
+      options
+    )
+    expect(ast.tag).toBe('script')
+    expect(ast.children[0].text).toBe(`const s = "</script>"; alert(s)`)
+    expect(
+      'Templates should only be responsible for mapping the state'
+    ).toHaveBeenWarned()
+  })
+
+  it('should not truncate style tags at </style> inside a string', () => {
+    const options = extend({}, baseOptions)
+    const ast = parse(`<style>a { content: "</style>" }</style>`, options)
+    expect(ast.tag).toBe('style')
+    expect(ast.children[0].text).toBe(`a { content: "</style>" }`)
+    expect(
+      'Templates should only be responsible for mapping the state'
+    ).toHaveBeenWarned()
+  })
+
   it('should ignore comments', () => {
     const options = extend({}, baseOptions)
     const ast = parse(`<div>123<!--comment here--></div>`, options)
