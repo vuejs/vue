@@ -360,4 +360,57 @@ describe('Options functional', () => {
     }).$mount()
     expect(vm.$el.innerHTML).toBe('<span>hi</span><span>foo</span><span>hi</span><span>bar</span>')
   })
+
+  it('should release render context metadata when functional results are destroyed', () => {
+    const Foo = {
+      functional: true,
+      render (h) {
+        return [h('span', 'one'), h('span', 'two')]
+      }
+    }
+    const vm = new Vue({
+      template: '<div><foo /></div>',
+      components: { Foo }
+    }).$mount()
+    const vnodes = vm._vnode.children
+    const renderContext = vnodes[0].devtoolsMeta.renderContext
+
+    expect(renderContext).toBeDefined()
+    expect(vnodes[1].devtoolsMeta.renderContext).toBe(renderContext)
+
+    vm.$destroy()
+
+    expect(vnodes[0].devtoolsMeta.renderContext).toBe(null)
+    expect(vnodes[1].devtoolsMeta.renderContext).toBe(null)
+  })
+
+  it('should clean up only the functional result that is removed', done => {
+    const Foo = {
+      functional: true,
+      props: { showFirst: Boolean },
+      render (h, context) {
+        const nodes = []
+        if (context.props.showFirst) {
+          nodes.push(h('span', { key: 'first' }, 'one'))
+        }
+        nodes.push(h('span', { key: 'second' }, 'two'))
+        return nodes
+      }
+    }
+    const vm = new Vue({
+      data: { showFirst: true },
+      template: '<div><foo :show-first="showFirst" /></div>',
+      components: { Foo }
+    }).$mount()
+    const removedVNode = vm._vnode.children[0]
+    const removedContext = removedVNode.devtoolsMeta.renderContext
+
+    vm.showFirst = false
+    waitForUpdate(() => {
+      const retainedVNode = vm._vnode.children[0]
+      expect(removedVNode.devtoolsMeta.renderContext).toBe(null)
+      expect(retainedVNode.devtoolsMeta.renderContext).toBeDefined()
+      expect(retainedVNode.devtoolsMeta.renderContext).not.toBe(removedContext)
+    }).then(done)
+  })
 })
