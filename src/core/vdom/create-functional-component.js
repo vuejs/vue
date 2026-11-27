@@ -89,6 +89,10 @@ export function FunctionalRenderContext (
   }
 }
 
+FunctionalRenderContext.prototype.teardown = function (vnode) {
+  vnode.devtoolsMeta.renderContext = null
+}
+
 installRenderHelpers(FunctionalRenderContext.prototype)
 
 export function createFunctionalComponent (
